@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-ai-mcp</artifactId>
-			<version>0.2.0</version>
+			<version>0.3.0</version>
 		</dependency>
 
 	</dependencies>
