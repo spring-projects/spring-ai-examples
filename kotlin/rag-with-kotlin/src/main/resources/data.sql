@@ -1,5 +1,5 @@
 delete from dog;
-delete from vector_store ;
+
 INSERT INTO dog (id, name, description, dob, owner, gender, image) VALUES
     (97, 'Rocky', 'A brown Chihuahua known for being protective.', '2019-01-28', NULL, 'm', 'https://raw.githubusercontent.com/joshlong-attic/dog-images/main/chihuahua-1.png');
 
