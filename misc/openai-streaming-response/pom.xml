@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
-		<spring-ai.version>1.0.0-M4</spring-ai.version>
+		<spring-ai.version>1.0.0-M5</spring-ai.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -60,7 +60,7 @@
 			<dependency>
 				<groupId>org.springframework.ai</groupId>
 				<artifactId>spring-ai-bom</artifactId>
-				<version>${spring-ai.version}</version>
+				<version>1.0.0-M5</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

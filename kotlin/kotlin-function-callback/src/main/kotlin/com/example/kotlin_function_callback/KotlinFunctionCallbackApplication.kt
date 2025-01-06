@@ -12,13 +12,6 @@ import org.springframework.context.annotation.Description
 @SpringBootApplication
 class KotlinFunctionCallbackApplication {
 
-	companion object {
-		@JvmStatic
-		fun main(args: Array<String>) {
-			runApplication<KotlinFunctionCallbackApplication>(*args)
-		}
-	}
-
 	@Bean
 	fun init(chatClientBuilder: ChatClient.Builder) = CommandLineRunner {
 		try {
@@ -38,13 +31,14 @@ class KotlinFunctionCallbackApplication {
 
 @Configuration
 class Config {
+
 	@Bean
 	fun weatherFunctionInfo(currentWeather: (WeatherRequest) -> WeatherResponse): FunctionCallback {
 		return FunctionCallback.builder()
+			.function("WeatherInfo", currentWeather)
 			.description(
 				"Find the weather conditions, forecasts, and temperatures for a location, like a city or state."
 			)
-			.function("WeatherInfo", currentWeather)
 			.inputType(WeatherRequest::class.java)
 			.build()
 	}
@@ -54,4 +48,8 @@ class Config {
 	fun currentWeather(): (WeatherRequest) -> WeatherResponse = { request ->
 		MockKotlinWeatherService().invoke(request)
 	}
+}
+
+fun main(args: Array<String>) {
+	runApplication<KotlinFunctionCallbackApplication>(*args)
 }

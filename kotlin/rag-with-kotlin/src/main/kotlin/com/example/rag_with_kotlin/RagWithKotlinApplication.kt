@@ -2,6 +2,7 @@ package com.example.rag_with_kotlin
 
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor
+import org.springframework.ai.chat.client.entity
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -49,13 +50,12 @@ fun main(args: Array<String>) {
             }
             bean {
                 val cc = ref<ChatClient>()
-                val dogAdoptionSuggestion = cc
+                cc
                     .prompt(" do you have any neurotic dogs? ")
                     .call()
-                    .entity<DogAdoptionSuggestion>()
-                println(dogAdoptionSuggestion)
-
-
+                    .entity<DogAdoptionSuggestion>().also {
+                        print(it)
+                    }
             }
         }
         addInitializers(context)
