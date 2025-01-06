@@ -57,10 +57,10 @@ public class SpringAiJavaFunctionCallbackApplication {
 		@Bean
 		public FunctionCallback weatherFunctionInfo(Function<WeatherRequest, WeatherResponse> currentWeather) {
 			return FunctionCallback.builder()
+					.function("WeatherInfo", currentWeather)
 					.description(
 							"Find the weather conditions, forecasts, and temperatures for a location, like a city or state."
 					)
-					.function("WeatherInfo", currentWeather)
 					.inputType(WeatherRequest.class)
 					.build();
 		}
