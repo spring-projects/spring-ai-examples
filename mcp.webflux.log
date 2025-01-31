@@ -1,46 +1,63 @@
-2025-01-24T12:29:43.836+01:00  INFO 49430 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 49430 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server/target/mcp-webflux-server-0.0.1-SNAPSHOT.jar started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
-2025-01-24T12:29:43.837+01:00  INFO 49430 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
-2025-01-24T12:29:44.414+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=9ad56cc6-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Spring AI MCP Client, version=1.0.0}}]
-2025-01-24T12:29:44.422+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.server.McpAsyncServer         : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Spring AI MCP Client, version=1.0.0]
-2025-01-24T12:29:44.475+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
-2025-01-24T12:29:44.475+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=9ad56cc6-1, params=null]
-2025-01-24T12:29:44.478+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=9ad56cc6-2, params={}]
-2025-01-24T12:29:44.490+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9ad56cc6-3, params={name=toUpperCase, arguments={input=accountName}}]
-2025-01-24T12:29:44.515+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9ad56cc6-4, params={name=getBooks, arguments={title=Spring Framework}}]
-2025-01-24T12:29:44.520+01:00  INFO 49430 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.91 seconds (process running for 1.157)
-2025-01-24T12:29:49.269+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=9ad56cc6-5, params={}]
-2025-01-24T12:29:49.276+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=9ad56cc6-6, params={uri=system://info}]
-2025-01-24T12:29:49.286+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=9ad56cc6-7, params={}]
-2025-01-24T12:29:49.293+01:00  INFO 49430 --- [pool-1-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=9ad56cc6-8, params={name=greeting, arguments={name=Spring}}]
-2025-01-24T19:03:06.765+01:00  INFO 90957 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 90957 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server/target/mcp-webflux-server-0.0.1-SNAPSHOT.jar started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
-2025-01-24T19:03:06.767+01:00  INFO 90957 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
-2025-01-24T19:03:07.174+01:00  INFO 91011 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 91011 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server/target/mcp-webflux-server-0.0.1-SNAPSHOT.jar started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
-2025-01-24T19:03:07.176+01:00  INFO 91011 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
-2025-01-24T19:03:07.427+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=9e0a3f40-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Spring AI MCP Client, version=1.0.0}}]
-2025-01-24T19:03:07.433+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.server.McpAsyncServer         : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Spring AI MCP Client, version=1.0.0]
-2025-01-24T19:03:07.499+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
-2025-01-24T19:03:07.500+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=9e0a3f40-1, params=null]
-2025-01-24T19:03:07.502+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=9e0a3f40-2, params={}]
-2025-01-24T19:03:07.517+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9e0a3f40-3, params={name=toUpperCase, arguments={input=accountName}}]
-2025-01-24T19:03:07.540+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9e0a3f40-4, params={name=getBooks, arguments={title=Spring Framework}}]
-2025-01-24T19:03:07.628+01:00  INFO 90957 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
-2025-01-24T19:03:07.635+01:00  INFO 90957 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 1.093 seconds (process running for 1.335)
-2025-01-24T19:03:07.841+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=a7f036cf-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Spring AI MCP Client, version=1.0.0}}]
-2025-01-24T19:03:07.849+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.server.McpAsyncServer         : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Spring AI MCP Client, version=1.0.0]
-2025-01-24T19:03:07.904+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
-2025-01-24T19:03:07.905+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=a7f036cf-1, params=null]
-2025-01-24T19:03:07.907+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=a7f036cf-2, params={}]
-2025-01-24T19:03:07.920+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=a7f036cf-3, params={name=toUpperCase, arguments={input=accountName}}]
-2025-01-24T19:03:07.946+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=a7f036cf-4, params={name=getBooks, arguments={title=Spring Framework}}]
-2025-01-24T19:03:10.035+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=a7f036cf-5, params={}]
-2025-01-24T19:03:10.045+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=a7f036cf-6, params={uri=system://info}]
-2025-01-24T19:03:10.057+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=a7f036cf-7, params={}]
-2025-01-24T19:03:10.064+01:00  INFO 91011 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=a7f036cf-8, params={name=greeting, arguments={name=Spring}}]
-2025-01-24T19:03:10.070+01:00  WARN 91011 --- [main] onfigReactiveWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-01-24T19:03:10.074+01:00  INFO 91011 --- [main] .s.b.a.l.ConditionEvaluationReportLogger : 
+2025-02-04T08:40:22.052+01:00  INFO 24441 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 24441 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:40:22.053+01:00  INFO 24441 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:40:22.633+01:00  INFO 24441 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools1 notification: true
+2025-02-04T08:40:22.633+01:00  INFO 24441 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T08:40:22.634+01:00  INFO 24441 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T08:40:22.703+01:00  INFO 24441 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-02-04T08:40:22.713+01:00  INFO 24441 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.817 seconds (process running for 0.959)
+2025-02-04T08:40:50.281+01:00  INFO 24441 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=10ab5f7e-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T08:40:50.285+01:00  INFO 24441 --- [reactor-http-nio-3] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T08:40:50.334+01:00  INFO 24441 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T08:40:50.337+01:00  INFO 24441 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=10ab5f7e-1, params=null]
+2025-02-04T08:40:50.341+01:00  INFO 24441 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=10ab5f7e-2, params={}]
+2025-02-04T08:40:50.352+01:00  INFO 24441 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=10ab5f7e-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T08:40:50.372+01:00  INFO 24441 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=10ab5f7e-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T08:40:59.798+01:00  INFO 24441 --- [SpringApplicationShutdownHook] i.m.s.t.WebFluxSseServerTransport        : Graceful shutdown completed
+2025-02-04T08:40:59.799+01:00  INFO 24441 --- [SpringApplicationShutdownHook] i.m.s.t.WebFluxSseServerTransport        : Graceful shutdown completed
+2025-02-04T08:40:59.799+01:00  INFO 24441 --- [SpringApplicationShutdownHook] i.m.s.t.WebFluxSseServerTransport        : Graceful shutdown completed
+2025-02-04T08:41:20.747+01:00  INFO 25010 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 25010 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:41:20.748+01:00  INFO 25010 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:41:21.255+01:00  INFO 25010 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools1 notification: true
+2025-02-04T08:41:21.255+01:00  INFO 25010 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T08:41:21.256+01:00  INFO 25010 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T08:41:21.316+01:00  INFO 25010 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-02-04T08:41:21.327+01:00  INFO 25010 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.724 seconds (process running for 0.853)
+2025-02-04T08:41:26.711+01:00  INFO 25010 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=05ed81ed-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T08:41:26.716+01:00  INFO 25010 --- [reactor-http-nio-3] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T08:41:26.770+01:00  INFO 25010 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T08:41:26.774+01:00  INFO 25010 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=05ed81ed-1, params=null]
+2025-02-04T08:41:26.777+01:00  INFO 25010 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=05ed81ed-2, params={}]
+2025-02-04T08:41:26.789+01:00  INFO 25010 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=05ed81ed-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T08:41:26.813+01:00  INFO 25010 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=05ed81ed-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T08:41:50.804+01:00  INFO 25010 --- [SpringApplicationShutdownHook] i.m.s.t.WebFluxSseServerTransport        : Graceful shutdown completed
+2025-02-04T08:41:50.805+01:00  INFO 25010 --- [SpringApplicationShutdownHook] i.m.s.t.WebFluxSseServerTransport        : Graceful shutdown completed
+2025-02-04T08:43:08.607+01:00  INFO 25896 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 25896 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:43:08.608+01:00  INFO 25896 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:46:08.620+01:00  INFO 26989 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 26989 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:46:08.621+01:00  INFO 26989 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:48:34.253+01:00  INFO 27839 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 27839 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:48:34.254+01:00  INFO 27839 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:49:52.888+01:00  INFO 28331 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 28331 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:49:52.889+01:00  INFO 28331 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:50:03.727+01:00  INFO 28331 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T08:50:03.735+01:00  INFO 28331 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T08:50:03.738+01:00  INFO 28331 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T08:50:03.831+01:00  INFO 28331 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-02-04T08:50:03.842+01:00  INFO 28331 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 11.121 seconds (process running for 11.361)
+2025-02-04T08:50:10.938+01:00  INFO 28331 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=9e138b73-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T08:50:10.942+01:00  INFO 28331 --- [reactor-http-nio-3] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T08:50:10.991+01:00  INFO 28331 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T08:50:10.994+01:00  INFO 28331 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=9e138b73-1, params=null]
+2025-02-04T08:50:10.997+01:00  INFO 28331 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=9e138b73-2, params={}]
+2025-02-04T08:50:11.009+01:00  INFO 28331 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9e138b73-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T08:50:11.031+01:00  INFO 28331 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=9e138b73-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T08:58:29.040+01:00  INFO 31507 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 31507 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:58:29.041+01:00  INFO 31507 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:58:29.383+01:00  WARN 31507 --- [main] onfigReactiveWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'openLibrary' defined in file [/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes/org/springframework/ai/mcp/sample/server/OpenLibrary.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'org.springframework.web.client.RestClient$Builder' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-02-04T08:58:29.388+01:00  INFO 31507 --- [main] .s.b.a.l.ConditionEvaluationReportLogger : 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-01-24T19:03:10.083+01:00 ERROR 91011 --- [main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+2025-02-04T08:58:29.396+01:00 ERROR 31507 --- [main] o.s.b.d.LoggingFailureAnalysisReporter   : 
 
 ***************************
 APPLICATION FAILED TO START
@@ -48,15 +65,80 @@ APPLICATION FAILED TO START
 
 Description:
 
-Web server failed to start. Port 8080 was already in use.
+Parameter 0 of constructor in org.springframework.ai.mcp.sample.server.OpenLibrary required a bean of type 'org.springframework.web.client.RestClient$Builder' that could not be found.
+
 
 Action:
 
-Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+Consider defining a bean of type 'org.springframework.web.client.RestClient$Builder' in your configuration.
 
-2025-01-24T19:03:10.173+01:00  INFO 91011 --- [parallel-1] o.s.a.m.s.t.StdioServerTransport         : Graceful shutdown completed
-2025-01-24T19:03:10.180+01:00  INFO 91011 --- [parallel-2] o.s.a.m.s.t.StdioServerTransport         : Graceful shutdown completed
-2025-01-24T19:03:10.191+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=9e0a3f40-5, params={}]
-2025-01-24T19:03:10.199+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=9e0a3f40-6, params={uri=system://info}]
-2025-01-24T19:03:10.208+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=9e0a3f40-7, params={}]
-2025-01-24T19:03:10.214+01:00  INFO 90957 --- [pool-3-thread-1] o.s.ai.mcp.spec.DefaultMcpSession        : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=9e0a3f40-8, params={name=greeting, arguments={name=Spring}}]
+2025-02-04T08:59:37.454+01:00  INFO 31930 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 31930 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T08:59:37.455+01:00  INFO 31930 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T08:59:48.012+01:00  INFO 31930 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T08:59:56.272+01:00  INFO 31930 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T09:00:33.315+01:00  INFO 32276 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 32276 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T09:00:33.317+01:00  INFO 32276 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T09:00:38.442+01:00  INFO 32276 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T09:00:45.177+01:00  INFO 32276 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T09:00:53.321+01:00  INFO 32276 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T09:00:53.414+01:00  INFO 32276 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-02-04T09:00:53.426+01:00  INFO 32276 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 20.281 seconds (process running for 20.503)
+2025-02-04T09:02:50.663+01:00  INFO 33120 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 33120 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T09:02:50.664+01:00  INFO 33120 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T09:02:53.361+01:00  INFO 33120 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T09:02:53.775+01:00  INFO 33120 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T09:02:54.499+01:00  INFO 33120 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T09:02:56.237+01:00  INFO 33120 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered roots change consumer
+2025-02-04T09:02:56.324+01:00  INFO 33120 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-02-04T09:02:56.333+01:00  INFO 33120 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 5.838 seconds (process running for 6.063)
+2025-02-04T09:03:04.022+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=d5df71e0-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T09:03:04.027+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T09:03:04.078+01:00  INFO 33120 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T09:03:04.081+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=d5df71e0-1, params=null]
+2025-02-04T09:03:04.085+01:00  INFO 33120 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=d5df71e0-2, params={}]
+2025-02-04T09:03:04.099+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=d5df71e0-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T09:03:04.121+01:00  INFO 33120 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=d5df71e0-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T09:03:05.461+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=d5df71e0-5, params={}]
+2025-02-04T09:03:05.473+01:00  INFO 33120 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=d5df71e0-6, params={uri=system://info}]
+2025-02-04T09:03:05.484+01:00  INFO 33120 --- [reactor-http-nio-3] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=d5df71e0-7, params={}]
+2025-02-04T09:03:05.493+01:00  INFO 33120 --- [reactor-http-nio-4] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=d5df71e0-8, params={name=greeting, arguments={name=Spring}}]
+2025-02-04T09:04:42.029+01:00  INFO 34111 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 34111 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/mcp-webflux-server-starter-0.0.1-SNAPSHOT.jar started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T09:04:42.030+01:00  INFO 34111 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T09:04:42.635+01:00  INFO 34111 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T09:04:42.635+01:00  INFO 34111 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T09:04:42.636+01:00  INFO 34111 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T09:04:42.636+01:00  INFO 34111 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered roots change consumer
+2025-02-04T09:04:42.656+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=e1fd2c34-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T09:04:42.664+01:00  INFO 34111 --- [pool-1-thread-1] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T09:04:42.704+01:00  INFO 34111 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.889 seconds (process running for 1.126)
+2025-02-04T09:04:42.713+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T09:04:42.714+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=e1fd2c34-1, params=null]
+2025-02-04T09:04:42.715+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=e1fd2c34-2, params={}]
+2025-02-04T09:04:42.725+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=e1fd2c34-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T09:04:42.748+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=e1fd2c34-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T09:04:43.831+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=e1fd2c34-5, params={}]
+2025-02-04T09:04:43.842+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=e1fd2c34-6, params={uri=system://info}]
+2025-02-04T09:04:43.853+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=e1fd2c34-7, params={}]
+2025-02-04T09:04:43.861+01:00  INFO 34111 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=e1fd2c34-8, params={name=greeting, arguments={name=Spring}}]
+2025-02-04T09:04:43.976+01:00  INFO 34111 --- [boundedElastic-1] i.m.s.transport.StdioServerTransport     : Graceful shutdown complete
+2025-02-04T09:04:43.976+01:00  INFO 34111 --- [boundedElastic-2] i.m.s.transport.StdioServerTransport     : Graceful shutdown complete
+2025-02-04T09:05:37.695+01:00  INFO 34531 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 34531 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/mcp-webflux-server-starter/target/mcp-webflux-server-starter-0.0.1-SNAPSHOT.jar started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-02-04T09:05:37.696+01:00  INFO 34531 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-02-04T09:05:38.286+01:00  INFO 34531 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered tools3 notification: true
+2025-02-04T09:05:38.286+01:00  INFO 34531 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered resources1 notification: true
+2025-02-04T09:05:38.287+01:00  INFO 34531 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered prompts1 notification: true
+2025-02-04T09:05:38.287+01:00  INFO 34531 --- [main] o.s.a.a.m.s.MpcServerAutoConfiguration   : Registered roots change consumer
+2025-02-04T09:05:38.308+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=initialize, id=7d0c24ff-0, params={protocolVersion=2024-11-05, capabilities={}, clientInfo={name=Java SDK MCP Client, version=1.0.0}}]
+2025-02-04T09:05:38.315+01:00  INFO 34531 --- [pool-1-thread-1] i.m.server.McpAsyncServer                : Client initialize request - Protocol: 2024-11-05, Capabilities: ClientCapabilities[experimental=null, roots=null, sampling=null], Info: Implementation[name=Java SDK MCP Client, version=1.0.0]
+2025-02-04T09:05:38.358+01:00  INFO 34531 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.878 seconds (process running for 1.112)
+2025-02-04T09:05:38.366+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received notification: JSONRPCNotification[jsonrpc=2.0, method=notifications/initialized, params=null]
+2025-02-04T09:05:38.366+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=ping, id=7d0c24ff-1, params=null]
+2025-02-04T09:05:38.368+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/list, id=7d0c24ff-2, params={}]
+2025-02-04T09:05:38.379+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=7d0c24ff-3, params={name=toUpperCase, arguments={input=accountName}}]
+2025-02-04T09:05:38.402+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=tools/call, id=7d0c24ff-4, params={name=getBooks, arguments={title=Spring Framework}}]
+2025-02-04T09:05:40.508+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/list, id=7d0c24ff-5, params={}]
+2025-02-04T09:05:40.519+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=resources/read, id=7d0c24ff-6, params={uri=system://info}]
+2025-02-04T09:05:40.529+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/list, id=7d0c24ff-7, params={}]
+2025-02-04T09:05:40.536+01:00  INFO 34531 --- [pool-1-thread-1] i.m.spec.DefaultMcpSession               : Received request: JSONRPCRequest[jsonrpc=2.0, method=prompts/get, id=7d0c24ff-8, params={name=greeting, arguments={name=Spring}}]
+2025-02-04T09:05:40.653+01:00  INFO 34531 --- [boundedElastic-1] i.m.s.transport.StdioServerTransport     : Graceful shutdown complete
+2025-02-04T09:05:40.653+01:00  INFO 34531 --- [boundedElastic-2] i.m.s.transport.StdioServerTransport     : Graceful shutdown complete

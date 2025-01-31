@@ -25,9 +25,15 @@
 		<module>model-context-protocol/sqlite/chatbot</module>
 		<module>model-context-protocol/filesystem</module>
 		<module>model-context-protocol/brave</module>
+		<module>model-context-protocol/brave-starter</module>
+		<module>model-context-protocol/brave-chatbot</module>
 		<module>model-context-protocol/mcp-webmvc-server</module>
 		<module>model-context-protocol/mcp-webflux-server</module>
+		<module>model-context-protocol/mcp-webflux-server-starter</module>
 		<module>model-context-protocol/mcp-servlet-server</module>
+		<module>model-context-protocol/mcp-weather-server</module>
+		<module>model-context-protocol/mcp-weather-server-starter</module>
+		<module>model-context-protocol/mcp-weather-server-quickstart</module>
 		<module>agentic-patterns</module>
 	</modules>
 
