@@ -1,12 +1,12 @@
 package org.springframework.ai.mcp.samples.brave;
 
+import java.util.List;
 import java.util.Scanner;
 
-import org.springframework.ai.autoconfigure.mcp.client.stdio.McpClientDefinitions;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.mcp.McpToolUtils;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,15 +20,13 @@ public class Application {
 	}
 
 	@Bean
-	public CommandLineRunner chatbot(ChatClient.Builder chatClientBuilder, McpClientDefinitions mcpClientDefinitions) {
+	public CommandLineRunner chatbot(ChatClient.Builder chatClientBuilder, List<ToolCallback> tools) {
 
 		return args -> {
 
-			var mcpClients = mcpClientDefinitions.toMcpSyncClients();
-
 			var chatClient = chatClientBuilder
 					.defaultSystem("You are useful assistant, expert in AI and Java.")
-					.defaultTools(McpToolUtils.getToolCallbacks(mcpClients))
+					.defaultTools(tools)
 					.defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
 					.build();
 
