@@ -49,6 +49,8 @@
 		<module>model-context-protocol/web-search/brave-starter</module>
 		<module>model-context-protocol/web-search/brave-chatbot</module>
 
+		<module>model-context-protocol/talent-arena/brave-chatbot</module>
+		<module>model-context-protocol/talent-arena/mcp-weather-server</module>
 
 		<module>agentic-patterns</module>
 	</modules>

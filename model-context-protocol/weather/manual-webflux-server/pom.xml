@@ -19,7 +19,7 @@
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
 
     <properties>
-        <mcp.version>0.7.0-SNAPSHOT</mcp.version>
+        <mcp.version>0.7.0</mcp.version>
     </properties>
 
     <dependencyManagement>
