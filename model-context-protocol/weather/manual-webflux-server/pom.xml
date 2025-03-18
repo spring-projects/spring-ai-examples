@@ -19,7 +19,7 @@
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
 
     <properties>
-        <mcp.version>0.7.0-SNAPSHOT</mcp.version>
+        <mcp.version>0.8.0-SNAPSHOT</mcp.version>
     </properties>
 
     <dependencyManagement>
@@ -47,7 +47,7 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-core</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-mcp</artifactId>
@@ -102,6 +102,18 @@
     </build>
 
     <repositories>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>

@@ -1,0 +1,4 @@
+2025-03-17T21:20:53.178+01:00  INFO 52952 --- [main] o.s.a.m.s.server.McpServerApplication    : Starting McpServerApplication using Java 17.0.12 with PID 52952 (/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/weather/manual-webflux-server/target/classes started by christiantzolov in /Users/christiantzolov/Dev/projects/spring-ai-examples)
+2025-03-17T21:20:53.179+01:00  INFO 52952 --- [main] o.s.a.m.s.server.McpServerApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-03-17T21:20:53.788+01:00  INFO 52952 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080 (http)
+2025-03-17T21:20:53.797+01:00  INFO 52952 --- [main] o.s.a.m.s.server.McpServerApplication    : Started McpServerApplication in 0.782 seconds (process running for 0.909)

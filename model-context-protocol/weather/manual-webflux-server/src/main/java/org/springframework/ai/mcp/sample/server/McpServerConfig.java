@@ -3,10 +3,10 @@ package org.springframework.ai.mcp.sample.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.transport.StdioServerTransport;
-import io.modelcontextprotocol.server.transport.WebFluxSseServerTransport;
+import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+import io.modelcontextprotocol.server.transport.WebFluxSseServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.ServerMcpTransport;
+import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
 import org.springframework.ai.mcp.McpToolUtils;
 import org.springframework.ai.tool.ToolCallbacks;
@@ -21,23 +21,23 @@ public class McpServerConfig {
 	// STDIO transport
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "stdio")
-	public StdioServerTransport stdioServerTransport() {
-		return new StdioServerTransport();
+	public StdioServerTransportProvider stdioServerTransportProvider() {
+		return new StdioServerTransportProvider();
 	}
 
 	// SSE transport
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "sse")
-	public WebFluxSseServerTransport sseServerTransport() {
-		return new WebFluxSseServerTransport(new ObjectMapper(), "/mcp/message");
+	public WebFluxSseServerTransportProvider sseServerTransportProvider() {
+		return new WebFluxSseServerTransportProvider(new ObjectMapper(), "/mcp/message");
 	}
 
 	// Router function for SSE transport used by Spring WebFlux to start an HTTP
 	// server.
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "sse")
-	public RouterFunction<?> mcpRouterFunction(WebFluxSseServerTransport transport) {
-		return transport.getRouterFunction();
+	public RouterFunction<?> mcpRouterFunction(WebFluxSseServerTransportProvider transportProvider) {
+		return transportProvider.getRouterFunction();
 	}
 
 	@Bean
@@ -46,7 +46,7 @@ public class McpServerConfig {
 	}
 
 	@Bean
-	public McpSyncServer mcpServer(ServerMcpTransport transport, WeatherApiClient weatherApiClient) { // @formatter:off
+	public McpSyncServer mcpServer(McpServerTransportProvider transportProvider, WeatherApiClient weatherApiClient) { // @formatter:off
 
 		// Configure server capabilities with resource support
 		var capabilities = McpSchema.ServerCapabilities.builder()
@@ -55,10 +55,10 @@ public class McpServerConfig {
 			.build();
 
 		// Create the server with both tool and resource capabilities
-		McpSyncServer server = McpServer.sync(transport)
+		McpSyncServer server = McpServer.sync(transportProvider)
 			.serverInfo("MCP Demo Weather Server", "1.0.0")
 			.capabilities(capabilities)
-			.tools(McpToolUtils.toSyncToolRegistration(ToolCallbacks.from(weatherApiClient))) // Add @Tools
+			.tools(McpToolUtils.toSyncToolSpecifications(ToolCallbacks.from(weatherApiClient))) // Add @Tools
 			.build();
 		
 		return server; // @formatter:on
