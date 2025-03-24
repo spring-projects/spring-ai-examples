@@ -5,14 +5,15 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Scanner;
 
+import io.modelcontextprotocol.client.McpClient;
+import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.client.transport.ServerParameters;
+import io.modelcontextprotocol.client.transport.StdioClientTransport;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.mcp.client.McpClient;
-import org.springframework.ai.mcp.client.McpSyncClient;
-import org.springframework.ai.mcp.client.transport.ServerParameters;
-import org.springframework.ai.mcp.client.transport.StdioClientTransport;
-import org.springframework.ai.mcp.spring.McpFunctionCallback;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,12 +29,12 @@ public class Application {
 
 	@Bean
 	public CommandLineRunner interactiveChat(ChatClient.Builder chatClientBuilder,
-			List<McpFunctionCallback> functionCallbacks,
+			List<McpSyncClient> mcpClients,
 			ConfigurableApplicationContext context) {
 		return args -> {
 
 			var chatClient = chatClientBuilder
-					.defaultFunctions(functionCallbacks.toArray(new McpFunctionCallback[0]))
+					.defaultTools(new SyncMcpToolCallbackProvider(mcpClients))
 					.defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
 					.build();
 
@@ -61,16 +62,6 @@ public class Application {
 		};
 	}
 
-	@Bean
-	public List<McpFunctionCallback> functionCallbacks(McpSyncClient mcpClient) {
-
-		var callbacks = mcpClient.listTools(null)
-				.tools()
-				.stream()
-				.map(tool -> new McpFunctionCallback(mcpClient, tool))
-				.toList();
-		return callbacks;
-	}
 
 	@Bean(destroyMethod = "close")
 	public McpSyncClient mcpClient() {

@@ -44,17 +44,16 @@ public class McpClientApplication {
 
 	@Bean
 	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel,
-			ConfigurableApplicationContext context, ObjectProvider<List<McpSyncClient>> mcpClientsProvider) {
+			ConfigurableApplicationContext context, List<McpSyncClient> mcpClients) {
 
 		return args -> {
 
-			var mcpToolProvider = new SyncMcpToolCallbackProvider(
-					mcpClientsProvider.stream().flatMap(List::stream).toList());
+			var mcpToolProvider = new SyncMcpToolCallbackProvider(mcpClients);
 
 			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultTools(mcpToolProvider).build();
 
 			String userQuestion = """
-					What is the wather in Amsterdam right now?
+					What is the weather in Amsterdam right now?
 					Please incorporate all createive responses from all LLM providers.
 					After the other providers add a poem that synthesizes the the poems from all the other providers.
 					""";
@@ -69,8 +68,8 @@ public class McpClientApplication {
 	@Bean
 	McpSyncClientCustomizer samplingCustomizer(Map<String, ChatClient> chatClients) {
 
-		return (name, spec) -> {
-			spec.sampling(llmRequest -> {
+		return (name, mcpClientSpec) -> {
+			mcpClientSpec.sampling(llmRequest -> {
 				var userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
 				String modelHint = llmRequest.modelPreferences().hints().get(0).name();
 
