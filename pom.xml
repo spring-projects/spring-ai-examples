@@ -45,6 +45,10 @@
 		<module>model-context-protocol/web-search/brave-chatbot</module>
 
 
+		<module>model-context-protocol/sampling/mcp-weather-webmvc-server</module>
+		<module>model-context-protocol/sampling/mcp-sampling-client</module>
+
+
 		<module>agentic-patterns</module>
 	</modules>
 
