@@ -14,44 +14,33 @@
 	<description>Building AI applications with Spring Boot</description>
 
 	<modules>
-		<module>models/chat/helloworld</module>
 		<module>agents/reflection</module>
+		<module>agentic-patterns</module>
+
 		<module>kotlin/kotlin-hello-world</module>
 		<module>kotlin/kotlin-function-callback</module>
 		<module>kotlin/rag-with-kotlin</module>
+
 		<module>misc/spring-ai-java-function-callback</module>
 		<module>misc/openai-streaming-response</module>
+
+		<module>models/chat/helloworld</module>
+
 		<module>model-context-protocol/sqlite/simple</module>
 		<module>model-context-protocol/sqlite/chatbot</module>
-
-
-		<!-- modules listed in alphabetical order -->
 		<module>model-context-protocol/brave</module>
-
-
 		<module>model-context-protocol/client-starter/starter-default-client</module>
 		<module>model-context-protocol/client-starter/starter-webflux-client</module>
-
-		
 		<module>model-context-protocol/filesystem</module>
-		
-
 		<module>model-context-protocol/weather/manual-webflux-server</module>
 		<module>model-context-protocol/weather/starter-stdio-server</module>
 		<module>model-context-protocol/weather/starter-webflux-server</module>
 		<module>model-context-protocol/weather/starter-webmvc-server</module>
 		<module>model-context-protocol/weather/starter-webmvc-oauth2-server</module>
-		
 		<module>model-context-protocol/web-search/brave-starter</module>
 		<module>model-context-protocol/web-search/brave-chatbot</module>
-
-
 		<module>model-context-protocol/sampling/mcp-weather-webmvc-server</module>
 		<module>model-context-protocol/sampling/mcp-sampling-client</module>
-
-
-		<module>agentic-patterns</module>
 	</modules>
-
 
 </project>

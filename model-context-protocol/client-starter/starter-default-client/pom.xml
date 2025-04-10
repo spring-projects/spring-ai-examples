@@ -14,7 +14,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Spring AI - MCP Starter Default Client</name>
 	<description>Spring AI - MCP Starter Default Client</description>
-	
+
 	<properties>
 		<java.version>17</java.version>
 		<spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
@@ -33,7 +33,7 @@
 	</dependencyManagement>
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-mcp-client</artifactId>
@@ -48,7 +48,7 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-anthropic</artifactId>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -75,7 +75,7 @@
 		<repository>
 			<id>spring-milestones</id>
 			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/libs-milestone-local</url>
+			<url>https://repo.spring.io/milestone</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -89,6 +89,5 @@
 			</releases>
 		</repository>
 	</repositories>
-
 
 </project>
