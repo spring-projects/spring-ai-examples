@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: none
   ai:
     azure:
       openai:
