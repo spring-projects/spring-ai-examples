@@ -1,7 +1,7 @@
 # Spring AI Model Context Protocol Demo Application
 
 A demo application showcasing the integration of Spring AI with File system using the Model Context Protocol (MCP). 
-This application enables natural language interactions with predefiend folders in your local files system.
+This application enables natural language interactions with predefined folders in your local files system.
 
 It starts and connects to [Filesystem MCP-Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) with provided accsss to your `model-context-protocol/filesystem/target` folder
 
