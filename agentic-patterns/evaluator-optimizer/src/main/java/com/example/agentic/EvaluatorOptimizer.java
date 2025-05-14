@@ -273,7 +273,7 @@ public class EvaluatorOptimizer {
 	 *         (PASS/NEEDS_IMPROVEMENT/FAIL)
 	 *         and detailed feedback for improvement
 	 */
-	private EvaluationResponse evalute(String content, String task) {
+	private EvaluationResponse evaluate(String content, String task) {
 
 		EvaluationResponse evaluationResponse = chatClient.prompt()
 				.user(u -> u.text("{prompt}\nOriginal task: {task}\nContent to evaluate: {content}")

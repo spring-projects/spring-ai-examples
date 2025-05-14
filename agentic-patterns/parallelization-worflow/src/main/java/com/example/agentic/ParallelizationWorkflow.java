@@ -72,11 +72,11 @@ import org.springframework.util.Assert;
  *      "https://www.anthropic.com/research/building-effective-agents">Building
  *      Effective Agents</a>
  */
-public class ParallelizationlWorkflow {
+public class ParallelizationWorkflow {
 
 	private final ChatClient chatClient;
 
-	public ParallelizationlWorkflow(ChatClient chatClient) {
+	public ParallelizationWorkflow(ChatClient chatClient) {
 		this.chatClient = chatClient;
 	}
 
