@@ -38,7 +38,7 @@ public class Application {
 			// PARALLEL WORKFLOW
 			// ------------------------------------------------------------
 
-			List<String> parallelResponse = new ParallelizationlWorkflow(chatClientBuilder.build())
+			List<String> parallelResponse = new ParallelizationWorkflow(chatClientBuilder.build())
 					.parallel("""
 							Analyze how market changes will impact this stakeholder group.
 							Provide specific impacts and recommended actions.
