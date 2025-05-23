@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Bean;
 public class McpClientApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(McpClientApplication.class, args).close();;
+		SpringApplication.run(McpClientApplication.class, args).close();
 	}
 
 	@Bean
