@@ -52,13 +52,13 @@ public class ReflectionAgent {
     public String run(String userQuestion, int maxIterations) {
 
         String generation = generateChatClient.prompt(userQuestion).call().content();
-        System.out.println("##generation\n\n" + generation);
+        System.out.println("## Generation\n\n" + generation);
         String critique;
         for (int i = 0; i < maxIterations; i++) {
 
             critique = critiqueChatClient.prompt(generation).call().content();
 
-            System.out.println("##Critique\n\n" + critique);
+            System.out.println("## Critique\n\n" + critique);
             if (critique.contains("<OK>")) {
                 System.out.println("\n\nStop sequence found\n\n");
                 break;
