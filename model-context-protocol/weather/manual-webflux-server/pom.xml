@@ -17,7 +17,6 @@
 
     <name>Spring AI MCP Weather Sample</name>
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
-
     <properties>
         <mcp.version>0.10.0</mcp.version>
         <spring.ai.version>1.0.0</spring.ai.version>
