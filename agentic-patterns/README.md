@@ -24,7 +24,7 @@ Implements prompt chaining to decompose tasks into a sequence of LLM calls where
 - Document generation with structured steps
 
 ### 2. Parallelization Workflow
-[parallelization-worflow/](parallelization-worflow/)
+[parallelization-workflow/](parallelization-workflow/)
 
 Enables concurrent processing of multiple LLM operations with two key variations:
 - **Sectioning**: Breaking tasks into independent subtasks run in parallel
