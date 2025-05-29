@@ -19,7 +19,7 @@
     <description>Sample Spring Boot application demonstrating MCP Server usage with OAuth2 authorization</description>
 
     <properties>
-        <spring.ai.version>1.0.0</spring.ai.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>${spring.ai.version}</version>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
