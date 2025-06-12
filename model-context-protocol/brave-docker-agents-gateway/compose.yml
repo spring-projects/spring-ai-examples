@@ -1,0 +1,18 @@
+services:
+  mcp-gateway:
+    image: docker/agents_gateway:v2
+    ports:
+      - 8811:8811
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    command:
+      - --transport=sse
+      - --secrets=/run/secrets/mcp_secret
+      - --servers=brave
+      - --tools=*
+    secrets:
+      - mcp_secret
+    
+secrets:
+  mcp_secret:
+    file: .env

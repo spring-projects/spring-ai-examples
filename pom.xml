@@ -29,6 +29,7 @@
 		<module>model-context-protocol/sqlite/simple</module>
 		<module>model-context-protocol/sqlite/chatbot</module>
 		<module>model-context-protocol/brave</module>
+		<module>model-context-protocol/brave-docker-agents-gateway</module>
 		<module>model-context-protocol/client-starter/starter-default-client</module>
 		<module>model-context-protocol/client-starter/starter-webflux-client</module>
 		<module>model-context-protocol/filesystem</module>
