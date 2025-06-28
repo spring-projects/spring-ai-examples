@@ -8,7 +8,7 @@ services:
     command: sh -c 'echo "brave.api_key=$${BRAVE_API_KEY}" > /tmp/secrets/mcp_secret'
 
   mcp-gateway:
-    image: docker/agents_gateway:v2
+    image: docker/mcp-gateway:latest
     depends_on:
       - env-setup
     ports:
