@@ -28,13 +28,13 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 @Service
-public class WeatherService {
+public class SpringAiToolProvider {
 
 	private static final String BASE_URL = "https://api.weather.gov";
 
 	private final RestClient restClient;
 
-	public WeatherService() {
+	public SpringAiToolProvider() {
 
 		this.restClient = RestClient.builder()
 			.baseUrl(BASE_URL)
@@ -137,7 +137,7 @@ public class WeatherService {
 	}
 
 	public static void main(String[] args) {
-		WeatherService client = new WeatherService();
+		SpringAiToolProvider client = new SpringAiToolProvider();
 		System.out.println(client.getWeatherForecastByLocation(47.6062, -122.3321));
 		System.out.println(client.getAlerts("NY"));
 	}

@@ -2,10 +2,11 @@ package org.springframework.ai.mcp.sample.server;
 
 import java.util.List;
 
-import com.logaritex.mcp.spring.SpringAiMcpAnnotationProvider;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncCompletionSpecification;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import org.springaicommunity.mcp.spring.SyncMcpAnnotationProvider;
 
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
@@ -21,23 +22,29 @@ public class McpServerApplication {
 	}
 
 	@Bean
-	public ToolCallbackProvider weatherTools(WeatherService weatherService) {
+	public ToolCallbackProvider weatherTools(SpringAiToolProvider weatherService) {
 		return MethodToolCallbackProvider.builder().toolObjects(weatherService).build();
 	}
 
 	@Bean
 	public List<SyncResourceSpecification> resourceSpecs(UserProfileResourceProvider userProfileResourceProvider) {
-		return SpringAiMcpAnnotationProvider.createSyncResourceSpecifications(List.of(userProfileResourceProvider));
+		return SyncMcpAnnotationProvider.createSyncResourceSpecifications(List.of(userProfileResourceProvider));
 	}
 
 	@Bean
 	public List<SyncPromptSpecification> promptSpecs(PromptProvider promptProvider) {
-		return SpringAiMcpAnnotationProvider.createSyncPromptSpecifications(List.of(promptProvider));
+		return SyncMcpAnnotationProvider.createSyncPromptSpecifications(List.of(promptProvider));
 	}
 
 	@Bean
 	public List<SyncCompletionSpecification> completionSpecs(AutocompleteProvider autocompleteProvider) {
-		return SpringAiMcpAnnotationProvider.createSyncCompleteSpecifications(List.of(autocompleteProvider));
+		return SyncMcpAnnotationProvider.createSyncCompleteSpecifications(List.of(autocompleteProvider));
+	}
+
+	@Bean
+	public List<SyncToolSpecification> toolSpecs(McpToolProvider toolProvider) {
+		var toolSpecs = SyncMcpAnnotationProvider.createSyncToolSpecifications(List.of(toolProvider));
+		return toolSpecs;
 	}
 
 }
