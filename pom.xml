@@ -32,6 +32,7 @@
 		<module>model-context-protocol/brave-docker-agents-gateway</module>
 		<module>model-context-protocol/client-starter/starter-default-client</module>
 		<module>model-context-protocol/client-starter/starter-webflux-client</module>
+		<module>model-context-protocol/client-starter/starter-streamable-http-client</module>
 		<module>model-context-protocol/filesystem</module>
 		<module>model-context-protocol/weather/manual-webflux-server</module>
 		<module>model-context-protocol/weather/starter-stdio-server</module>
