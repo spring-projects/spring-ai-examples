@@ -90,7 +90,7 @@ public class WeatherService {
 								.systemPrompt("You are a poet!")
 								.messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,
 										new McpSchema.TextContent(
-												"Please write a poem about thius weather forecast (temperature is in Celsious). Use markdown format :\n "
+												"Please write a poem about this weather forecast (temperature is in Celsius). Use markdown format :\n "
 														+ ModelOptionsUtils
 																.toJsonStringPrettyPrinter(weatherResponse)))));
 

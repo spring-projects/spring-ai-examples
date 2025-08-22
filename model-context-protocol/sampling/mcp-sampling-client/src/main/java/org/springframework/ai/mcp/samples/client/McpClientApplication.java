@@ -86,7 +86,6 @@ public class McpClientApplication {
 
 				return CreateMessageResult.builder().content(new McpSchema.TextContent(response)).build();
 			});
-			System.out.println("Customizing " + name);
 		};
 	}
 

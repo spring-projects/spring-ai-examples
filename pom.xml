@@ -43,7 +43,8 @@
 		<module>model-context-protocol/sampling/mcp-weather-webmvc-server</module>
 		<module>model-context-protocol/sampling/mcp-sampling-client</module>
 
-		<module>model-context-protocol/mcp-annotations-server</module>
+		<module>model-context-protocol/mcp-annotations/mcp-annotations-server</module>
+		<module>model-context-protocol/mcp-annotations/mcp-annotations-client</module>
 		
 		<module>model-context-protocol/dynamic-tool-update/client</module>
 		<module>model-context-protocol/dynamic-tool-update/server</module>
