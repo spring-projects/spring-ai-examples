@@ -12,7 +12,7 @@
 
     <groupId>com.example</groupId>
 
-    <artifactId>mcp-sampling-weather-server</artifactId>
+    <artifactId>mcp-sampling-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <name>Spring AI MCP Sampling - Weather Server</name>

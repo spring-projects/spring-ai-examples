@@ -17,50 +17,22 @@ package org.springframework.ai.mcp.samples.client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.context.annotation.Configuration;
 import org.springaicommunity.mcp.method.elicitation.SyncElicitationSpecification;
 import org.springaicommunity.mcp.method.logging.SyncLoggingSpecification;
 import org.springaicommunity.mcp.method.progress.SyncProgressSpecification;
 import org.springaicommunity.mcp.method.sampling.SyncSamplingSpecification;
 import org.springaicommunity.mcp.spring.SyncMcpAnnotationProvider;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.mcp.customizer.McpSyncClientCustomizer;
 import org.springframework.ai.mcp.samples.client.customizers.AnnotationSyncClientCustomizer;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import io.modelcontextprotocol.client.McpSyncClient;
-import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
-import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
-
-@SpringBootApplication
-public class McpClientApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(McpClientApplication.class, args).close();
-	}
-
-	@Bean
-	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel,
-			List<McpSyncClient> mcpClients) {
-
-		return args -> {
-			McpSyncClient mcpClient = mcpClients.get(0);
-
-			// Call a tool that sends progress notifications
-			CallToolRequest toolRequest = CallToolRequest.builder()
-					.name("tool1")
-					.arguments(Map.of("input", "test input"))
-					.progressToken("test-progress-token")
-					.build();
-
-			CallToolResult response = mcpClient.callTool(toolRequest);
-
-			System.out.println("Tool response: " + response);
-		};
-	}
+@Configuration
+public class AppConfiguration {
 
 	@Bean
 	List<SyncLoggingSpecification> loggingSpecs(McpClientHandlers clientMcpHandlers) {
@@ -87,5 +59,12 @@ public class McpClientApplication {
 			List<SyncSamplingSpecification> samplingSpecs, List<SyncElicitationSpecification> elicitationSpecs,
 			List<SyncProgressSpecification> progressSpecs) {
 		return new AnnotationSyncClientCustomizer(samplingSpecs, loggingSpecs, elicitationSpecs, progressSpecs);
+	}
+
+	@Bean
+	public Map<String, ChatClient> chatClients(List<ChatModel> chatModels) {
+		return chatModels.stream().collect(Collectors.toMap(model -> model.getClass().getSimpleName().toLowerCase(),
+				model -> ChatClient.builder(model).build()));
+
 	}
 }

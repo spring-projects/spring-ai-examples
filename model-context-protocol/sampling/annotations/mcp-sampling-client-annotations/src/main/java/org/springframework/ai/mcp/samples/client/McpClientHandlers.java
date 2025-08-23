@@ -4,23 +4,26 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springaicommunity.mcp.annotation.McpElicitation;
 import org.springaicommunity.mcp.annotation.McpLogging;
 import org.springaicommunity.mcp.annotation.McpProgress;
 import org.springaicommunity.mcp.annotation.McpSampling;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CreateMessageRequest;
 import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
-import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.spec.McpSchema.ProgressNotification;
 
 @Service
-public class ClientMcpHandlers {
+public class McpClientHandlers {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClientMcpHandlers.class);
+	private static final Logger logger = LoggerFactory.getLogger(McpClientHandlers.class);
+
+	@Autowired
+	Map<String, ChatClient> chatClients;
 
 	@McpProgress(clientId = "server1")
 	public void progressHandler(ProgressNotification progressNotification) {
@@ -37,22 +40,21 @@ public class ClientMcpHandlers {
 	@McpSampling
 	public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
 
-		logger.info("   MCP SAMPLING REQUEST: {}", llmRequest);
+		logger.info("MCP SAMPLING: {}", llmRequest);
 
-		String userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
-
+		var userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
 		String modelHint = llmRequest.modelPreferences().hints().get(0).name();
 
-		return CreateMessageResult.builder()
-				.content(new McpSchema.TextContent("Response " + userPrompt + " with model hint " + modelHint))
-				.build();
+		ChatClient hintedChatClient = chatClients.entrySet().stream()
+				.filter(e -> e.getKey().contains(modelHint)).findFirst()
+				.orElseThrow().getValue();
+
+		String response = hintedChatClient.prompt()
+				.system(llmRequest.systemPrompt())
+				.user(userPrompt)
+				.call()
+				.content();
+
+		return CreateMessageResult.builder().content(new McpSchema.TextContent(response)).build();
 	};
-
-	@McpElicitation
-	public ElicitResult elicitationHandler(McpSchema.ElicitRequest request) {
-		logger.info("MCP ELICITATION REQUEST: {}", request);
-
-		return new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("message", request.message()));
-	}
-
 }

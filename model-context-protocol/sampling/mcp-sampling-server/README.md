@@ -1,4 +1,4 @@
-# Spring AI MCP Weather Server Sample with WebMVC Starter and Sampling
+# Spring AI MCP Sampling Server
 
 This sample project demonstrates how to create an MCP server using the Spring AI MCP Server Boot Starter with WebMVC transport. It implements a weather service that exposes tools for retrieving weather information using the Open-Meteo API and showcases MCP Sampling capabilities.
 
@@ -53,7 +53,7 @@ This starter provides:
 
 Build the project using Maven:
 ```bash
-./mvnw clean install -DskipTests
+./mvnw clean package -DskipTests
 ```
 
 ## Running the Server
@@ -62,13 +62,13 @@ The server supports two transport modes:
 
 ### WebMVC SSE Mode (Default)
 ```bash
-java -jar target/mcp-sampling-weather-server-0.0.1-SNAPSHOT.jar
+java -jar target/mcp-sampling-server-0.0.1-SNAPSHOT.jar
 ```
 
 ### STDIO Mode
 To enable STDIO transport, set the appropriate properties:
 ```bash
-java -Dspring.ai.mcp.server.stdio=true -Dspring.main.web-application-type=none -jar target/mcp-sampling-weather-server-0.0.1-SNAPSHOT.jar
+java -Dspring.ai.mcp.server.stdio=true -Dspring.main.web-application-type=none -jar target/mcp-sampling-server-0.0.1-SNAPSHOT.jar
 ```
 
 ## Configuration
@@ -77,24 +77,17 @@ Configure the server through `application.properties`:
 
 ```properties
 # Server identification
-spring.ai.mcp.server.name=my-weather-server
+spring.ai.mcp.server.name=mcp-sampling-server
 spring.ai.mcp.server.version=0.0.1
 
-# Server type (SYNC/ASYNC)
-spring.ai.mcp.server.type=SYNC
-
-# Transport configuration
-spring.ai.mcp.server.stdio=false
-spring.ai.mcp.server.sse-message-endpoint=/mcp/message
-
-# Change notifications
-spring.ai.mcp.server.resource-change-notification=true
-spring.ai.mcp.server.tool-change-notification=true
-spring.ai.mcp.server.prompt-change-notification=true
-
-# Logging (required for STDIO transport)
+# Logging configuration
 spring.main.banner-mode=off
-logging.file.name=./target/starter-webmvc-server.log
+logging.file.name=./model-context-protocol/sampling/mcp-sampling-server/target/server.log
+
+# Uncomment for STDIO transport
+# spring.ai.mcp.server.stdio=true
+# spring.main.web-application-type=none
+# logging.pattern.console=
 ```
 
 ## Available Tools
@@ -133,7 +126,9 @@ The `WeatherService` implements the weather tool using the `@Tool` annotation an
 @Service
 public class WeatherService {
     @Tool(description = "Get the temperature (in celsius) for a specific location")
-    public String getTemperature(double latitude, double longitude, ToolContext toolContext) {
+    public String getTemperature(@ToolParam(description = "The location latitude") double latitude,
+                                @ToolParam(description = "The location longitude") double longitude,
+                                ToolContext toolContext) {
         // Retrieve weather data from Open-Meteo API
         WeatherResponse weatherResponse = restClient
             .get()
@@ -149,8 +144,9 @@ public class WeatherService {
     }
 
     public String callMcpSampling(ToolContext toolContext, WeatherResponse weatherResponse) {
-        // Implementation that calls both OpenAI and Anthropic models
-        // to generate poems about the weather
+        // Uses McpToolUtils.getMcpExchange() to access the MCP exchange
+        // Sends sampling requests with model preferences for OpenAI and Anthropic
+        // Returns combined poems from both models along with weather data
     }
 }
 ```
@@ -181,7 +177,7 @@ var stdioParams = ServerParameters.builder("java")
           "-Dspring.main.banner-mode=off",
           "-Dlogging.pattern.console=",
           "-jar",
-          "target/mcp-sampling-weather-server-0.0.1-SNAPSHOT.jar")
+          "target/mcp-sampling-server-0.0.1-SNAPSHOT.jar")
     .build();
 
 var transport = new StdioClientTransport(stdioParams);
@@ -189,7 +185,8 @@ var client = McpClient.sync(transport).build();
 ```
 
 The sample project includes example client implementations:
-- [SampleClient.java](src/test/java/org/springframework/ai/mcp/sample/client/SampleClient.java): Manual MCP client implementation
+- [SampleClient.java](src/test/java/org/springframework/ai/mcp/sample/client/SampleClient.java): Manual MCP client implementation with sampling support
+- [ClientSse.java](src/test/java/org/springframework/ai/mcp/sample/client/ClientSse.java): SSE transport connection
 - [ClientStdio.java](src/test/java/org/springframework/ai/mcp/sample/client/ClientStdio.java): STDIO transport connection
 
 ### Sampling Client
@@ -230,8 +227,9 @@ To run the sampling client:
    export OPENAI_API_KEY=your-openai-key
    export ANTHROPIC_API_KEY=your-anthropic-key
    ```
-3. Run the client:
+3. Navigate to the client directory and run:
    ```bash
+   cd ../mcp-sampling-client
    java -jar target/mcp-sampling-client-0.0.1-SNAPSHOT.jar
    ```
 

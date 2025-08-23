@@ -40,12 +40,18 @@
 		<module>model-context-protocol/weather/starter-webmvc-oauth2-server</module>
 		<module>model-context-protocol/web-search/brave-starter</module>
 		<module>model-context-protocol/web-search/brave-chatbot</module>
-		<module>model-context-protocol/sampling/mcp-weather-webmvc-server</module>
+		
+		<!-- SAMPLING -->
+		<module>model-context-protocol/sampling/mcp-sampling-server</module>
 		<module>model-context-protocol/sampling/mcp-sampling-client</module>
+		<module>model-context-protocol/sampling/annotations/mcp-sampling-server-annotations</module>
+		<module>model-context-protocol/sampling/annotations/mcp-sampling-client-annotations</module>
 
+		<!-- MCP ANNOTATIONS -->
 		<module>model-context-protocol/mcp-annotations/mcp-annotations-server</module>
 		<module>model-context-protocol/mcp-annotations/mcp-annotations-client</module>
-		
+
+		<!-- DYNAMIC TOOL UPDATE -->
 		<module>model-context-protocol/dynamic-tool-update/client</module>
 		<module>model-context-protocol/dynamic-tool-update/server</module>
 

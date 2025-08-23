@@ -14,10 +14,18 @@ The MCP Sampling examples showcase:
 
 ## Projects
 
-This directory contains two main projects:
+This directory contains several projects demonstrating MCP Sampling:
 
-1. **[mcp-weather-webmvc-server](./mcp-weather-webmvc-server)**: An MCP server that provides weather information and uses MCP Sampling to generate creative content
+### Main Projects
+1. **[mcp-sampling-server](./mcp-sampling-server)**: An MCP server that provides weather information and uses MCP Sampling to generate creative content
 2. **[mcp-sampling-client](./mcp-sampling-client)**: An MCP client that handles sampling requests and routes them to different LLM providers
+
+### Annotation-based Examples
+
+Showcase the same MCP Sampling functionality as the main sampling examples but use the annotation-based approach for simplified development - find more in the **[README](./annotations/README.md)**
+
+3. **[annotations/mcp-sampling-server-annotations](./annotations/mcp-sampling-server-annotations)**: Server implementation using Spring AI's annotation-based approach
+4. **[annotations/mcp-sampling-client-annotations](./annotations/mcp-sampling-client-annotations)**: Client implementation using Spring AI's annotation-based approach
 
 ## What is MCP Sampling?
 
@@ -74,38 +82,38 @@ The MCP Weather Server implements the server-side of MCP Sampling:
 
 ```java
 public String callMcpSampling(ToolContext toolContext, WeatherResponse weatherResponse) {
-    String openAiWeatherPoem = "<no OpenAI poem>";
-    String anthropicWeatherPoem = "<no Anthropic poem>";
+    StringBuilder openAiWeatherPoem = new StringBuilder();
+    StringBuilder anthropicWeatherPoem = new StringBuilder();
 
-    if (toolContext != null && toolContext.getContext().containsKey("exchange")) {
-        // Spring AI MCP Auto-configuration injects the McpSyncServerExchange into the ToolContext
-        McpSyncServerExchange exchange = (McpSyncServerExchange) toolContext.getContext().get("exchange");
-        if (exchange.getClientCapabilities().sampling() != null) {
-            var messageRequestBuilder = McpSchema.CreateMessageRequest.builder()
-                    .systemPrompt("You are a poet!")
-                    .messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,
-                            new McpSchema.TextContent(
-                                    "Please write a poem about this weather forecast (temperature is in Celsius)..."))));
+    McpToolUtils.getMcpExchange(toolContext)
+            .ifPresent(exchange -> {
+                if (exchange.getClientCapabilities().sampling() != null) {
+                    var messageRequestBuilder = McpSchema.CreateMessageRequest.builder()
+                            .systemPrompt("You are a poet!")
+                            .messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,
+                                    new McpSchema.TextContent(
+                                            "Please write a poem about this weather forecast (temperature is in Celsius). Use markdown format :\n "
+                                                    + ModelOptionsUtils.toJsonStringPrettyPrinter(weatherResponse)))));
 
-            // Request poem from OpenAI
-            var openAiLlmMessageRequest = messageRequestBuilder
-                    .modelPreferences(ModelPreferences.builder().addHint("openai").build())
-                    .build();
-            CreateMessageResult openAiLlmResponse = exchange.createMessage(openAiLlmMessageRequest);
-            openAiWeatherPoem = ((McpSchema.TextContent) openAiLlmResponse.content()).text();
+                    // Request poem from OpenAI
+                    var openAiLlmMessageRequest = messageRequestBuilder
+                            .modelPreferences(ModelPreferences.builder().addHint("openai").build())
+                            .build();
+                    CreateMessageResult openAiLlmResponse = exchange.createMessage(openAiLlmMessageRequest);
+                    openAiWeatherPoem.append(((McpSchema.TextContent) openAiLlmResponse.content()).text());
 
-            // Request poem from Anthropic
-            var anthropicLlmMessageRequest = messageRequestBuilder
-                    .modelPreferences(ModelPreferences.builder().addHint("anthropic").build())
-                    .build();
-            CreateMessageResult anthropicAiLlmResponse = exchange.createMessage(anthropicLlmMessageRequest);
-            anthropicWeatherPoem = ((McpSchema.TextContent) anthropicAiLlmResponse.content()).text();
-        }
-    }
+                    // Request poem from Anthropic
+                    var anthropicLlmMessageRequest = messageRequestBuilder
+                            .modelPreferences(ModelPreferences.builder().addHint("anthropic").build())
+                            .build();
+                    CreateMessageResult anthropicAiLlmResponse = exchange.createMessage(anthropicLlmMessageRequest);
+                    anthropicWeatherPoem.append(((McpSchema.TextContent) anthropicAiLlmResponse.content()).text());
+                }
+            });
 
     // Combine responses
-    return "OpenAI poem about the weather: " + openAiWeatherPoem + "\n\n" +
-           "Anthropic poem about the weather: " + anthropicWeatherPoem + "\n" +
+    return "OpenAI poem about the weather: " + openAiWeatherPoem.toString() + "\n\n" +
+           "Anthropic poem about the weather: " + anthropicWeatherPoem.toString() + "\n" +
            ModelOptionsUtils.toJsonStringPrettyPrinter(weatherResponse);
 }
 ```
@@ -154,9 +162,9 @@ NOTE: To prevent cyclic dependencies you have to disable MCP tool callbacks auto
 ### Step 1: Start the MCP Weather Server
 
 ```bash
-cd mcp-weather-webmvc-server
-./mvnw clean install -DskipTests
-java -jar target/mcp-sampling-weather-server-0.0.1-SNAPSHOT.jar
+cd mcp-sampling-server
+./mvnw clean package -DskipTests
+java -jar target/mcp-sampling-server-0.0.1-SNAPSHOT.jar
 ```
 
 ### Step 2: Set Environment Variables
@@ -170,7 +178,7 @@ export ANTHROPIC_API_KEY=your-anthropic-key
 
 ```bash
 cd mcp-sampling-client
-./mvnw clean install
+./mvnw clean package
 java -Dai.user.input='What is the weather in Amsterdam right now?' -jar target/mcp-sampling-client-0.0.1-SNAPSHOT.jar
 ```
 
@@ -182,8 +190,10 @@ When you run the application, you'll see creative responses from both OpenAI and
 
 Spring AI provides several MCP client and server implementations:
 
-- **[starter-default-client](../client-starter/starter-default-client)**: A default MCP client implementation using Spring Boot
-- **[starter-webflux-client](../client-starter/starter-webflux-client)**: An MCP client implementation using Spring WebFlux
+- **[MCP Annotations](../mcp-annotations)**: Examples using Spring AI's annotation-based MCP approach
+- **[Weather Server](../weather)**: A simple weather MCP server example
+- **[SQLite Server](../sqlite)**: An MCP server that provides SQLite database access
+- **[Filesystem Server](../filesystem)**: An MCP server for file system operations
 
 ## Additional Resources
 
