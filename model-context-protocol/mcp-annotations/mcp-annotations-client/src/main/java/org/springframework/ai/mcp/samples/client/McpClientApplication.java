@@ -22,7 +22,7 @@ import org.springaicommunity.mcp.method.elicitation.SyncElicitationSpecification
 import org.springaicommunity.mcp.method.logging.SyncLoggingSpecification;
 import org.springaicommunity.mcp.method.progress.SyncProgressSpecification;
 import org.springaicommunity.mcp.method.sampling.SyncSamplingSpecification;
-import org.springaicommunity.mcp.spring.SyncMcpAnnotationProvider;
+import org.springaicommunity.mcp.spring.SyncMcpAnnotationProviders;
 import org.springframework.ai.mcp.customizer.McpSyncClientCustomizer;
 import org.springframework.ai.mcp.samples.client.customizers.AnnotationSyncClientCustomizer;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -64,22 +64,22 @@ public class McpClientApplication {
 
 	@Bean
 	List<SyncLoggingSpecification> loggingSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProvider.createSyncLoggingSpecifications(List.of(clientMcpHandlers));
+		return SyncMcpAnnotationProviders.loggingSpecifications(List.of(clientMcpHandlers));
 	}
 
 	@Bean
 	List<SyncSamplingSpecification> samplingSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProvider.createSyncSamplingSpecifications(List.of(clientMcpHandlers));
+		return SyncMcpAnnotationProviders.samplingSpecifications(List.of(clientMcpHandlers));
 	}
 
 	@Bean
 	List<SyncElicitationSpecification> elicitationSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProvider.createSyncElicitationSpecifications(List.of(clientMcpHandlers));
+		return SyncMcpAnnotationProviders.elicitationSpecifications(List.of(clientMcpHandlers));
 	}
 
 	@Bean
 	List<SyncProgressSpecification> progressSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProvider.createSyncProgressSpecifications(List.of(clientMcpHandlers));
+		return SyncMcpAnnotationProviders.progressSpecifications(List.of(clientMcpHandlers));
 	}
 
 	@Bean

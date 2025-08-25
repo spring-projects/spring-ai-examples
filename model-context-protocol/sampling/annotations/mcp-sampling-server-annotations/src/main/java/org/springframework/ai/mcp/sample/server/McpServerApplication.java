@@ -2,7 +2,7 @@ package org.springframework.ai.mcp.sample.server;
 
 import java.util.List;
 
-import org.springaicommunity.mcp.spring.SyncMcpAnnotationProvider;
+import org.springaicommunity.mcp.spring.SyncMcpAnnotationProviders;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,7 @@ public class McpServerApplication {
 
 	@Bean
 	public List<SyncToolSpecification> toolSpecs(WeatherService weatherService) {
-		return SyncMcpAnnotationProvider.createSyncToolSpecifications(List.of(weatherService));
+		return SyncMcpAnnotationProviders.toolSpecifications(List.of(weatherService));
 	}
 
 }
