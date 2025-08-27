@@ -40,11 +40,7 @@ public class WeatherService {
 
 	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(WeatherService.class);
 
-	private final RestClient restClient;
-
-	public WeatherService() {
-		this.restClient = RestClient.create();
-	}
+	private final RestClient restClient = RestClient.create();
 
 	/**
 	 * The response format from the Open-Meteo API

@@ -18,23 +18,36 @@ import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.spec.McpSchema.ProgressNotification;
 
 @Service
-public class McpClientHandlers {
+public class McpClientHandlerProviders {
 
-	private static final Logger logger = LoggerFactory.getLogger(McpClientHandlers.class);
+	private static final Logger logger = LoggerFactory.getLogger(McpClientHandlerProviders.class);
 
-	@McpProgress(clientId = "server1")
+	/**
+	 * Handles progress notifications for the client identified by {@code clientId = "server1"}.
+	 * <br>
+	 * The {@code clientId} is configured via application properties, for example:
+	 * <ul>
+	 *   <li>{@code spring.ai.mcp.client.sse.connections.server1.url=...}</li>
+	 *   <li>{@code spring.ai.mcp.client.streamable-http.connections.server1.url=...}</li>
+	 * </ul>
+	 * 
+	 * The handler is assigned only to the client with ID "server1".
+	 *
+	 * @param progressNotification the progress notification received from the server
+	 */
+	@McpProgress(clients = "server1")
 	public void progressHandler(ProgressNotification progressNotification) {
 		logger.info("MCP PROGRESS: [{}] progress: {} total: {} message: {}",
 				progressNotification.progressToken(), progressNotification.progress(),
 				progressNotification.total(), progressNotification.message());
 	}
 
-	@McpLogging
+	@McpLogging(clients = "server1")
 	public void loggingHandler(LoggingMessageNotification loggingMessage) {
 		logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data());
 	}
 
-	@McpSampling
+	@McpSampling(clients = "server1")
 	public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
 		logger.info("MCP SAMPLING: {}", llmRequest);
 
@@ -46,7 +59,7 @@ public class McpClientHandlers {
 				.build();
 	}
 
-	@McpElicitation
+	@McpElicitation(clients = "server1")
 	public ElicitResult elicitationHandler(McpSchema.ElicitRequest request) {
 		logger.info("MCP ELICITATION: {}", request);
 		return new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("message", request.message()));

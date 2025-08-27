@@ -1,43 +1,25 @@
 # Spring AI MCP Annotations Examples
 
-This directory contains comprehensive examples demonstrating the Model Context Protocol (MCP) using Spring AI's annotation-based approach. These examples showcase the full spectrum of MCP capabilities including tools, resources, prompts, completions, and client-side handlers using declarative annotations.
+This directory contains examples demonstrating the Model Context Protocol (MCP) using Spring AI's annotation-based approach. These examples showcase MCP capabilities including tools, resources, prompts, completions, and client-side handlers using declarative annotations.
 
 ## Overview
 
 The MCP Annotations examples demonstrate:
 
-- **Complete MCP Feature Set**: Tools, resources, prompts, completions, and client handlers
 - **Annotation-Driven Development**: Simplified MCP development using `@McpTool`, `@McpResource`, `@McpPrompt`, `@McpComplete`, and client annotations
 - **Declarative Configuration**: Automatic registration and configuration through annotations
-- **Multiple Data Sources**: Weather APIs, user profiles, and completion databases
 - **Client-Server Communication**: Full bidirectional MCP communication patterns
-- **Advanced MCP Features**: Progress tracking, logging, sampling, and elicitation
-
-## What Makes This Special?
-
-This is the most comprehensive MCP annotation example, showcasing:
-
-### Server-Side Capabilities
-- **Multiple Tool Providers**: Weather data from different APIs (Open-Meteo and Weather.gov)
-- **Rich Resource System**: User profiles with various access patterns and URI templates
-- **Dynamic Prompts**: Contextual prompt generation with parameter validation
-- **Smart Completions**: Auto-completion for usernames, countries, and other data
+- **Multiple MCP Features**: Tools, resources, prompts, completions, and client handlers
 - **Mixed Annotation Styles**: Both MCP annotations and Spring AI `@Tool` annotations
-
-### Client-Side Features
-- **Comprehensive Handlers**: Logging, progress, sampling, and elicitation support
-- **Annotation-Based Configuration**: Automatic handler registration
-- **Custom Client Customizers**: Advanced client configuration patterns
 
 ## Projects
 
 ### 1. mcp-annotations-server
-A comprehensive MCP server implementation showcasing all major MCP features:
+A comprehensive MCP server implementation showcasing all major MCP features using annotations.
 
 #### Tools
-- **Weather Tools**: Temperature data from Open-Meteo API using `@McpTool`
-- **Weather Forecast**: Detailed forecasts from Weather.gov API using Spring AI `@Tool`
-- **Weather Alerts**: State-based weather alerts using Spring AI `@Tool`
+- **Weather Tool**: Temperature data from Open-Meteo API using `@McpTool`
+- **Additional Tools**: Weather forecast and alerts from Weather.gov API using Spring AI `@Tool`
 
 #### Resources
 - **User Profiles**: Complete user information with multiple access patterns
@@ -46,20 +28,23 @@ A comprehensive MCP server implementation showcasing all major MCP features:
 - **User Connections**: Social connections and relationships
 - **User Notifications**: Dynamic notification generation
 - **User Avatars**: Binary data handling with custom MIME types
+- **User Location**: Simple location information
 
 #### Prompts
 - **Greeting Prompts**: Simple parameterized greetings
 - **Personalized Messages**: Complex prompts with multiple parameters and logic
 - **Conversation Starters**: Multi-message conversation flows
 - **Dynamic Content**: Map-based argument handling
+- **Single Message**: Single message responses
+- **String List**: List-based responses
 
 #### Completions
 - **Username Completion**: Auto-complete for user status URIs
+- **Name Completion**: Auto-complete for personalized message prompts
 - **Country Completion**: Travel-related country name completion
-- **Context-Aware**: Different completion strategies based on context
 
 ### 2. mcp-annotations-client
-A comprehensive MCP client implementation demonstrating all client-side MCP capabilities:
+A simple MCP client implementation demonstrating client-side MCP capabilities using annotations.
 
 #### Handler Types
 - **Progress Handlers**: Track long-running operations with `@McpProgress`
@@ -74,30 +59,6 @@ A comprehensive MCP client implementation demonstrating all client-side MCP capa
 ```java
 @SpringBootApplication
 public class McpServerApplication {
-    // Automatic tool registration from multiple providers
-    @Bean
-    public List<SyncToolSpecification> toolSpecs(McpToolProvider toolProvider, McpToolProvider2 toolProvider2) {
-        return SyncMcpAnnotationProvider.createSyncToolSpecifications(List.of(toolProvider, toolProvider2));
-    }
-
-    // Resource specifications from annotation providers
-    @Bean
-    public List<SyncResourceSpecification> resourceSpecs(McpUserProfileResourceProvider userProfileResourceProvider) {
-        return SyncMcpAnnotationProvider.createSyncResourceSpecifications(List.of(userProfileResourceProvider));
-    }
-
-    // Prompt specifications
-    @Bean
-    public List<SyncPromptSpecification> promptSpecs(McpPromptProvider promptProvider) {
-        return SyncMcpAnnotationProvider.createSyncPromptSpecifications(List.of(promptProvider));
-    }
-
-    // Completion specifications
-    @Bean
-    public List<SyncCompletionSpecification> completionSpecs(McpCompletionProvider autocompleteProvider) {
-        return SyncMcpAnnotationProvider.createSyncCompleteSpecifications(List.of(autocompleteProvider));
-    }
-
     // Traditional Spring AI tool integration
     @Bean
     public ToolCallbackProvider weatherTools(SpringAiToolProvider weatherService) {
@@ -106,33 +67,32 @@ public class McpServerApplication {
 }
 ```
 
+The server uses automatic annotation scanning to register MCP providers. All `@McpTool`, `@McpResource`, `@McpPrompt`, and `@McpComplete` annotated methods are automatically discovered and registered.
+
 ### Client Architecture
 
 ```java
 @SpringBootApplication
 public class McpClientApplication {
-    // Automatic handler registration
     @Bean
-    List<SyncLoggingSpecification> loggingSpecs(McpClientHandlers clientMcpHandlers) {
-        return SyncMcpAnnotationProvider.createSyncLoggingSpecifications(List.of(clientMcpHandlers));
-    }
-
-    @Bean
-    List<SyncSamplingSpecification> samplingSpecs(McpClientHandlers clientMcpHandlers) {
-        return SyncMcpAnnotationProvider.createSyncSamplingSpecifications(List.of(clientMcpHandlers));
-    }
-
-    // Custom client configuration
-    @Bean
-    McpSyncClientCustomizer annotationMcpSyncClientCustomizer(
-            List<SyncLoggingSpecification> loggingSpecs,
-            List<SyncSamplingSpecification> samplingSpecs,
-            List<SyncElicitationSpecification> elicitationSpecs,
-            List<SyncProgressSpecification> progressSpecs) {
-        return new AnnotationSyncClientCustomizer(samplingSpecs, loggingSpecs, elicitationSpecs, progressSpecs);
+    public CommandLineRunner predefinedQuestions(List<McpSyncClient> mcpClients) {
+        return args -> {
+            for (McpSyncClient mcpClient : mcpClients) {
+                // Call tools and interact with MCP servers
+                CallToolRequest toolRequest = CallToolRequest.builder()
+                    .name("tool1")
+                    .arguments(Map.of("input", "test input"))
+                    .progressToken("test-progress-token")
+                    .build();
+                
+                CallToolResult response = mcpClient.callTool(toolRequest);
+            }
+        };
     }
 }
 ```
+
+Client handlers are automatically registered through annotation scanning.
 
 ## Key Implementation Examples
 
@@ -140,7 +100,7 @@ public class McpClientApplication {
 
 ```java
 @Service
-public class McpToolProvider {
+public class ToolProvider {
     @McpTool(description = "Get the temperature (in celsius) for a specific location")
     public WeatherResponse getTemperature(
             @McpToolParam(description = "The location latitude") double latitude,
@@ -160,7 +120,7 @@ public class McpToolProvider {
 
 ```java
 @Service
-public class McpUserProfileResourceProvider {
+public class UserProfileResourceProvider {
     @McpResource(uri = "user-profile://{username}", 
                  name = "User Profile", 
                  description = "Provides user profile information for a specific user")
@@ -187,7 +147,7 @@ public class McpUserProfileResourceProvider {
 
 ```java
 @Service
-public class McpPromptProvider {
+public class PromptProvider {
     @McpPrompt(name = "personalized-message", 
                description = "Generates a personalized message based on user information")
     public GetPromptResult personalizedMessage(
@@ -225,7 +185,7 @@ public class McpPromptProvider {
 
 ```java
 @Service
-public class McpCompletionProvider {
+public class CompletionProvider {
     @McpComplete(uri = "user-status://{username}")
     public List<String> completeUsername(String usernamePrefix) {
         String prefix = usernamePrefix.toLowerCase();
@@ -241,7 +201,7 @@ public class McpCompletionProvider {
             .toList();
     }
 
-    @McpComplete(prompt = "travel-planner")
+    @McpComplete(prompt = "personalized-message")
     public CompleteResult completeCountryName(CompleteRequest request) {
         String prefix = request.argument().value().toLowerCase();
         String firstLetter = prefix.substring(0, 1);
@@ -260,20 +220,20 @@ public class McpCompletionProvider {
 
 ```java
 @Service
-public class McpClientHandlers {
-    @McpProgress(clientId = "server1")
+public class McpClientHandlerProviders {
+    @McpProgress(clients = "server1")
     public void progressHandler(ProgressNotification progressNotification) {
         logger.info("MCP PROGRESS: [{}] progress: {} total: {} message: {}",
             progressNotification.progressToken(), progressNotification.progress(),
             progressNotification.total(), progressNotification.message());
     }
 
-    @McpLogging
+    @McpLogging(clients = "server1")
     public void loggingHandler(LoggingMessageNotification loggingMessage) {
         logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data());
     }
 
-    @McpSampling
+    @McpSampling(clients = "server1")
     public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
         String userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
         String modelHint = llmRequest.modelPreferences().hints().get(0).name();
@@ -283,7 +243,7 @@ public class McpClientHandlers {
             .build();
     }
 
-    @McpElicitation
+    @McpElicitation(clients = "server1")
     public ElicitResult elicitationHandler(McpSchema.ElicitRequest request) {
         logger.info("MCP ELICITATION: {}", request);
         return new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("message", request.message()));
@@ -292,16 +252,6 @@ public class McpClientHandlers {
 ```
 
 ## Key Dependencies
-
-Both projects use the Spring AI MCP Annotations library:
-
-```xml
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>spring-ai-mcp-annotations</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-</dependency>
-```
 
 ### Server Dependencies
 ```xml
@@ -317,14 +267,6 @@ Both projects use the Spring AI MCP Annotations library:
     <groupId>org.springframework.ai</groupId>
     <artifactId>spring-ai-starter-mcp-client</artifactId>
 </dependency>
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-starter-model-openai</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-starter-model-anthropic</artifactId>
-</dependency>
 ```
 
 ## Running the Examples
@@ -333,8 +275,6 @@ Both projects use the Spring AI MCP Annotations library:
 
 - Java 17 or later
 - Maven 3.6+
-- OpenAI API key (for client)
-- Anthropic API key (for client)
 
 ### Step 1: Start the MCP Annotations Server
 
@@ -346,14 +286,7 @@ java -jar target/mcp-annotations-server-0.0.1-SNAPSHOT.jar
 
 The server will start on `http://localhost:8080` with SSE transport enabled.
 
-### Step 2: Set Environment Variables (for client)
-
-```bash
-export OPENAI_API_KEY=your-openai-key
-export ANTHROPIC_API_KEY=your-anthropic-key
-```
-
-### Step 3: Run the MCP Annotations Client
+### Step 2: Run the MCP Annotations Client
 
 ```bash
 cd mcp-annotations-client
@@ -365,8 +298,6 @@ java -jar target/mcp-annotations-client-0.0.1-SNAPSHOT.jar
 
 ### Tools
 - `getTemperature`: Get temperature data using Open-Meteo API
-- `getWeatherForecastByLocation`: Detailed weather forecast from Weather.gov
-- `getAlerts`: Weather alerts for US states
 
 ### Resources
 - `user-profile://{username}`: Complete user profile information
@@ -387,8 +318,8 @@ java -jar target/mcp-annotations-client-0.0.1-SNAPSHOT.jar
 
 ### Completions
 - Username completion for `user-status://` URIs
+- Name completion for `personalized-message` prompts
 - Country name completion for travel prompts
-- Context-aware completion strategies
 
 ## Configuration
 
@@ -403,7 +334,7 @@ spring.ai.mcp.server.version=0.0.1
 spring.main.banner-mode=off
 
 # Logging configuration
-logging.file.name=./model-context-protocol/weather/starter-webmvc-server/target/starter-webmvc-server.log
+logging.file.name=./model-context-protocol/mcp-annotations/mcp-annotations-server/target/mcp-annotations-server.log
 
 # Uncomment for STDIO transport
 # spring.ai.mcp.server.stdio=true
@@ -419,10 +350,6 @@ logging.file.name=./model-context-protocol/weather/starter-webmvc-server/target/
 ```properties
 spring.application.name=mcp
 spring.main.web-application-type=none
-
-# API keys for LLM providers
-spring.ai.openai.api-key=${OPENAI_API_KEY}
-spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
 
 # MCP client connection
 spring.ai.mcp.client.sse.connections.server1.url=http://localhost:8080
@@ -475,17 +402,13 @@ Resources can specify custom MIME types for different content types, including b
 ### Server Exchange Integration
 Methods can access `McpSyncServerExchange` for advanced server operations like logging notifications and progress tracking.
 
-## Comparison with Other Examples
+## Sample Data
 
-| Feature | Basic Examples | Sampling Examples | **Annotations Examples** |
-|---------|---------------|-------------------|---------------------------|
-| **Tools** | ✓ Basic | ✓ With Sampling | ✓ **Comprehensive** |
-| **Resources** | ✗ | ✗ | ✓ **Full Featured** |
-| **Prompts** | ✗ | ✗ | ✓ **Dynamic & Flexible** |
-| **Completions** | ✗ | ✗ | ✓ **Context-Aware** |
-| **Client Handlers** | ✗ | ✓ Sampling Only | ✓ **All Types** |
-| **Annotation Style** | Manual Config | Manual Config | ✓ **Declarative** |
-| **Mixed Approaches** | ✗ | ✗ | ✓ **MCP + Spring AI** |
+The server includes sample user profiles for testing:
+- **john**: John Smith (New York, age 32)
+- **jane**: Jane Doe (London, age 28)
+- **bob**: Bob Johnson (Tokyo, age 45)
+- **alice**: Alice Brown (Sydney, age 36)
 
 ## Related Projects
 
@@ -497,8 +420,8 @@ Methods can access `McpSyncServerExchange` for advanced server operations like l
 ## Additional Resources
 
 * [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
-* [MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
-* [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)
+* [Spring AI MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
+* [Spring AI MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)
+* [Spring AI Annotations](https://docs.spring.io/spring-ai/reference/1.1-SNAPSHOT/api/mcp/mcp-annotations-overview.html)
+* [Java MCP Annotations](https://github.com/spring-ai-community/mcp-annotations)
 * [Model Context Protocol Specification](https://modelcontextprotocol.github.io/specification/)
-* [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-* [Spring AI MCP Annotations](https://github.com/spring-projects-experimental/spring-ai-mcp-annotations)

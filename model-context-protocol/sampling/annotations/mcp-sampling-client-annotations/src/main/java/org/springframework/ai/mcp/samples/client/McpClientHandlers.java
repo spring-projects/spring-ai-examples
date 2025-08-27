@@ -25,19 +25,19 @@ public class McpClientHandlers {
 	@Autowired
 	Map<String, ChatClient> chatClients;
 
-	@McpProgress(clientId = "server1")
+	@McpProgress(clients = "server1")
 	public void progressHandler(ProgressNotification progressNotification) {
 		logger.info("MCP PROGRESS: [{}] progress: {} total: {} message: {}",
 				progressNotification.progressToken(), progressNotification.progress(),
 				progressNotification.total(), progressNotification.message());
 	}
 
-	@McpLogging
+	@McpLogging(clients = "server1")
 	public void loggingHandler(LoggingMessageNotification loggingMessage) {
 		logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data());
 	}
 
-	@McpSampling
+	@McpSampling(clients = "server1")
 	public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
 
 		logger.info("MCP SAMPLING: {}", llmRequest);

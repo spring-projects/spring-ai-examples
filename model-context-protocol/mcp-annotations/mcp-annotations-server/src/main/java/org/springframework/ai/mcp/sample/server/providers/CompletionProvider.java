@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.server.provider;
+package org.springframework.ai.mcp.sample.server.providers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +30,13 @@ import org.springframework.stereotype.Service;
  * @author Christian Tzolov
  */
 @Service
-public class McpCompletionProvider {
+public class CompletionProvider {
 
 	private final Map<String, List<String>> countryDatabase = new HashMap<>();
 
 	private final Map<String, List<String>> usernameDatabase = new HashMap<>();
 
-	public McpCompletionProvider() {
+	public CompletionProvider() {
 
 		usernameDatabase.put("a", List.of("alex123", "admin", "alice_wonder", "andrew99"));
 		usernameDatabase.put("b", List.of("bob_builder", "blue_sky", "batman", "butterfly"));

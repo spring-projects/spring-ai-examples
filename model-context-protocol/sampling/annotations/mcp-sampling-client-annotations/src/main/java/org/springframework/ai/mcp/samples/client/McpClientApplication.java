@@ -16,8 +16,11 @@
 package org.springframework.ai.mcp.samples.client;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.CommandLineRunner;
@@ -53,5 +56,11 @@ public class McpClientApplication {
 			System.out.println("> USER: " + userQuestion);
 			System.out.println("> ASSISTANT: " + chatClient.prompt(userQuestion).call().content());
 		};
+	}
+
+	@Bean
+	public Map<String, ChatClient> chatClients(List<ChatModel> chatModels) {
+		return chatModels.stream().collect(Collectors.toMap(model -> model.getClass().getSimpleName().toLowerCase(),
+				model -> ChatClient.builder(model).build()));
 	}
 }
