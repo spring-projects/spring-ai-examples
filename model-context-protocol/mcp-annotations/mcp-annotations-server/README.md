@@ -53,11 +53,6 @@ The project requires the Spring AI MCP Server WebMVC Boot Starter and MCP Annota
 
 ```xml
 <dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>spring-ai-mcp-annotations</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-</dependency>
-<dependency>
     <groupId>org.springframework.ai</groupId>
     <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
 </dependency>
@@ -65,8 +60,8 @@ The project requires the Spring AI MCP Server WebMVC Boot Starter and MCP Annota
 
 These dependencies provide:
 - HTTP-based transport using Spring MVC (`WebMvcSseServerTransport`)
-- Auto-configured SSE endpoints
-- Optional STDIO transport
+- Auto-configured SSE, Streamable-HTTP or Stateless endpoints, configured by the `spring.ai.mcp.server.protocol=...` property and defaulting to `SSE`.
+- Optional STDIO transport, if the `spring.ai.mcp.server.stdio=true` is set
 - Annotation-based method handling for MCP operations
 
 ## Building the Project
@@ -80,9 +75,12 @@ Build the project using Maven:
 
 The server supports two transport modes:
 
-### WebMVC SSE Mode (Default)
+### WebMVC SSE/Streamable-HTTP/Stateless Mode
+
+Mode depends on the `spring.ai.mcp.server.protocol=...` setting.
+
 ```bash
-java -jar target/mcp-annotations-server-0.0.1-SNAPSHOT.jar
+java -Dspring.ai.mcp.server.protocol=STREAMABLE -jar target/mcp-annotations-server-0.0.1-SNAPSHOT.jar
 ```
 
 ### STDIO Mode
@@ -99,6 +97,9 @@ Configure the server through `application.properties`:
 # Server identification
 spring.ai.mcp.server.name=my-weather-server
 spring.ai.mcp.server.version=0.0.1
+spring.ai.mcp.server.protocol=STREAMABLE
+# spring.ai.mcp.server.protocol=STATELESS
+
 
 # Transport configuration (uncomment to enable STDIO)
 # spring.ai.mcp.server.stdio=true
@@ -109,7 +110,7 @@ spring.main.banner-mode=off
 # logging.pattern.console=
 
 # Log file location
-logging.file.name=./model-context-protocol/weather/starter-webmvc-server/target/starter-webmvc-server.log
+logging.file.name=./model-context-protocol/mcp-annotations/mcp-annotations-server/target/server.log
 ```
 
 ## Server Implementation
@@ -123,29 +124,10 @@ public class McpServerApplication {
         SpringApplication.run(McpServerApplication.class, args);
     }
 
+    // (Optional) not MCP annotation. Just demostrates how to use the @Tool along with the @McpTool to provision MCP Server Tools.
     @Bean
     public ToolCallbackProvider weatherTools(SpringAiToolProvider weatherService) {
         return MethodToolCallbackProvider.builder().toolObjects(weatherService).build();
-    }
-
-    @Bean
-    public List<SyncResourceSpecification> resourceSpecs(UserProfileResourceProvider userProfileResourceProvider) {
-        return SyncMcpAnnotationProvider.createSyncResourceSpecifications(List.of(userProfileResourceProvider));
-    }
-
-    @Bean
-    public List<SyncPromptSpecification> promptSpecs(PromptProvider promptProvider) {
-        return SyncMcpAnnotationProvider.createSyncPromptSpecifications(List.of(promptProvider));
-    }
-
-    @Bean
-    public List<SyncCompletionSpecification> completionSpecs(AutocompleteProvider autocompleteProvider) {
-        return SyncMcpAnnotationProvider.createSyncCompleteSpecifications(List.of(autocompleteProvider));
-    }
-
-    @Bean
-    public List<SyncToolSpecification> toolSpecs(McpToolProvider toolProvider) {
-        return SyncMcpAnnotationProvider.createSyncToolSpecifications(List.of(toolProvider));
     }
 }
 ```
@@ -183,7 +165,8 @@ Uses MCP-specific `@McpTool` annotation for temperature retrieval:
 @Service
 public class McpToolProvider {
     @McpTool(description = "Get the temperature (in celsius) for a specific location")
-    public WeatherResponse getTemperature(
+    public WeatherResponse getTemperature(McpSyncServerExchange exchange,
+            @McpProgressToken String progressToken
             @McpToolParam(description = "The location latitude") double latitude,
             @McpToolParam(description = "The location longitude") double longitude,
             @McpToolParam(description = "The city name") String city) {
@@ -364,45 +347,171 @@ public class AutocompleteProvider {
 
 You can connect to the server using either STDIO or SSE transport:
 
-### Manual Clients
-
-#### WebMVC SSE Client
-
-For servers using SSE transport:
-
-```java
-var transport = HttpClientSseClientTransport.builder("http://localhost:8080").build();
-var client = McpClient.sync(transport).build();
-```
-
-#### STDIO Client
-
-For servers using STDIO transport:
-
-```java
-var stdioParams = ServerParameters.builder("java")
-    .args("-Dspring.ai.mcp.server.stdio=true",
-          "-Dspring.main.web-application-type=none",
-          "-Dspring.main.banner-mode=off",
-          "-Dlogging.pattern.console=",
-          "-jar",
-          "target/mcp-annotations-server-0.0.1-SNAPSHOT.jar")
-    .build();
-
-var transport = new StdioClientTransport(stdioParams);
-var client = McpClient.sync(transport).build();
-```
-
-The sample project includes example client implementations:
-- [SampleClient.java](src/test/java/org/springframework/ai/mcp/sample/client/SampleClient.java): Manual MCP client implementation
-- [ClientStdio.java](src/test/java/org/springframework/ai/mcp/sample/client/ClientStdio.java): STDIO transport connection
-- [ClientSse.java](src/test/java/org/springframework/ai/mcp/sample/client/ClientSse.java): SSE transport connection
-
 ### Boot Starter Clients
 
-For a better development experience, consider using the [MCP Client Boot Starters](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html). These starters enable auto-configuration of multiple STDIO and/or SSE connections to MCP servers.
+For a better development experience, consider using the [MCP Client Boot Starters](https://docs.spring.io/spring-ai/reference/1.1-SNAPSHOT/api/mcp/mcp-client-boot-starter-docs.html) and related [MCP Client Annotations](https://docs.spring.io/spring-ai/reference/1.1-SNAPSHOT/api/mcp/mcp-annotations-client.html) support.
 
-#### STDIO Transport
+The MCP Client Boot Starter provides:
+- Auto-configuration for MCP client connections
+- Declarative annotation-based handlers for server notifications
+- Support for multiple transport protocols (SSE, Streamable-HTTP, STDIO)
+- Automatic registration of client handlers
+
+#### Client Dependencies
+
+Add the MCP Client Boot Starter to your project:
+
+```xml
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-mcp-client</artifactId>
+</dependency>
+```
+
+#### Client Annotations
+
+The client supports several annotations for handling server notifications:
+
+- `@McpLogging` - Handle logging message notifications from MCP servers
+- `@McpProgress` - Handle progress notifications for long-running operations  
+- `@McpSampling` - Handle sampling requests from MCP servers for LLM completions
+- `@McpElicitation` - Handle elicitation requests to gather additional information from users
+- `@McpToolListChanged` - Handle notifications when the server's tool list changes
+- `@McpResourceListChanged` - Handle notifications when the server's resource list changes
+- `@McpPromptListChanged` - Handle notifications when the server's prompt list changes
+
+**Important**: All MCP client annotations **MUST** include a `clients` parameter to associate the handler with a specific MCP client connection.
+
+#### Example Client Implementation
+
+```java
+@SpringBootApplication
+public class McpClientApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(McpClientApplication.class, args).close();
+    }
+
+    @Bean
+    public CommandLineRunner predefinedQuestions(List<McpSyncClient> mcpClients) {
+        return args -> {
+            for (McpSyncClient mcpClient : mcpClients) {
+                System.out.println(">>> MCP Client: " + mcpClient.getClientInfo());
+
+               // Call a tool that sends progress notifications
+               CallToolRequest toolRequest = CallToolRequest.builder()
+                     .name("tool1")
+                     .arguments(Map.of("input", "test input"))
+                     .progressToken("test-progress-token")
+                     .build();
+
+               CallToolResult response = mcpClient.callTool(toolRequest);
+
+               System.out.println("Tool response: " + response);
+            }
+        };
+    }
+}
+```
+
+#### Client Handler Providers
+
+```java
+@Service
+public class McpClientHandlerProviders {
+
+    private static final Logger logger = LoggerFactory.getLogger(McpClientHandlerProviders.class);
+
+    @McpProgress(clients = "server1")
+    public void progressHandler(ProgressNotification progressNotification) {
+        logger.info("MCP PROGRESS: [{}] progress: {} total: {} message: {}",
+                progressNotification.progressToken(), progressNotification.progress(),
+                progressNotification.total(), progressNotification.message());
+    }
+
+    @McpLogging(clients = "server1")
+    public void loggingHandler(LoggingMessageNotification loggingMessage) {
+        logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data());
+    }
+
+    @McpSampling(clients = "server1")
+    public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
+        logger.info("MCP SAMPLING: {}", llmRequest);
+        String userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
+        String modelHint = llmRequest.modelPreferences().hints().get(0).name();
+
+        return CreateMessageResult.builder()
+                .content(new McpSchema.TextContent("Response " + userPrompt + " with model hint " + modelHint))
+                .build();
+    }
+
+    @McpElicitation(clients = "server1")
+    public ElicitResult elicitationHandler(McpSchema.ElicitRequest request) {
+        logger.info("MCP ELICITATION: {}", request);
+        return new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("message", request.message()));
+    }
+}
+```
+
+#### Client Configuration
+
+Configure client connections in `application.properties`:
+
+```properties
+spring.application.name=mcp
+spring.main.web-application-type=none
+
+# Streamable-HTTP transport configuration
+spring.ai.mcp.client.streamable-http.connections.server1.url=http://localhost:8080
+
+# SSE transport configuration (alternative)
+# spring.ai.mcp.client.sse.connections.server1.url=http://localhost:8080
+
+# Global client settings
+spring.ai.mcp.client.request-timeout=5m
+
+# Logging configuration
+logging.level.io.modelcontextprotocol.client=WARN
+logging.level.io.modelcontextprotocol.spec=WARN
+
+# Optional: Disable tool callback if not needed
+# spring.ai.mcp.client.toolcallback.enabled=false
+```
+
+#### Running the Client Examples
+
+##### Streamable-HTTP (HttpClient) Transport
+
+1. Start the MCP annotations server:
+
+```bash
+java -Dspring.ai.mcp.server.protocol=STREAMABLE -jar mcp-annotations-server-0.0.1-SNAPSHOT.jar
+```
+
+2. In another console, start the client configured with Streamable-HTTP transport:
+
+```bash
+java -Dspring.ai.mcp.client.streamable-http.connections.server1.url=http://localhost:8080 \
+ -jar mcp-annotations-client-0.0.1-SNAPSHOT.jar
+```
+
+##### SSE Transport
+
+1. Start the MCP annotations server with SSE protocol:
+
+```bash
+java -Dspring.ai.mcp.server.protocol=SSE -jar mcp-annotations-server-0.0.1-SNAPSHOT.jar
+```
+
+2. Start the client configured with SSE transport:
+
+```bash
+java -Dspring.ai.mcp.client.sse.connections.server1.url=http://localhost:8080 \
+ -jar mcp-annotations-client-0.0.1-SNAPSHOT.jar
+```
+
+**NOTE:** the `clients="server1"` parameter of the `@McpLogging`, `@McpSampling`, `@McpProgress` and `@McpElicitate` annotations corresponds to the conneciton name you put in your `spring.ai.mcp.client.streamable-http.connections.server1.url=` or `spring.ai.mcp.client.sse.connections.server1.url=` configuraitons.
+
+##### STDIO Transport
 
 1. Create a `mcp-servers-config.json` configuration file:
 
@@ -427,27 +536,16 @@ For a better development experience, consider using the [MCP Client Boot Starter
 
 ```bash
 java -Dspring.ai.mcp.client.stdio.servers-configuration=file:mcp-servers-config.json \
- -Dai.user.input='What is the weather in NY?' \
  -Dlogging.pattern.console= \
- -jar mcp-starter-default-client-0.0.1-SNAPSHOT.jar
+ -jar mcp-annotations-client-0.0.1-SNAPSHOT.jar
 ```
 
-#### SSE (WebMVC) Transport
+The client will automatically:
+- Connect to the configured MCP servers
+- Register annotated handlers based on the `clients` parameter
+- Handle server notifications and requests through the annotated methods
+- Provide logging and progress updates as configured
 
-1. Start the MCP annotations server:
-
-```bash
-java -jar mcp-annotations-server-0.0.1-SNAPSHOT.jar
-```
-
-2. In another console, start the client configured with SSE transport:
-
-```bash
-java -Dspring.ai.mcp.client.sse.connections.annotations-server.url=http://localhost:8080 \
- -Dlogging.pattern.console= \
- -Dai.user.input='What is the weather in NY?' \
- -jar mcp-starter-default-client-0.0.1-SNAPSHOT.jar
-```
 
 ## Additional Resources
 

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */ 
-package org.springframework.ai.mcp.sample.server.provider;
+package org.springframework.ai.mcp.sample.server.providers;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
  * @author Christian Tzolov
  */
 @Service
-public class McpPromptProvider {
+public class PromptProvider {
     	/**
 		 * A simple greeting prompt that takes a name parameter.
 		 * @param name The name to greet

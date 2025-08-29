@@ -18,14 +18,6 @@ package org.springframework.ai.mcp.samples.client;
 import java.util.List;
 import java.util.Map;
 
-import org.springaicommunity.mcp.method.elicitation.SyncElicitationSpecification;
-import org.springaicommunity.mcp.method.logging.SyncLoggingSpecification;
-import org.springaicommunity.mcp.method.progress.SyncProgressSpecification;
-import org.springaicommunity.mcp.method.sampling.SyncSamplingSpecification;
-import org.springaicommunity.mcp.spring.SyncMcpAnnotationProviders;
-import org.springframework.ai.mcp.customizer.McpSyncClientCustomizer;
-import org.springframework.ai.mcp.samples.client.customizers.AnnotationSyncClientCustomizer;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -43,49 +35,25 @@ public class McpClientApplication {
 	}
 
 	@Bean
-	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel,
+	public CommandLineRunner predefinedQuestions(
 			List<McpSyncClient> mcpClients) {
 
 		return args -> {
-			McpSyncClient mcpClient = mcpClients.get(0);
 
-			// Call a tool that sends progress notifications
-			CallToolRequest toolRequest = CallToolRequest.builder()
-					.name("tool1")
-					.arguments(Map.of("input", "test input"))
-					.progressToken("test-progress-token")
-					.build();
+			for (McpSyncClient mcpClient : mcpClients) {
+				System.out.println(">>> MCP Client: " + mcpClient.getClientInfo());
 
-			CallToolResult response = mcpClient.callTool(toolRequest);
+				// Call a tool that sends progress notifications
+				CallToolRequest toolRequest = CallToolRequest.builder()
+						.name("tool1")
+						.arguments(Map.of("input", "test input"))
+						.progressToken("test-progress-token")
+						.build();
 
-			System.out.println("Tool response: " + response);
+				CallToolResult response = mcpClient.callTool(toolRequest);
+
+				System.out.println("Tool response: " + response);
+			}
 		};
-	}
-
-	@Bean
-	List<SyncLoggingSpecification> loggingSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProviders.loggingSpecifications(List.of(clientMcpHandlers));
-	}
-
-	@Bean
-	List<SyncSamplingSpecification> samplingSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProviders.samplingSpecifications(List.of(clientMcpHandlers));
-	}
-
-	@Bean
-	List<SyncElicitationSpecification> elicitationSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProviders.elicitationSpecifications(List.of(clientMcpHandlers));
-	}
-
-	@Bean
-	List<SyncProgressSpecification> progressSpecs(McpClientHandlers clientMcpHandlers) {
-		return SyncMcpAnnotationProviders.progressSpecifications(List.of(clientMcpHandlers));
-	}
-
-	@Bean
-	McpSyncClientCustomizer annotationMcpSyncClientCustomizer(List<SyncLoggingSpecification> loggingSpecs,
-			List<SyncSamplingSpecification> samplingSpecs, List<SyncElicitationSpecification> elicitationSpecs,
-			List<SyncProgressSpecification> progressSpecs) {
-		return new AnnotationSyncClientCustomizer(samplingSpecs, loggingSpecs, elicitationSpecs, progressSpecs);
 	}
 }

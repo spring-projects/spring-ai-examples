@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.server.provider;
+package org.springframework.ai.mcp.sample.server.providers;
 
 import java.util.List;
 import java.util.Map;
@@ -36,10 +36,10 @@ import io.modelcontextprotocol.spec.McpSchema.ProgressNotification;
  * @author Christian Tzolov
  */
 @Service
-public class McpToolProvider2 {
+public class ToolProvider2 {
 
 	@McpTool(description = "Test tool", name = "tool1")
-	public String toolWithSamplingAndElicitation(McpSyncServerExchange exchange, @McpToolParam String input,
+	public String toolLggingSamplingElicitationProgress(McpSyncServerExchange exchange, @McpToolParam String input,
 			@McpProgressToken String progressToken) {
 
 		exchange.loggingNotification(LoggingMessageNotification.builder().data("Tool1 Started!").build());

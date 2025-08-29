@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.server.provider;
+package org.springframework.ai.mcp.sample.server.providers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,11 +32,11 @@ import org.springframework.stereotype.Service;
  * @author Christian Tzolov
  */
 @Service
-public class McpUserProfileResourceProvider {
+public class UserProfileResourceProvider {
 	
 	private final Map<String, Map<String, String>> userProfiles = new HashMap<>();
 
-	public McpUserProfileResourceProvider() {
+	public UserProfileResourceProvider() {
 		// Initialize with some sample data
 		Map<String, String> johnProfile = new HashMap<>();
 		johnProfile.put("name", "John Smith");
@@ -106,7 +106,7 @@ public class McpUserProfileResourceProvider {
 	/**
 	 * Resource method that takes an exchange and URI variables.
 	 */
-	@McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange", description = "Provides user profile information with server exchange context")
+	// @McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange", description = "Provides user profile information with server exchange context")
 	public ReadResourceResult getProfileWithExchange(McpSyncServerExchange exchange, String username) {
 		String profileInfo = formatProfileInfo(userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>()));
 
@@ -130,8 +130,7 @@ public class McpUserProfileResourceProvider {
 	 * URI variable parameters.
 	 */
 	@McpResource(uri = "user-notifications://{username}", name = "User Notifications", description = "Provides notifications for a specific user")
-	public List<ResourceContents> getUserNotifications(McpSyncServerExchange exchange, ReadResourceRequest request,
-			String username) {
+	public List<ResourceContents> getUserNotifications(ReadResourceRequest request, String username) {
 		// Generate notifications based on username
 		String notifications = generateNotifications(username);
 

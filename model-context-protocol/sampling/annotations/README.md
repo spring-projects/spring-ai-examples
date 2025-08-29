@@ -2,6 +2,24 @@
 
 This directory contains annotation-based examples demonstrating the Model Context Protocol (MCP) Sampling capability in Spring AI. These examples showcase the same MCP Sampling functionality as the main sampling examples but use Spring AI's annotation-based approach for simplified development.
 
+---
+
+## Project Structure
+
+```
+annotations/
+├── mcp-sampling-client-annotations/   # Sample MCP client (annotation-based)
+├── mcp-sampling-server-annotations/   # Sample MCP server (annotation-based)
+└── README.md
+```
+
+| Sub-Project                       | Type   | Description                                                                 |
+|------------------------------------|--------|-----------------------------------------------------------------------------|
+| mcp-sampling-server-annotations    | Server | Annotation-based MCP server exposing weather+poem tool via LLMs             |
+| mcp-sampling-client-annotations    | Client | Annotation-based MCP client aggregating creative responses from all LLMs    |
+
+---
+
 ## Overview
 
 The annotation-based MCP Sampling examples demonstrate:
@@ -18,175 +36,98 @@ The annotation-based approach provides several advantages over the traditional i
 
 ### Server-Side Benefits
 - **`@McpTool`**: Automatic tool registration without manual `ToolCallbackProvider` configuration
-- **`SyncMcpAnnotationProvider`**: Automatic tool specification generation
+- **Automatic Tool Specification Generation**: No need for explicit bean registration
 - **Simplified Dependency Injection**: Direct access to `McpSyncServerExchange` as method parameter
 
 ### Client-Side Benefits
 - **`@McpSampling`**: Declarative sampling request handling
 - **`@McpLogging`**: Built-in logging support for MCP operations
 - **`@McpProgress`**: Progress notification handling
-- **`AnnotationSyncClientCustomizer`**: Automatic registration of annotation-based handlers
+- **Automatic Handler Registration**: Annotation-based handlers are auto-registered
 
-## Projects
+---
+
+## Sub-Projects
 
 ### 1. mcp-sampling-server-annotations
+
 An MCP server implementation using Spring AI's annotation-based approach that:
 - Provides weather information via the `@McpTool` annotation
 - Uses MCP Sampling to generate creative content from multiple LLM providers
 - Demonstrates simplified server-side MCP implementation
 
+#### Key Implementation
+
+```java
+@Service
+public class WeatherService {
+    // ... see source for details ...
+    @McpTool(description = "Get the temperature (in celsius) for a specific location")
+    public String getTemperature2(McpSyncServerExchange exchange,
+            @McpToolParam(description = "The location latitude") double latitude,
+            @McpToolParam(description = "The location longitude") double longitude) {
+        // Fetch weather, request poems from OpenAI/Anthropic, return combined result
+    }
+}
+```
+
+The server is a standard Spring Boot application:
+
+```java
+@SpringBootApplication
+public class McpServerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(McpServerApplication.class, args);
+    }
+}
+```
+
 ### 2. mcp-sampling-client-annotations
+
 An MCP client implementation using annotation-based handlers that:
 - Handles sampling requests using `@McpSampling`
 - Routes requests to different LLM providers based on model hints
 - Provides logging and progress tracking capabilities
 
-## How It Works
-
-### Annotation-Based Server Implementation
-
-The server uses the `@McpTool` annotation for automatic tool registration:
-
-```java
-@Service
-public class WeatherService {
-
-    @McpTool(description = "Get the temperature (in celsius) for a specific location")
-    public String getTemperature2(McpSyncServerExchange exchange,
-            @McpToolParam(description = "The location latitude") double latitude,
-            @McpToolParam(description = "The location longitude") double longitude) {
-        
-        // Retrieve weather data
-        WeatherResponse weatherResponse = restClient
-            .get()
-            .uri("https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m",
-                latitude, longitude)
-            .retrieve()
-            .body(WeatherResponse.class);
-
-        // Use MCP Sampling with model preferences
-        if (exchange.getClientCapabilities().sampling() != null) {
-            var messageRequestBuilder = McpSchema.CreateMessageRequest.builder()
-                .systemPrompt("You are a poet!")
-                .messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,
-                    new McpSchema.TextContent("Please write a poem about this weather forecast..."))));
-
-            // Request poem from OpenAI
-            var openAiRequest = messageRequestBuilder
-                .modelPreferences(ModelPreferences.builder().addHint("openai").build())
-                .build();
-            CreateMessageResult openAiResponse = exchange.createMessage(openAiRequest);
-
-            // Request poem from Anthropic
-            var anthropicRequest = messageRequestBuilder
-                .modelPreferences(ModelPreferences.builder().addHint("anthropic").build())
-                .build();
-            CreateMessageResult anthropicResponse = exchange.createMessage(anthropicRequest);
-        }
-
-        return combinedResponse;
-    }
-}
-```
-
-Tool registration is handled automatically:
+#### Key Implementation
 
 ```java
 @SpringBootApplication
-public class McpServerApplication {
+public class McpClientApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(McpClientApplication.class, args).close();
+    }
     @Bean
-    public List<SyncToolSpecification> toolSpecs(WeatherService weatherService) {
-        return SyncMcpAnnotationProvider.createSyncToolSpecifications(List.of(weatherService));
+    public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel, List<McpSyncClient> mcpClients) {
+        return args -> {
+            var mcpToolProvider = new SyncMcpToolCallbackProvider(mcpClients);
+            ChatClient chatClient = ChatClient.builder(openAiChatModel)
+                .defaultToolCallbacks(mcpToolProvider)
+                .build();
+            String userQuestion = """
+                What is the weather in Amsterdam right now?
+                Please incorporate all creative responses from all LLM providers.
+                After the other providers add a poem that synthesizes the poems from all the other providers.
+                """;
+            System.out.println("> USER: " + userQuestion);
+            System.out.println("> ASSISTANT: " + chatClient.prompt(userQuestion).call().content());
+        };
     }
 }
 ```
 
-### Annotation-Based Client Implementation
+---
 
-The client uses annotation-based handlers for MCP operations:
+## How It Works
 
-```java
-@Service
-public class ClientMcpHandlers {
+- The server exposes a tool for weather queries and, if sampling is requested, generates poems using both OpenAI and Anthropic models.
+- The client sends a prompt, receives creative responses from all LLM providers, and prints the result.
+- Logging notifications are sent for sampling start and finish.
+- The Open-Meteo API is used for real-time weather data.
 
-    @Autowired
-    Map<String, ChatClient> chatClients;
-
-    @McpSampling
-    public CreateMessageResult samplingHandler(CreateMessageRequest llmRequest) {
-        var userPrompt = ((McpSchema.TextContent) llmRequest.messages().get(0).content()).text();
-        String modelHint = llmRequest.modelPreferences().hints().get(0).name();
-
-        // Find the appropriate chat client based on the model hint
-        ChatClient hintedChatClient = chatClients.entrySet().stream()
-            .filter(e -> e.getKey().contains(modelHint))
-            .findFirst()
-            .orElseThrow().getValue();
-
-        // Generate response using the selected model
-        String response = hintedChatClient.prompt()
-            .system(llmRequest.systemPrompt())
-            .user(userPrompt)
-            .call()
-            .content();
-
-        return CreateMessageResult.builder()
-            .content(new McpSchema.TextContent(response))
-            .build();
-    }
-
-    @McpLogging
-    public void loggingHandler(LoggingMessageNotification loggingMessage) {
-        logger.info("MCP LOGGING: [{}] {}", loggingMessage.level(), loggingMessage.data());
-    }
-
-    @McpProgress(clientId = "server1")
-    public void progressHandler(ProgressNotification progressNotification) {
-        logger.info("MCP PROGRESS: [{}] progress: {} total: {} message: {}",
-            progressNotification.progressToken(), progressNotification.progress(),
-            progressNotification.total(), progressNotification.message());
-    }
-}
-```
-
-Handler registration is managed through configuration:
-
-```java
-@Configuration
-public class AppConfiguration {
-
-    @Bean
-    List<SyncSamplingSpecification> samplingSpecs(ClientMcpHandlers clientMcpHandlers) {
-        return SyncMcpAnnotationProvider.createSyncSamplingSpecifications(List.of(clientMcpHandlers));
-    }
-
-    @Bean
-    List<SyncLoggingSpecification> loggingSpecs(ClientMcpHandlers clientMcpHandlers) {
-        return SyncMcpAnnotationProvider.createSyncLoggingSpecifications(List.of(clientMcpHandlers));
-    }
-
-    @Bean
-    McpSyncClientCustomizer annotationMcpSyncClientCustomizer(
-            List<SyncLoggingSpecification> loggingSpecs,
-            List<SyncSamplingSpecification> samplingSpecs,
-            List<SyncElicitationSpecification> elicitationSpecs,
-            List<SyncProgressSpecification> progressSpecs) {
-        return new AnnotationSyncClientCustomizer(samplingSpecs, loggingSpecs, elicitationSpecs, progressSpecs);
-    }
-}
-```
+---
 
 ## Key Dependencies
-
-Both projects use the Spring AI MCP Annotations library:
-
-```xml
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>spring-ai-mcp-annotations</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-</dependency>
-```
 
 ### Server Dependencies
 ```xml
@@ -211,6 +152,8 @@ Both projects use the Spring AI MCP Annotations library:
     <artifactId>spring-ai-starter-model-anthropic</artifactId>
 </dependency>
 ```
+
+---
 
 ## Running the Examples
 
@@ -245,6 +188,8 @@ cd mcp-sampling-client-annotations
 ./mvnw clean package
 java -jar target/mcp-sampling-client-annotations-0.0.1-SNAPSHOT.jar
 ```
+
+---
 
 ## Configuration
 
@@ -308,6 +253,8 @@ logging.level.io.modelcontextprotocol.client=WARN
 logging.level.io.modelcontextprotocol.spec=WARN
 ```
 
+---
+
 ## Sample Output
 
 When you run the annotation-based client, you'll see output similar to:
@@ -342,6 +289,8 @@ Weather Data:
 }
 ```
 
+---
+
 ## Comparison with Traditional Implementation
 
 | Aspect | Traditional Approach | Annotation-Based Approach |
@@ -353,6 +302,8 @@ Weather Data:
 | **Type Safety** | Manual parameter handling | Automatic parameter injection |
 | **Debugging** | Complex stack traces | Clearer annotation-based flow |
 
+---
+
 ## Advantages of Annotation-Based Approach
 
 1. **Reduced Boilerplate**: Less configuration code required
@@ -362,6 +313,8 @@ Weather Data:
 5. **Easier Testing**: Simplified unit testing of individual handlers
 6. **Maintainability**: Cleaner separation of concerns
 
+---
+
 ## Related Projects
 
 - **[Main Sampling Examples](../)**: Traditional implementation using manual configuration
@@ -370,11 +323,24 @@ Weather Data:
 - **[SQLite Server](../../sqlite)**: Database access MCP server
 - **[Filesystem Server](../../filesystem)**: File system operations MCP server
 
+---
+
 ## Additional Resources
 
 * [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
-* [MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
-* [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)
+* [Spring AI MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
+* [Spring AI MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)
+* [Spring AI Annotations](https://docs.spring.io/spring-ai/reference/1.1-SNAPSHOT/api/mcp/mcp-annotations-overview.html)
+* [Java MCP Annotations](https://github.com/spring-ai-community/mcp-annotations)
 * [Model Context Protocol Specification](https://modelcontextprotocol.github.io/specification/)
-* [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-* [Spring AI MCP Annotations](https://github.com/spring-projects-experimental/spring-ai-mcp-annotations)
+
+---
+
+## Troubleshooting & FAQ
+
+- **Q: I get a connection refused error when running the client.**
+  - A: Make sure the server is running and accessible at the configured URL.
+- **Q: I get authentication errors from OpenAI or Anthropic.**
+  - A: Ensure your API keys are set correctly in your environment or application.properties.
+- **Q: How do I switch to STDIO transport?**
+  - A: Uncomment the relevant properties in `application.properties` as shown above.

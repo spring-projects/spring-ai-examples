@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */ 
-package org.springframework.ai.mcp.sample.server.provider;
+package org.springframework.ai.mcp.sample.server.providers;
 
 import java.time.LocalDateTime;
 
@@ -28,13 +28,13 @@ import org.springframework.web.client.RestClient;
  * @author Christian Tzolov
  */
 @Service
-public class McpToolProvider {
+public class ToolProvider {
 
-		private static final Logger logger = org.slf4j.LoggerFactory.getLogger(McpToolProvider.class);
+	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ToolProvider.class);
 
 	private final RestClient restClient;
 
-	public McpToolProvider() {
+	public ToolProvider() {
 		this.restClient = RestClient.create();
 	}
 
