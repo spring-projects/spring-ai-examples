@@ -9,6 +9,7 @@ import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
+import io.modelcontextprotocol.json.McpJsonMapper;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -71,7 +72,7 @@ public class Application {
 						getDbPath())
 				.build();
 
-		var mcpClient = McpClient.sync(new StdioClientTransport(stdioParams))
+		var mcpClient = McpClient.sync(new StdioClientTransport(stdioParams, McpJsonMapper.createDefault()))
 				.requestTimeout(Duration.ofSeconds(10)).build();
 
 		var init = mcpClient.initialize();
