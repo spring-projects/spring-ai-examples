@@ -64,11 +64,12 @@ public class PromptProvider {
 				@McpArg(name = "interests", description = "The user's interests", required = false) String interests) {
 
 			exchange.loggingNotification(LoggingMessageNotification.builder()
-				.level(LoggingLevel.INFO)	
-				.data("personalized-message event").build());
+				// .level(LoggingLevel.INFO)	
+				.data("personalized-message event")
+				.build());
 
 			StringBuilder message = new StringBuilder();
-			message.append("Hello, ").append(name).append("!\n\n");
+			message.append("\nHello, ").append(name).append("!\n");
 
 			if (age != null) {
 				message.append("At ").append(age).append(" years old, you have ");

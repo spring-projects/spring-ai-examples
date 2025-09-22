@@ -19,6 +19,7 @@ import java.io.File;
 
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
+import io.modelcontextprotocol.json.McpJsonMapper;
 
 /**
  * With stdio transport, the MCP server is automatically started by the client.
@@ -41,7 +42,7 @@ public class ClientStdio {
 						"model-context-protocol/weather/starter-webmvc-server/target/mcp-weather-starter-webmvc-server-0.0.1-SNAPSHOT.jar")
 				.build();
 
-		var transport = new StdioClientTransport(stdioParams);
+		var transport = new StdioClientTransport(stdioParams, McpJsonMapper.createDefault());
 
 		new SampleClient(transport).run();
 	}

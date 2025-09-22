@@ -26,6 +26,12 @@ import org.springframework.context.annotation.Bean;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.CompleteRequest;
+import io.modelcontextprotocol.spec.McpSchema.CompleteRequest.CompleteArgument;
+import io.modelcontextprotocol.spec.McpSchema.CompleteResult;
+import io.modelcontextprotocol.spec.McpSchema.GetPromptRequest;
+import io.modelcontextprotocol.spec.McpSchema.GetPromptResult;
+import io.modelcontextprotocol.spec.McpSchema.PromptReference;
 
 @SpringBootApplication
 public class McpClientApplication {
@@ -49,10 +55,26 @@ public class McpClientApplication {
 						.arguments(Map.of("input", "test input"))
 						.progressToken("test-progress-token")
 						.build();
-
 				CallToolResult response = mcpClient.callTool(toolRequest);
-
 				System.out.println("Tool response: " + response);
+
+				CompleteResult nameCompletion = mcpClient.completeCompletion(
+					new CompleteRequest(
+						new PromptReference("personalized-message"), 
+						new CompleteArgument("name", "J")));
+
+				System.out.println("Name completions: " + nameCompletion.completion());
+
+				String nameValue = nameCompletion.completion().values().get(3);
+
+				try {
+				GetPromptResult promptResponse = mcpClient
+					.getPrompt(new GetPromptRequest("personalized-message", Map.of("name", nameValue)));
+
+				System.out.println("Prompt response: " + promptResponse);
+				} catch (Exception e) {
+					System.err.println("Error getting prompt: " + e.getMessage());
+				}
 			}
 		};
 	}
