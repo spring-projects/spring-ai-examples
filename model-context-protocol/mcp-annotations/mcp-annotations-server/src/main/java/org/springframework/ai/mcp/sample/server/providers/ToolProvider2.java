@@ -21,6 +21,8 @@ import java.util.Map;
 import org.springaicommunity.mcp.annotation.McpProgressToken;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springaicommunity.mcp.context.DefaultMcpSyncRequestContext;
+
 import org.springframework.stereotype.Service;
 
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -35,10 +37,10 @@ import io.modelcontextprotocol.spec.McpSchema.ProgressNotification;
 /**
  * @author Christian Tzolov
  */
-@Service
+// @Service
 public class ToolProvider2 {
 
-	@McpTool(description = "Test tool", name = "tool1")
+	@McpTool(description = "Test tool", name = "tool1", generateOutputSchema = true)
 	public String toolLggingSamplingElicitationProgress(McpSyncServerExchange exchange, @McpToolParam String input,
 			@McpProgressToken String progressToken) {
 
@@ -48,12 +50,12 @@ public class ToolProvider2 {
 				new ProgressNotification(progressToken, 0.0, 1.0, "tool call start"));
 
 		exchange.ping(); // call client ping
-
+			
 		// call elicitation
 		var elicitationRequest = McpSchema.ElicitRequest.builder()
 				.message("Test message")
 				.requestedSchema(
-						Map.of("type", "object", "properties", Map.of("message", Map.of("type", "string"))))
+						Map.of("type", "object", "properties", Map.of("name", Map.of("type", "string"), "age", Map.of("type", "integer"))))
 				.build();
 
 		ElicitResult elicitationResult = exchange.createElicitation(elicitationRequest);

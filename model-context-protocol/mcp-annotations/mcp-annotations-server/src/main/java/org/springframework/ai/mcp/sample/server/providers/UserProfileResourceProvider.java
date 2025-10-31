@@ -68,6 +68,12 @@ public class UserProfileResourceProvider {
 		userProfiles.put("alice", aliceProfile);
 	}
 
+	@McpResource(uri = "static://hello", name = "Static Resource", description = "Example static resource")
+	public String staticResource() { 
+		return "Hello World!";
+	}
+
+
 	/**
 	 * Resource method that takes a ReadResourceRequest parameter and URI variable.
 	 */
@@ -106,7 +112,7 @@ public class UserProfileResourceProvider {
 	/**
 	 * Resource method that takes an exchange and URI variables.
 	 */
-	// @McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange", description = "Provides user profile information with server exchange context")
+	@McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange", description = "Provides user profile information with server exchange context")
 	public ReadResourceResult getProfileWithExchange(McpSyncServerExchange exchange, String username) {
 		String profileInfo = formatProfileInfo(userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>()));
 

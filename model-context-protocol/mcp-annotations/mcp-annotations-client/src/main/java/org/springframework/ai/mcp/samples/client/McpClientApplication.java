@@ -18,11 +18,6 @@ package org.springframework.ai.mcp.samples.client;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
@@ -32,6 +27,13 @@ import io.modelcontextprotocol.spec.McpSchema.CompleteResult;
 import io.modelcontextprotocol.spec.McpSchema.GetPromptRequest;
 import io.modelcontextprotocol.spec.McpSchema.GetPromptResult;
 import io.modelcontextprotocol.spec.McpSchema.PromptReference;
+import io.modelcontextprotocol.spec.McpSchema.ReadResourceRequest;
+import io.modelcontextprotocol.spec.McpSchema.ResourceReference;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class McpClientApplication {
@@ -68,13 +70,25 @@ public class McpClientApplication {
 				String nameValue = nameCompletion.completion().values().get(3);
 
 				try {
-				GetPromptResult promptResponse = mcpClient
-					.getPrompt(new GetPromptRequest("personalized-message", Map.of("name", nameValue)));
+					GetPromptResult promptResponse = mcpClient
+						.getPrompt(new GetPromptRequest("personalized-message", Map.of("name", nameValue)));
 
-				System.out.println("Prompt response: " + promptResponse);
+					System.out.println("Prompt response: " + promptResponse);
 				} catch (Exception e) {
 					System.err.println("Error getting prompt: " + e.getMessage());
 				}
+
+				nameCompletion = mcpClient.completeCompletion(
+					new CompleteRequest(
+						new ResourceReference("user-status://{username}"), 
+						new CompleteArgument("username", "J")));
+
+				System.out.println("Name completions: " + nameCompletion.completion());
+
+				var resourceResponse = mcpClient.readResource(new ReadResourceRequest("user-status://" + nameCompletion.completion().values().get(0)));
+
+				System.out.println("Resource response: " + resourceResponse);
+				
 			}
 		};
 	}

@@ -8,6 +8,8 @@ import org.springaicommunity.mcp.annotation.McpElicitation;
 import org.springaicommunity.mcp.annotation.McpLogging;
 import org.springaicommunity.mcp.annotation.McpProgress;
 import org.springaicommunity.mcp.annotation.McpSampling;
+import org.springaicommunity.mcp.context.StructuredElicitResult;
+
 import org.springframework.stereotype.Service;
 
 import io.modelcontextprotocol.spec.McpSchema;
@@ -59,10 +61,12 @@ public class McpClientHandlerProviders {
 				.build();
 	}
 
+	public record Person(String name, Number age) {}
+
 	@McpElicitation(clients = "server1")
-	public ElicitResult elicitationHandler(McpSchema.ElicitRequest request) {
+	public StructuredElicitResult<Person> elicitationHandler(McpSchema.ElicitRequest request) {
 		logger.info("MCP ELICITATION: {}", request);
-		return new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("message", request.message()));
+		return new StructuredElicitResult<>(ElicitResult.Action.ACCEPT, new Person("John Doe", 42), null);
 	}
 
 }
