@@ -63,9 +63,13 @@ public class SampleClient {
 					+ tool.inputSchema());
 		});
 
-		CallToolResult weatherForcastResult = client.callTool(new CallToolRequest("getWeatherForecastByLocation",
-				Map.of("latitude", "47.6062", "longitude", "-122.3321")));
-		System.out.println("Weather Forcast: " + weatherForcastResult);
+		// CallToolResult weatherForcastResult = client.callTool(new CallToolRequest("getWeatherForecastByLocation",
+		// 		Map.of("latitude", "47.6062", "longitude", "-122.3321")));
+		// System.out.println("Weather Forcast: " + weatherForcastResult);
+
+		CallToolResult weatherForcastResult2 = client.callTool(new CallToolRequest("getTemperature",
+				Map.of("latitude", "47.6062", "longitude", "-122.3321", "city", "Seattle")));
+		System.out.println("Weather Forcast: " + weatherForcastResult2);
 
 
 		// // Resources

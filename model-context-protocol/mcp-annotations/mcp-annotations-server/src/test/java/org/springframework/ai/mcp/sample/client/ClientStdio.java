@@ -39,7 +39,7 @@ public class ClientStdio {
 		var stdioParams = ServerParameters.builder("java")
 				.args("-Dspring.ai.mcp.server.stdio=true", "-Dspring.main.web-application-type=none",
 						"-Dlogging.pattern.console=", "-jar",
-						"model-context-protocol/weather/starter-webmvc-server/target/mcp-weather-starter-webmvc-server-0.0.1-SNAPSHOT.jar")
+						"model-context-protocol/mcp-annotations/mcp-annotations-server/target/mcp-annotations-server-0.0.1-SNAPSHOT.jar")
 				.build();
 
 		var transport = new StdioClientTransport(stdioParams, McpJsonMapper.createDefault());

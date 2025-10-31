@@ -53,9 +53,13 @@
 
 		<!-- DYNAMIC TOOL UPDATE -->
 		<module>model-context-protocol/dynamic-tool-update/client</module>
-		<module>model-context-protocol/dynamic-tool-update/server</module>
+		<module>model-context-protocol/dynamic-tool-update/server</module>		
 
 		<module>prompt-engineering/prompt-engineering-patterns</module>
+
+		<!-- ADVISORS -->
+		<module>advisors/recursive-advisor-demo</module>
+		
 	</modules>
 
 </project>
