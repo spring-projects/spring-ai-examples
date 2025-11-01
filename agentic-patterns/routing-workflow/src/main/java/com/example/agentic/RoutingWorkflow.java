@@ -28,6 +28,17 @@ import org.springframework.util.Assert;
  * model reasoning (captured internally as {@link RoutingResponse}).
  *
  * <p>
+ * The routing workflow is particularly effective for complex tasks where:
+ * <ul>
+ * <li>There are distinct categories of input that are better handled
+ * separately</li>
+ * <li>Classification can be handled accurately by an LLM or traditional
+ * classification model</li>
+ * <li>Different types of input require different specialized processing or
+ * expertise</li>
+ * </ul>
+ *
+ * <p>
  * Key characteristics:
  * <ul>
  * <li>LLM-driven content analysis and classification</li>
