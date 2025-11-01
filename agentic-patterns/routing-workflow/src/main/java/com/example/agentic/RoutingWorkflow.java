@@ -1,18 +1,18 @@
-/* 
-* Copyright 2024 - 2024 the original author or authors.
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-* 
-* https://www.apache.org/licenses/LICENSE-2.0
-* 
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+/*
+ * Copyright 2024 - 2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.example.agentic;
 
 import java.util.Map;
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  *     downstream components can act on</li>
  * <li>Extensible catalogue of routes defined by the caller</li>
  * </ul>
- *
+ * <p>
  * <p/>
  * The implementation uses the <a href=
  * "https://docs.spring.io/spring-ai/reference/1.0/api/structured-output-converter.html">Spring
@@ -56,14 +56,14 @@ import org.springframework.util.Assert;
  * @author Christian Tzolov, Joonas Vali
  * @see ChatClient
  * @see <a href=
- *      "https://docs.spring.io/spring-ai/reference/1.0/api/chatclient.html">Spring
- *      AI ChatClient</a>
+ * "https://docs.spring.io/spring-ai/reference/1.0/api/chatclient.html">Spring
+ * AI ChatClient</a>
  * @see <a href=
- *      "https://www.anthropic.com/research/building-effective-agents">Building
- *      Effective Agents</a>
+ * "https://www.anthropic.com/research/building-effective-agents">Building
+ * Effective Agents</a>
  * @see <a href=
- *      "https://docs.spring.io/spring-ai/reference/1.0/api/structured-output-converter.html">Spring
- *      AI Structured Output</a>
+ * "https://docs.spring.io/spring-ai/reference/1.0/api/structured-output-converter.html">Spring
+ * AI Structured Output</a>
  */
 public class RoutingWorkflow {
 
@@ -97,10 +97,10 @@ public class RoutingWorkflow {
         String routeKey = determineRoute(input, routes);
 
         if (!routes.containsKey(routeKey)) {
-					// LLM failure handling, retry, etc..
-					System.err.printf("Failed to detect the route, instead detected '%s', selecting fallback.%n", routeKey);
-					// Alternatively have fallback defined as a parameter or return Optional value...
-					return routes.keySet().stream().findFirst().orElseThrow();
+            // LLM failure handling, retry, etc..
+            System.err.printf("Failed to detect the route, instead detected '%s', selecting fallback.%n", routeKey);
+            // Alternatively have fallback defined as a parameter or return Optional value...
+            return routes.keySet().stream().findFirst().orElseThrow();
         }
 
         return routeKey;
@@ -111,7 +111,7 @@ public class RoutingWorkflow {
      * content classification. The classification process considers key terms,
      * context,
      * and patterns in the input to select the optimal route.
-     * 
+     *
      * <p>
      * The method uses an LLM to:
      * <ul>
@@ -128,24 +128,24 @@ public class RoutingWorkflow {
     private String determineRoute(String input, Map<String, String> availableRoutes) {
         System.out.println("\nAvailable routes: " + availableRoutes.keySet());
 
-				StringBuilder optionsWithDesc = new StringBuilder();
-			  availableRoutes.forEach((k, v) -> {
-					optionsWithDesc.append(String.format("- %s: %s\n", k, v));
-				});
+        StringBuilder optionsWithDesc = new StringBuilder();
+        availableRoutes.forEach((k, v) -> {
+            optionsWithDesc.append(String.format("- %s: %s\n", k, v));
+        });
 
         String selectorPrompt = String.format("""
-                Analyze the input and select the most appropriate support team from these options:
-                
-                %s
-                
-                First explain your reasoning, then provide your selection.
-                
-                Input: %s""", optionsWithDesc, input);
+            Analyze the input and select the most appropriate route from these options:
+            
+            %s
+            
+            First explain your reasoning, then provide your selection.
+            
+            Input: %s""", optionsWithDesc, input);
 
         RoutingResponse routingResponse = chatClient.prompt(selectorPrompt).call().entity(RoutingResponse.class);
 
         System.out.printf("Routing Analysis:%s\nSelected route: %s%n",
-                Objects.requireNonNull(routingResponse).reasoning(), routingResponse.selection());
+            Objects.requireNonNull(routingResponse).reasoning(), routingResponse.selection());
 
         return routingResponse.selection();
     }
