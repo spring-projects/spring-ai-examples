@@ -14,6 +14,7 @@ import io.modelcontextprotocol.json.McpJsonMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.mcp.McpToolNamePrefixGenerator;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -33,9 +34,11 @@ public class Application {
 			List<McpSyncClient> mcpClients,
 			ConfigurableApplicationContext context) {
 		return args -> {
-
-			var chatClient = chatClientBuilder
-					.defaultToolCallbacks(new SyncMcpToolCallbackProvider(mcpClients))
+			var toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
+				.mcpClients(mcpClients)
+				.toolNamePrefixGenerator(McpToolNamePrefixGenerator.noPrefix())
+				.build();
+			var chatClient = chatClientBuilder.defaultToolCallbacks(toolCallbackProvider)
 					.defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
 					.build();
 
