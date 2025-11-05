@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/mark/projects/spring-ai-examples/model-context-protocol/filesystem/target"
+      ],
+      "env": {}
+    }
+  }
+}

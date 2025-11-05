@@ -52,6 +52,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>org.springframework.ai.mcp.samples.filesystem.Application</mainClass>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

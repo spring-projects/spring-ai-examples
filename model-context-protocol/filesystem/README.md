@@ -1,160 +1,327 @@
-# Spring AI Model Context Protocol Demo Application
+# Spring AI Model Context Protocol - Filesystem Demo
 
-A demo application showcasing the integration of Spring AI with File system using the Model Context Protocol (MCP). 
-This application enables natural language interactions with predefiend folders in your local files system.
+A cross-platform demo application showcasing Spring AI integration with the Model Context Protocol (MCP) Filesystem server. This application enables natural language interactions with your local filesystem.
 
-It starts and connects to [Filesystem MCP-Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) with provided accsss to your `model-context-protocol/filesystem/target` folder
+Connects to the [Filesystem MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) with access to the `target` directory.
+
+## Platform Support
+
+✅ **Windows** - Automatic `cmd.exe` wrapper for npx
+✅ **Linux** - Direct npx execution
+✅ **macOS** - Direct npx execution
+
+The application **automatically detects** your operating system and configures the MCP client appropriately.
 
 ## Features
 
-- Natural language querying and updateing files on your local file system
-- Predefined question mode for automated database analysis
-- Seamless integration with OpenAI's language models
-- Built on Spring AI and Model Context Protocol
+- ✨ **Cross-platform** - Works on Windows, Linux, and macOS without modification
+- 🤖 Natural language querying and updating of local filesystem
+- 📝 Predefined question mode for automated analysis
+- 🔄 Two configuration approaches: programmatic (default) or JSON-based
+- 🚀 Built on Spring AI and Model Context Protocol
 
 ## Prerequisites
 
 - Java 17 or higher
 - Maven 3.6+
-- npx package manager
-- Git
+- Node.js and npx (npm comes with Node.js)
 - OpenAI API key
 
-## Installation
+### Installing Node.js/npx
 
-1. Install npx (Node Package eXecute):
-   first make sure to install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-   and then run:
-   ```bash
-   npm install -g npx
-   ```
+**Windows:**
+```cmd
+# Download and install from https://nodejs.org
+# npx is included with npm
+npx --version
+```
 
-2. Clone the repository:
+**Linux (Ubuntu/Debian):**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npx --version
+```
+
+**macOS:**
+```bash
+brew install node
+npx --version
+```
+
+## Quick Start
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/spring-projects/spring-ai-examples.git
-   cd model-context-protocol/filesystem
+   cd spring-ai-examples/model-context-protocol/filesystem
    ```
 
-3. Set up your OpenAI API key:
+2. **Set your OpenAI API key:**
+
+   **Linux/macOS:**
    ```bash
    export OPENAI_API_KEY='your-api-key-here'
    ```
 
-4. Build the demo:
-   ```bash
-   ./mvnw clean install
+   **Windows (Command Prompt):**
+   ```cmd
+   set OPENAI_API_KEY=your-api-key-here
    ```
 
-## Create a sample text file to explore
+   **Windows (PowerShell):**
+   ```powershell
+   $env:OPENAI_API_KEY="your-api-key-here"
+   ```
 
-Create a sample `spring-ai-mcp-overview.txt` file under your `filesystem/target` directory manually or use the `create-text-file.sh` script
+3. **Create a sample test file:**
 
+   **Linux/macOS:**
+   ```bash
+   ./create-text-file.sh
+   ```
 
-## Running the Application
+   **Windows:**
+   ```cmd
+   mkdir target
+   echo Sample content > target\spring-ai-mcp-overview.txt
+   ```
 
-### Predefined Questions
-Runs through a set of preset questions:
-```bash
-./mvnw spring-boot:run
-```
+4. **Run the application:**
 
-## Architecture Overview
+   **Linux/macOS:**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
-Spring AI's integration with MCP follows a simple chain of components:
+   **Windows:**
+   ```cmd
+   .\mvnw.cmd spring-boot:run
+   ```
 
-1. **MCP Client** provides the base communication layer with your filesystem
-2. **Function Callbacks** expose filesystem operations as AI-callable functions
-3. **Chat Client** connects these functions to the AI model
+## Configuration Approaches
 
-The bean definitions are described below, starting with the `ChatClient`
+The application supports two ways to configure the MCP client:
 
-### Chat Client
+### Option 1: Programmatic Configuration (Default - Recommended)
 
-```java
-@Bean
-@Profile("!chat")
-public CommandLineRunner predefinedQuestions(ChatClient.Builder chatClientBuilder,
-                                           List<McpFunctionCallback> functionCallbacks,
-                                           ConfigurableApplicationContext context) {
-    return args -> {
-        var chatClient = chatClientBuilder.defaultFunctions(functionCallbacks)
-                .build();
-        // Run Predefined Questions
-    };
-}
-```
-
-The chat client setup is remarkably simple - it just needs the function callbacks that were automatically created from the MCP tools. Spring's dependency injection handles all the wiring, making the integration seamless.
-
-Now let's look at the other bean definitions in detail...
-
-### Function Callbacks
-
-The application registers MCP tools with Spring AI using function callbacks:
-
-```java
-@Bean
-public List<McpFunctionCallback> functionCallbacks(McpSyncClient mcpClient) {
-    return mcpClient.listTools(null)
-            .tools()
-            .stream()
-            .map(tool -> new McpFunctionCallback(mcpClient, tool))
-            .toList();
-}
-```
-
-#### Purpose
-
-This bean is responsible for:
-1. Discovering available MCP tools from the client
-2. Converting each tool into a Spring AI function callback
-3. Making these callbacks available for use with the ChatClient
-
-
-#### How It Works
-
-1. `mcpClient.listTools(null)` queries the MCP server for all available tools
-   - The `null` parameter represents a pagination cursor
-   - When null, returns the first page of results
-   - A cursor string can be provided to get results after that position
-2. `.tools()` extracts the tool list from the response
-3. Each tool is transformed into a `McpFunctionCallback` using `.map()`
-4. These callbacks are collected into an array using `.toList()`
-
-#### Usage
-
-The registered callbacks enable the ChatClient to:
-- Access MCP tools during conversations
-- Handle function calls requested by the AI model
-- Execute tools against the MCP server (e.g., filesystem)
-
-
-### MCP Client 
-
-The application uses a synchronous MCP client to communicate with the Filesystem MCP Server running locally:
+The default approach uses automatic OS detection in `Application.java`:
 
 ```java
 @Bean(destroyMethod = "close")
+@ConditionalOnMissingBean(McpSyncClient.class)
 public McpSyncClient mcpClient() {
-    var stdioParams = ServerParameters.builder("npx")
-            .args("-y", "@modelcontextprotocol/server-filesystem", getDbPath())
-            .build();
+    ServerParameters stdioParams;
 
-    var mcpClient = McpClient.sync(new StdioServerTransport(stdioParams),
-            Duration.ofSeconds(10), new ObjectMapper());
+    if (isWindows()) {
+        // Windows: cmd.exe /c npx approach
+        var winArgs = new ArrayList<>(Arrays.asList(
+            "/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "target"));
+        stdioParams = ServerParameters.builder("cmd.exe")
+                .args(winArgs)
+                .build();
+    } else {
+        // Linux/Mac: direct npx approach
+        stdioParams = ServerParameters.builder("npx")
+                .args("-y", "@modelcontextprotocol/server-filesystem", "target")
+                .build();
+    }
 
-    var init = mcpClient.initialize();
-    System.out.println("MCP Initialized: " + init);
-
-    return mcpClient;
+    // Create and initialize client...
 }
 ```
 
-This configuration:
-1. Creates a stdio-based transport layer that communicates with the `npx` MCP server
-2. Specifies the location of folders to be used by the filesystem server.
-3. Sets a 10-second timeout for operations
-4. Uses Jackson for JSON serialization
-5. Initializes the connection to the MCP server
+**Advantages:**
+- ✅ Works out-of-the-box on all platforms
+- ✅ No configuration files needed
+- ✅ Automatic OS detection
 
-The `destroyMethod = "close"` annotation ensures proper cleanup when the application shuts down.
+**Disadvantages:**
+- ❌ Configuration is hardcoded in Java
+- ❌ Less flexible for different server configurations
+
+### Option 2: JSON Configuration (Optional)
+
+For more flexibility, you can use JSON-based configuration. Edit `src/main/resources/application.properties`:
+
+**For Windows:**
+```properties
+spring.ai.mcp.client.stdio.servers-configuration=classpath:/mcp-servers-config-windows.json
+```
+
+**For Linux/macOS:**
+```properties
+spring.ai.mcp.client.stdio.servers-configuration=classpath:/mcp-servers-config-linux.json
+```
+
+**Advantages:**
+- ✅ Externalized configuration
+- ✅ Easy to modify without recompiling
+- ✅ Can configure multiple MCP servers
+
+**Disadvantages:**
+- ❌ Must choose the correct OS-specific JSON file
+- ❌ Requires manual configuration
+
+**⚠️ Important:** When JSON configuration is enabled, the programmatic `@Bean` is automatically skipped via `@ConditionalOnMissingBean` to avoid conflicts.
+
+## Why Windows Requires Special Handling
+
+On Windows, `npx` is implemented as a **batch file** (.cmd), not a native executable. Java's `ProcessBuilder` (used internally by `StdioClientTransport`) cannot execute batch files directly.
+
+**Solution:** Wrap the command with `cmd.exe /c`:
+
+```java
+// Windows
+ServerParameters.builder("cmd.exe")
+    .args("/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "target")
+
+// vs. Linux/macOS
+ServerParameters.builder("npx")
+    .args("-y", "@modelcontextprotocol/server-filesystem", "target")
+```
+
+This pattern applies to other Windows batch files: `npm.cmd`, `node.cmd`, etc.
+
+## Architecture Overview
+
+### Cross-Platform MCP Client Creation
+
+The application uses Spring's `@ConditionalOnMissingBean` to support both configuration approaches:
+
+1. **Programmatic Bean** - Created when JSON config is NOT enabled
+2. **Auto-Configuration** - Created when JSON config IS enabled
+
+```java
+@Bean(destroyMethod = "close")
+@ConditionalOnMissingBean(McpSyncClient.class)
+public McpSyncClient mcpClient() {
+    // Only created if auto-config doesn't provide a client
+}
+```
+
+### CommandLineRunner with Dual Support
+
+The `CommandLineRunner` accepts both approaches:
+
+```java
+@Bean
+public CommandLineRunner predefinedQuestions(
+        @Autowired(required = false) List<McpSyncClient> mcpSyncClients,  // From JSON config
+        @Autowired(required = false) McpSyncClient mcpClient,              // From programmatic
+        ...) {
+
+    // Use whichever is available
+    List<McpSyncClient> clients = (mcpSyncClients != null && !mcpSyncClients.isEmpty())
+            ? mcpSyncClients
+            : (mcpClient != null ? List.of(mcpClient) : List.of());
+}
+```
+
+### Tool Integration
+
+MCP tools are automatically discovered and integrated with Spring AI:
+
+```java
+var chatClient = chatClientBuilder
+    .defaultToolCallbacks(new SyncMcpToolCallbackProvider(clients))
+    .build();
+```
+
+The AI model can then call MCP filesystem tools (read_file, write_file, etc.) through natural language.
+
+## JSON Configuration Files
+
+### mcp-servers-config-windows.json
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "target"],
+      "env": {}
+    }
+  }
+}
+```
+
+### mcp-servers-config-linux.json
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "target"],
+      "env": {}
+    }
+  }
+}
+```
+
+## Path Handling
+
+The example uses a **relative path** (`"target"`) instead of absolute paths for cross-platform compatibility:
+
+```java
+// ✅ Recommended: Relative path
+.args("-y", "@modelcontextprotocol/server-filesystem", "target")
+
+// ❌ Avoid: Absolute path with OS-specific separators
+.args("-y", "@modelcontextprotocol/server-filesystem", "/home/user/project/target")
+```
+
+The MCP server resolves relative paths based on the current working directory.
+
+## Troubleshooting
+
+### Windows: "Cannot run program 'npx'"
+
+**Cause:** npx is not in PATH or is a batch file that ProcessBuilder can't execute directly.
+
+**Solution:** Ensure the application is using the `cmd.exe` wrapper (should be automatic with the default programmatic approach).
+
+### Bean Conflicts: "Sinks.many().unicast() sinks only allow a single Subscriber"
+
+**Cause:** Both programmatic and JSON configuration are creating MCP clients simultaneously.
+
+**Solution:** Choose ONE approach:
+- Comment out JSON config in `application.properties` (use programmatic)
+- OR enable JSON config (programmatic will be skipped automatically)
+
+### Linux/macOS: "npx: command not found"
+
+**Cause:** Node.js/npm is not installed or not in PATH.
+
+**Solution:** Install Node.js:
+```bash
+# Linux
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# macOS
+brew install node
+```
+
+## Example Output
+
+```
+Detected Unix-like OS - using npx directly
+MCP Initialized: InitializeResult[protocolVersion=2024-11-05, ...]
+
+Running predefined questions with AI model responses:
+
+QUESTION: Can you explain the content of the target/spring-ai-mcp-overview.txt file?
+ASSISTANT: The file contains an overview of the Model Context Protocol (MCP) Java SDK...
+
+QUESTION: Please summarize the content... and store it in target/summary.md
+ASSISTANT: I've created a summary and saved it to target/summary.md...
+```
+
+## Learn More
+
+- [Model Context Protocol Specification](https://modelcontextprotocol.io)
+- [MCP Filesystem Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
+- [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
+- [Spring AI MCP Client Documentation](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)
