@@ -102,7 +102,8 @@ Or add to `src/main/resources/application.properties`:
 ```properties
 spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
 
-spring.ai.ollama.model-name=avcodes/flowaicom-flow-judge:q4
+spring.ai.ollama.chat.options.model=avcodes/flowaicom-flow-judge:q4
+spring.ai.ollama.chat.options.temperature=0
 
 spring.ai.chat.client.enabled=false
 
