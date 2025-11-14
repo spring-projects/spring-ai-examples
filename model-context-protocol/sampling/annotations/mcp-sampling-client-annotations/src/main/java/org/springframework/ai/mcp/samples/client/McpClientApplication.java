@@ -21,14 +21,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-import io.modelcontextprotocol.client.McpSyncClient;
 
 @SpringBootApplication
 public class McpClientApplication {
@@ -39,13 +37,11 @@ public class McpClientApplication {
 
 	@Bean
 	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel,
-			List<McpSyncClient> mcpClients) {
+			ToolCallbackProvider toolCallbackProvider) {
 
 		return args -> {
 
-			var mcpToolProvider = new SyncMcpToolCallbackProvider(mcpClients);
-
-			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultToolCallbacks(mcpToolProvider).build();
+			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultToolCallbacks(toolCallbackProvider).build();
 
 			String userQuestion = """
 					What is the weather in Amsterdam right now?

@@ -55,7 +55,7 @@ public class McpClientApplication {
 				CallToolRequest toolRequest = CallToolRequest.builder()
 						.name("tool1")
 						.arguments(Map.of("input", "test input"))
-						.progressToken("test-progress-token")
+						.progressToken(666)
 						.build();
 				CallToolResult response = mcpClient.callTool(toolRequest);
 				System.out.println("Tool response: " + response);
