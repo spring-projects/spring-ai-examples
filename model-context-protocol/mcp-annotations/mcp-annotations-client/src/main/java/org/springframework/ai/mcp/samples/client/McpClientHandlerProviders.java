@@ -1,7 +1,5 @@
 package org.springframework.ai.mcp.samples.client;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpElicitation;
@@ -32,7 +30,7 @@ public class McpClientHandlerProviders {
 	 *   <li>{@code spring.ai.mcp.client.sse.connections.server1.url=...}</li>
 	 *   <li>{@code spring.ai.mcp.client.streamable-http.connections.server1.url=...}</li>
 	 * </ul>
-	 * 
+	 *
 	 * The handler is assigned only to the client with ID "server1".
 	 *
 	 * @param progressNotification the progress notification received from the server
