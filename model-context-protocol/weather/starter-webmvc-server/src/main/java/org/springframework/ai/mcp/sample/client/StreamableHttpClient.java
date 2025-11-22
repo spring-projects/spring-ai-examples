@@ -28,7 +28,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 public class StreamableHttpClient {
 
 	public static void main(String[] args) {
-		
+
 		HttpClientStreamableHttpTransport transport = HttpClientStreamableHttpTransport.builder("http://localhost:8080")
 				.build();
 
