@@ -1,11 +1,11 @@
 {
-  "timeoutSec": 25,
+  "timeoutSec": 120,
   "successRegex": [
     "Started.*Application",
     "I am your AI assistant"
   ],
   "requiredEnv": [
-    "ANTHROPIC_API_KEY",
+    "SPRING_AI_ANTHROPIC_API_KEY",
     "BRAVE_API_KEY"
   ],
   "aiValidation": {

@@ -1,0 +1,15 @@
+{
+  "complexity": "web-server",
+  "timeoutSec": 120,
+  "successRegex": [
+    "OAuth2 token obtained",
+    "MCP weather server test passed"
+  ],
+  "requiredEnv": [],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "hybrid",
+    "expectedBehavior": "MCP OAuth2 server should start, authenticate with OAuth2, and respond to weather tool invocations",
+    "promptTemplate": "mcp_oauth2_server_validation"
+  }
+}

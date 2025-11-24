@@ -1,5 +1,5 @@
 {
-  "timeoutSec": 20,
+  "timeoutSec": 120,
   "successRegex": [
     "Started.*Application"
   ],

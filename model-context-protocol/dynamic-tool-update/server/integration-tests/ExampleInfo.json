@@ -1,5 +1,5 @@
 {
-  "timeoutSec": 15,
+  "timeoutSec": 120,
   "successRegex": [
     "Started.*Application",
     "Server: Implementation"

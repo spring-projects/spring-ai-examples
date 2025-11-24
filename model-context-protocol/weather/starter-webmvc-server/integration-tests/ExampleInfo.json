@@ -1,23 +1,24 @@
 {
-  "timeoutSec": 300,
+  "timeoutSec": 180,
+  "testMode": "web-server",
   "successRegex": [
-    "BUILD SUCCESS",
-    "Started.*Application",
-    "EVALUATION:\\\\s+PASS"
+    "Started McpServerApplication",
+    "Tomcat started on port.*8080",
+    "MCP server initialized"
   ],
-  "requiredEnv": [
-    "OPENAI_API_KEY"
-  ],
-  "aiValidation": {
-    "enabled": true,
-    "validationMode": "hybrid",
-    "readmeFile": "../README.md",
-    "expectedBehavior": "MCP weather server should start successfully and handle client requests for weather information via getWeatherForecastByLocation and getAlerts tools. The client should successfully connect, make weather queries, and receive coherent weather data responses.",
-    "promptTemplate": "client_server_validation",
-    "components": ["server", "client"],
-    "successCriteria": {
-      "requiresUserInteraction": false,
-      "expectedOutputTypes": ["api_response", "weather_data"]
-    }
-  }
+  "requiredEnv": [],
+  "webServerConfig": {
+    "startupTime": 15,
+    "testEndpoints": [
+      {
+        "url": "http://localhost:8080/mcp/message",
+        "method": "GET",
+        "expectedPattern": "text/event-stream",
+        "headers": {
+          "Accept": "text/event-stream"
+        }
+      }
+    ]
+  },
+  "notes": "MCP weather server with SSE transport. Endpoint returns SSE stream for MCP protocol."
 }

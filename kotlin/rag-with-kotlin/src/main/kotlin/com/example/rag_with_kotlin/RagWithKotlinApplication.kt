@@ -40,7 +40,7 @@ fun main(args: Array<String>) {
                 """.trimIndent()
                 ref<ChatClient.Builder>()
                     .defaultSystem(system)
-                    .defaultAdvisors(QuestionAnswerAdvisor(ref<VectorStore>()))
+                    .defaultAdvisors(QuestionAnswerAdvisor.builder(vs).build())
                     .build()
             }
             bean {
@@ -62,7 +62,7 @@ fun main(args: Array<String>) {
     }
 }
 
-data class DogAdoptionSuggestion(val name: String, val id: Int, val description: String)
+data class DogAdoptionSuggestion(val name: String?, val id: Int?, val description: String?)
 
 interface DogRepository : ListCrudRepository<Dog, Int>
 

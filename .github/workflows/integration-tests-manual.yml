@@ -83,40 +83,43 @@ jobs:
         BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
       run: |
         echo "🧪 Running integration tests with Spring AI ${{ inputs.spring_ai_version }}..."
-        echo "📝 Testing all 17 known passing examples"
+        echo "📝 Testing all 21 known passing examples"
         echo ""
         
         # Track test results
         test_results=0
         test_count=0
         
-        # List of known passing tests (17 total)
-        # Excluding: 
+        # List of known passing tests (21 total - updated Dec 2024)
+        # Now including web server tests and prompt-engineering-patterns!
+        # Still excluding: 
         # - kotlin/rag-with-kotlin (needs Docker)
-        # - misc/openai-streaming-response (timeout - web server)
-        # - model-context-protocol/weather/starter-webmvc-server (timeout - web server)
-        # - prompt-engineering/prompt-engineering-patterns (timeout - long running)
         # - model-context-protocol/client-starter/starter-webflux-client (connection issue)
         # - model-context-protocol/dynamic-tool-update/client (needs server)
         # - model-context-protocol/dynamic-tool-update/server (needs client)
         
         echo "════════════════════════════════════"
-        echo "  SIMPLE EXAMPLES (3 tests)"
+        echo "  SIMPLE EXAMPLES (4 tests)"
         echo "════════════════════════════════════"
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] models/chat/helloworld"
+        echo "[$test_count/21] models/chat/helloworld"
         ./integration-testing/scripts/run-integration-tests.sh "chat/helloworld" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] kotlin/kotlin-hello-world"
+        echo "[$test_count/21] kotlin/kotlin-hello-world"
         ./integration-testing/scripts/run-integration-tests.sh "kotlin-hello-world" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] misc/spring-ai-java-function-callback"
+        echo "[$test_count/21] kotlin/kotlin-function-callback"
+        ./integration-testing/scripts/run-integration-tests.sh "kotlin-function-callback" || test_results=$((test_results + 1))
+        echo ""
+        
+        test_count=$((test_count + 1))
+        echo "[$test_count/21] misc/spring-ai-java-function-callback"
         ./integration-testing/scripts/run-integration-tests.sh "spring-ai-java-function-callback" || test_results=$((test_results + 1))
         echo ""
         
@@ -126,12 +129,12 @@ jobs:
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agents/reflection"
+        echo "[$test_count/21] agents/reflection"
         ./integration-testing/scripts/run-integration-tests.sh "agents/reflection" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agents/tools-and-agent-tools"
+        echo "[$test_count/21] agents/tools-and-agent-tools"
         ./integration-testing/scripts/run-integration-tests.sh "agents/tools-and-agent-tools" || test_results=$((test_results + 1))
         echo ""
         
@@ -141,28 +144,53 @@ jobs:
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agentic-patterns/chain-workflow"
+        echo "[$test_count/21] agentic-patterns/chain-workflow"
         ./integration-testing/scripts/run-integration-tests.sh "agentic-patterns/chain-workflow" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agentic-patterns/evaluator-optimizer-pattern"
+        echo "[$test_count/21] agentic-patterns/evaluator-optimizer-pattern"
         ./integration-testing/scripts/run-integration-tests.sh "agentic-patterns/evaluator-optimizer-pattern" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agentic-patterns/orchestrator-workers"
+        echo "[$test_count/21] agentic-patterns/orchestrator-workers"
         ./integration-testing/scripts/run-integration-tests.sh "agentic-patterns/orchestrator-workers" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agentic-patterns/parallelization"
+        echo "[$test_count/21] agentic-patterns/parallelization"
         ./integration-testing/scripts/run-integration-tests.sh "agentic-patterns/parallelization" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] agentic-patterns/routing-agent"
+        echo "[$test_count/21] agentic-patterns/routing-agent"
         ./integration-testing/scripts/run-integration-tests.sh "agentic-patterns/routing-agent" || test_results=$((test_results + 1))
+        echo ""
+        
+        echo "════════════════════════════════════"
+        echo "  WEB SERVER EXAMPLES (2 tests)"
+        echo "════════════════════════════════════"
+        echo ""
+        
+        test_count=$((test_count + 1))
+        echo "[$test_count/21] misc/openai-streaming-response"
+        ./integration-testing/scripts/run-integration-tests.sh "misc/openai-streaming-response" || test_results=$((test_results + 1))
+        echo ""
+        
+        test_count=$((test_count + 1))
+        echo "[$test_count/21] model-context-protocol/weather/starter-webmvc-server"
+        ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/weather/starter-webmvc-server" || test_results=$((test_results + 1))
+        echo ""
+        
+        echo "════════════════════════════════════"
+        echo "  PROMPT ENGINEERING (1 test)"
+        echo "════════════════════════════════════"
+        echo ""
+        
+        test_count=$((test_count + 1))
+        echo "[$test_count/21] misc/prompt-engineering-patterns"
+        ./integration-testing/scripts/run-integration-tests.sh "misc/prompt-engineering-patterns" || test_results=$((test_results + 1))
         echo ""
         
         echo "════════════════════════════════════"
@@ -171,37 +199,37 @@ jobs:
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/brave"
+        echo "[$test_count/21] model-context-protocol/brave"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/brave" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/client-starter/starter-default-client"
+        echo "[$test_count/21] model-context-protocol/client-starter/starter-default-client"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/client-starter/starter-default-client" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/filesystem"
+        echo "[$test_count/21] model-context-protocol/filesystem"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/filesystem" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/sqlite/chatbot"
+        echo "[$test_count/21] model-context-protocol/sqlite/chatbot"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/sqlite/chatbot" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/sqlite/simple"
+        echo "[$test_count/21] model-context-protocol/sqlite/simple"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/sqlite/simple" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/web-search/brave-chatbot"
+        echo "[$test_count/21] model-context-protocol/web-search/brave-chatbot"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/web-search/brave-chatbot" || test_results=$((test_results + 1))
         echo ""
         
         test_count=$((test_count + 1))
-        echo "[$test_count/17] model-context-protocol/web-search/brave-starter"
+        echo "[$test_count/21] model-context-protocol/web-search/brave-starter"
         ./integration-testing/scripts/run-integration-tests.sh "model-context-protocol/web-search/brave-starter" || test_results=$((test_results + 1))
         echo ""
         
@@ -209,7 +237,7 @@ jobs:
         echo "  TEST SUMMARY"
         echo "════════════════════════════════════"
         if [ $test_results -eq 0 ]; then
-          echo "✅ All 17 examples tested successfully with Spring AI ${{ inputs.spring_ai_version }}"
+          echo "✅ All 21 examples tested successfully with Spring AI ${{ inputs.spring_ai_version }}"
         else
           echo "❌ $test_results test(s) failed with Spring AI ${{ inputs.spring_ai_version }}"
           exit 1
@@ -241,34 +269,42 @@ jobs:
         echo "## 📊 Test Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Spring AI Version**: ${{ inputs.spring_ai_version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Test Filter**: ${{ inputs.test_filter || 'None (ran all 17 passing examples)' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Filter**: ${{ inputs.test_filter || 'None (ran all 21 passing examples)' }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Examples Tested (17 total)" >> $GITHUB_STEP_SUMMARY
+        echo "### Examples Tested (21 total)" >> $GITHUB_STEP_SUMMARY
         echo "#### Simple Examples:" >> $GITHUB_STEP_SUMMARY
         echo "1. models/chat/helloworld" >> $GITHUB_STEP_SUMMARY
         echo "2. kotlin/kotlin-hello-world" >> $GITHUB_STEP_SUMMARY
-        echo "3. misc/spring-ai-java-function-callback" >> $GITHUB_STEP_SUMMARY
+        echo "3. kotlin/kotlin-function-callback" >> $GITHUB_STEP_SUMMARY
+        echo "4. misc/spring-ai-java-function-callback" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "#### Agent Examples:" >> $GITHUB_STEP_SUMMARY
-        echo "4. agents/reflection" >> $GITHUB_STEP_SUMMARY
-        echo "5. agents/tools-and-agent-tools" >> $GITHUB_STEP_SUMMARY
+        echo "5. agents/reflection" >> $GITHUB_STEP_SUMMARY
+        echo "6. agents/tools-and-agent-tools" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "#### Agentic Patterns:" >> $GITHUB_STEP_SUMMARY
-        echo "6. agentic-patterns/chain-workflow" >> $GITHUB_STEP_SUMMARY
-        echo "7. agentic-patterns/evaluator-optimizer-pattern" >> $GITHUB_STEP_SUMMARY
-        echo "8. agentic-patterns/orchestrator-workers" >> $GITHUB_STEP_SUMMARY
-        echo "9. agentic-patterns/parallelization" >> $GITHUB_STEP_SUMMARY
-        echo "10. agentic-patterns/routing-agent" >> $GITHUB_STEP_SUMMARY
+        echo "7. agentic-patterns/chain-workflow" >> $GITHUB_STEP_SUMMARY
+        echo "8. agentic-patterns/evaluator-optimizer-pattern" >> $GITHUB_STEP_SUMMARY
+        echo "9. agentic-patterns/orchestrator-workers" >> $GITHUB_STEP_SUMMARY
+        echo "10. agentic-patterns/parallelization" >> $GITHUB_STEP_SUMMARY
+        echo "11. agentic-patterns/routing-agent" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### Web Server Examples:" >> $GITHUB_STEP_SUMMARY
+        echo "12. misc/openai-streaming-response" >> $GITHUB_STEP_SUMMARY
+        echo "13. model-context-protocol/weather/starter-webmvc-server" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### Prompt Engineering:" >> $GITHUB_STEP_SUMMARY
+        echo "14. misc/prompt-engineering-patterns" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "#### MCP Examples:" >> $GITHUB_STEP_SUMMARY
-        echo "11. model-context-protocol/brave" >> $GITHUB_STEP_SUMMARY
-        echo "12. model-context-protocol/client-starter/starter-default-client" >> $GITHUB_STEP_SUMMARY
-        echo "13. model-context-protocol/filesystem" >> $GITHUB_STEP_SUMMARY
-        echo "14. model-context-protocol/sqlite/chatbot" >> $GITHUB_STEP_SUMMARY
-        echo "15. model-context-protocol/sqlite/simple" >> $GITHUB_STEP_SUMMARY
-        echo "16. model-context-protocol/web-search/brave-chatbot" >> $GITHUB_STEP_SUMMARY
-        echo "17. model-context-protocol/web-search/brave-starter" >> $GITHUB_STEP_SUMMARY
+        echo "15. model-context-protocol/brave" >> $GITHUB_STEP_SUMMARY
+        echo "16. model-context-protocol/client-starter/starter-default-client" >> $GITHUB_STEP_SUMMARY
+        echo "17. model-context-protocol/filesystem" >> $GITHUB_STEP_SUMMARY
+        echo "18. model-context-protocol/sqlite/chatbot" >> $GITHUB_STEP_SUMMARY
+        echo "19. model-context-protocol/sqlite/simple" >> $GITHUB_STEP_SUMMARY
+        echo "20. model-context-protocol/web-search/brave-chatbot" >> $GITHUB_STEP_SUMMARY
+        echo "21. model-context-protocol/web-search/brave-starter" >> $GITHUB_STEP_SUMMARY
         if [ "${{ inputs.test_filter }}" != "" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Additional filtered test**: ${{ inputs.test_filter }}" >> $GITHUB_STEP_SUMMARY

@@ -1,5 +1,6 @@
 {
   "timeoutSec": 180,
+  "testMode": "web-server",
   "successRegex": [
     "data.*metadata.*id.*chatcmpl",
     "finishReason.*STOP",
@@ -7,5 +8,18 @@
   ],
   "requiredEnv": [
     "OPENAI_API_KEY"
-  ]
+  ],
+  "webServerConfig": {
+    "startupTime": 15,
+    "testEndpoints": [
+      {
+        "url": "http://localhost:8080/ai/generateStream?message=Tell%20me%20a%20short%20joke",
+        "method": "GET",
+        "expectedPattern": "data.*chatcmpl.*text",
+        "headers": {
+          "Accept": "text/event-stream"
+        }
+      }
+    ]
+  }
 }

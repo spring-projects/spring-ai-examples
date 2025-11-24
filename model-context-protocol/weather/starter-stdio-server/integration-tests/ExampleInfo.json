@@ -1,0 +1,17 @@
+{
+  "timeoutSec": 120,
+  "successRegex": [
+    "BUILD SUCCESS",
+    "Connected to: spring-ai-mcp-weather-stdio-server",
+    "Found 2 tools",
+    "Tool response contains expected content: Temperature",
+    "Tool response contains expected content: alert",
+    "All tests passed"
+  ],
+  "requiredEnv": [],
+  "aiValidation": {
+    "enabled": false,
+    "validationMode": "regex",
+    "expectedBehavior": "STDIO MCP server should build, connect via STDIO transport, discover weather tools, and successfully invoke weather forecast and alerts tools"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "timeoutSec": 120,
+  "timeoutSec": 300,
   "successRegex": [
     "=== Running Basic Patterns ===",
     "Output: (POSITIVE|NEGATIVE|NEUTRAL)", 

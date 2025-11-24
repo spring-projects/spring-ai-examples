@@ -3,7 +3,7 @@
 //DEPS com.fasterxml.jackson.core:jackson-databind:2.17.1
 //JAVA 17
 //FILES ExampleInfo.json
-//SOURCES ../../../integration-testing/jbang-lib/IntegrationTestUtils.java
+//SOURCES ../../../../integration-testing/jbang-lib/IntegrationTestUtils.java
 
 /*
  * Integration test launcher for starter-webflux-client

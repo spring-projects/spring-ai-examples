@@ -1,0 +1,14 @@
+{
+  "complexity": "web-server",
+  "timeoutSec": 120,
+  "successRegex": [
+    "MCP weather server test passed"
+  ],
+  "requiredEnv": [],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "hybrid",
+    "expectedBehavior": "MCP WebFlux server should start, accept SSE connections, and respond to weather tool invocations",
+    "promptTemplate": "mcp_server_validation"
+  }
+}

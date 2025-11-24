@@ -1,0 +1,14 @@
+{
+  "complexity": "web-server",
+  "timeoutSec": 120,
+  "successRegex": [
+    "MCP annotations server test passed"
+  ],
+  "requiredEnv": [],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "hybrid",
+    "expectedBehavior": "MCP annotations server should start, expose tools, resources, prompts, and completions via SSE",
+    "promptTemplate": "mcp_comprehensive_server_validation"
+  }
+}

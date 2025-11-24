@@ -8,7 +8,7 @@
     "Process terminated with code 143"
   ],
   "requiredEnv": [
-    "ANTHROPIC_API_KEY",
+    "SPRING_AI_ANTHROPIC_API_KEY",
     "BRAVE_API_KEY"
   ]
 }
