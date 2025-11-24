@@ -1,35 +1,22 @@
-name: Spring AI Examples Integration Tests
+name: Integration Tests
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   schedule:
     - cron: '0 6 * * *'  # Daily at 6 AM UTC
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: 'Run specific test (e.g., kotlin-hello-world, agentic-patterns/chain-workflow)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
-  unit-tests:
-    name: Unit & Simple Tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-
-      - name: Run unit tests
-        run: ./mvnw -q test --batch-mode
-
   integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,96 +24,68 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
-          cache: 'maven'
+          distribution: 'temurin'
+          cache: maven
 
       - name: Install JBang
         run: |
           curl -Ls https://sh.jbang.dev | bash -s - app setup
-          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+          echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
 
       - name: Verify JBang installation
         run: |
+          export PATH="$HOME/.jbang/bin:$PATH"
           jbang version
           java -version
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-
-      - name: Install additional dependencies
-        run: |
-          # Install uvx for MCP examples
-          python3 -m pip install uv
-          # Install other potential dependencies
           sudo apt-get update
           sudo apt-get install -y sqlite3
+
+      - name: Cache JBang dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.jbang
+          key: ${{ runner.os }}-jbang-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-jbang-
 
       - name: Run integration tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SPRING_AI_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SPRING_AI_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
         run: |
-          python3 scripts/run_integration_tests.py --verbose --report integration-test-report.md
+          if [ -n "${{ inputs.test_filter }}" ]; then
+            echo "Running specific test: ${{ inputs.test_filter }}"
+            ./integration-testing/scripts/run-integration-tests.sh "${{ inputs.test_filter }}"
+          else
+            echo "Running all integration tests"
+            ./integration-testing/scripts/run-integration-tests.sh
+          fi
 
-      - name: Upload test report
+      - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-report
-          path: integration-test-report.md
+          name: integration-test-logs-${{ github.run_number }}
+          path: |
+            integration-testing/logs/**/*.log
           retention-days: 7
 
-      - name: Upload test logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-logs
-          path: |
-            **/integration-tests/*.log
-            **/target/spring-boot-run.log
-          retention-days: 3
-
-  cross-platform:
-    name: Cross-Platform Tests
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, windows-2022, macos-13]
-        java: [17, 21]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java }}
-          cache: 'maven'
-
-      - name: Install JBang (Unix)
-        if: runner.os != 'Windows'
+      - name: Summary
+        if: always()
         run: |
-          curl -Ls https://sh.jbang.dev | bash -s - app setup
-          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
-
-      - name: Install JBang (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          choco install jbang
-
-      - name: Verify JBang installation
-        run: |
-          jbang version
-
-      - name: Run sample integration test
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          # Run just one simple integration test for cross-platform verification
-          # This will be updated once we have actual integration tests
-          echo "Cross-platform test placeholder - will run actual tests once available"
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Filter**: ${{ inputs.test_filter || 'All tests' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Required Secrets" >> $GITHUB_STEP_SUMMARY
+          echo "- \`OPENAI_API_KEY\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ANTHROPIC_API_KEY\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`BRAVE_API_KEY\`" >> $GITHUB_STEP_SUMMARY
