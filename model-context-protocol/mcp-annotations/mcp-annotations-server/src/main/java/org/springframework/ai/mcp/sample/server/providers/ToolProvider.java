@@ -16,11 +16,13 @@
 package org.springframework.ai.mcp.sample.server.providers;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-
+import org.springframework.ai.mcp.sample.server.model.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -61,4 +63,22 @@ public class ToolProvider {
 		return response;
 	}
 	
+	@McpTool(description = "Get temperatures (in celsius) for two specific locations simultaneously")
+	public List<WeatherResponse> getTemperatures(@McpToolParam(description = "The first location point") Point point1,
+            @McpToolParam(description = "The second location point") Point point2) {
+
+		String latParam = point1.getLatitude() + "," + point2.getLatitude();
+        String longParam = point1.getLongitude() + "," + point2.getLongitude();
+        
+		WeatherResponse[] responses = restClient
+                .get()
+                .uri("https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&current=temperature_2m",
+                        latParam, longParam)
+                .retrieve()
+                .body(WeatherResponse[].class);
+
+		logger.info("Checked 2 locations. Point1: {}, Point2: {}", point1, point2);
+
+		return responses != null ? Arrays.asList(responses) : List.of();
+	}
 }
