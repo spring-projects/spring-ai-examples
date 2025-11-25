@@ -1,0 +1,22 @@
+{
+  "timeoutSec": 300,
+  "successRegex": [
+    "Started McpClientApplication",
+    "MCP LOGGING.*[Ss]ampling"
+  ],
+  "requiredEnv": [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY"
+  ],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "primary",
+    "readmeFile": "../README.md",
+    "expectedBehavior": "MCP Sampling E2E test demonstrating multi-model delegation. The server should start, client connects via MCP SSE, sends a weather query. The server uses MCP Sampling to delegate creative poem generation to LLM providers. Success is indicated by: (1) MCP sampling logs showing the sampling flow occurred, (2) A creative poem or response about weather being generated. The exact format of poems may vary - what matters is that creative weather-related content was produced through the MCP Sampling mechanism.",
+    "promptTemplate": "example_validation",
+    "successCriteria": {
+      "expectedComponents": ["server_startup", "client_connection", "mcp_sampling_flow", "weather_poem_generated"],
+      "validationNote": "Tests MCP Sampling flow - AI validates creative output quality rather than exact string matching"
+    }
+  }
+}
