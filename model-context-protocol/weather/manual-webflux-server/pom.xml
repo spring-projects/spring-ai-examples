@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>4.0.0</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -19,7 +19,8 @@
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
 
     <properties>
-        <mcp.version>0.10.0</mcp.version>
+        <mcp.version>0.17.0-SNAPSHOT</mcp.version>
+        <junit.version>6.0.1</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -69,6 +70,20 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

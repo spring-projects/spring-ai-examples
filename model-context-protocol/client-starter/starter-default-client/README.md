@@ -6,7 +6,7 @@ Follow the [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/
 
 ## Overview
 
-The project uses Spring Boot 3.3.6 and Spring AI 1.1.0-SNAPSHOT to create a command-line application that demonstrates MCP server integration. The application:
+The project uses Spring Boot 4.0.0 and Spring AI 2.0.0-SNAPSHOT to create a command-line application that demonstrates MCP server integration. The application:
 - Connects to MCP servers using STDIO and/or SSE (HttpClient-based) transports
 - Integrates with Spring AI's chat capabilities
 - Demonstrates tool execution through MCP servers

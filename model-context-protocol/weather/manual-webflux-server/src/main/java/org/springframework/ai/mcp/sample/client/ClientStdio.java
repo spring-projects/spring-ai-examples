@@ -20,6 +20,8 @@ import java.io.File;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
 
+import io.modelcontextprotocol.json.McpJsonMapper;
+
 /**
  * With stdio transport, the MCP server is automatically started by the client. But you
  * have to build the server jar first: <pre>./mvnw clean install -DskipTests</pre>
@@ -31,11 +33,12 @@ public class ClientStdio {
 		System.out.println(new File(".").getAbsolutePath());
 
 		var stdioParams = ServerParameters.builder("java")
-			.args("-Dtransport.mode=stdio", "-Dspring.main.web-application-type=none", "-jar",
+			.args("-Dspring.main.banner-mode=off", "-Dlogging.pattern.console=", "-Dtransport.mode=stdio",
+					"-Dspring.main.web-application-type=none", "-jar",
 					"model-context-protocol/weather/manual-webflux-server/target/mcp-weather-server-0.0.1-SNAPSHOT.jar")
 			.build();
 
-		var transport = new StdioClientTransport(stdioParams);
+		var transport = new StdioClientTransport(stdioParams, McpJsonMapper.createDefault());
 
 		new SampleClient(transport).run();
 	}

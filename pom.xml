@@ -17,9 +17,9 @@
 		<module>agents/reflection</module>
 		<module>agentic-patterns</module>
 
-		<module>kotlin/kotlin-hello-world</module>
+		<!-- <module>kotlin/kotlin-hello-world</module>
 		<module>kotlin/kotlin-function-callback</module>
-		<module>kotlin/rag-with-kotlin</module>
+		<module>kotlin/rag-with-kotlin</module> -->
 
 		<module>misc/spring-ai-java-function-callback</module>
 		<module>misc/openai-streaming-response</module>

@@ -1,6 +1,7 @@
 package org.springframework.ai.mcp.sample.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.modelcontextprotocol.json.McpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
@@ -22,14 +23,14 @@ public class McpServerConfig {
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "stdio")
 	public StdioServerTransportProvider stdioServerTransportProvider() {
-		return new StdioServerTransportProvider();
+		return new StdioServerTransportProvider(McpJsonMapper.createDefault());
 	}
 
 	// SSE transport
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "sse")
 	public WebFluxSseServerTransportProvider sseServerTransportProvider() {
-		return new WebFluxSseServerTransportProvider(new ObjectMapper(), "/mcp/message");
+		return WebFluxSseServerTransportProvider.builder().messageEndpoint("/mcp/message").build();
 	}
 
 	// Router function for SSE transport used by Spring WebFlux to start an HTTP

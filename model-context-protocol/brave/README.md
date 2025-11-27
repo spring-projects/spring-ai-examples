@@ -103,7 +103,7 @@ This setup allows the AI model to:
 ## Dependencies
 
 The project uses:
-- Spring Boot 3.3.6
-- Spring AI 1.1.0-SNAPSHOT
+- Spring Boot 4.0.0
+- Spring AI 2.0.0-SNAPSHOT
 - spring-ai-starter-model-openai
 - spring-ai-starter-mcp-client
