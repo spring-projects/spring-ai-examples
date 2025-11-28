@@ -16,7 +16,7 @@ Obtain a token by calling the `/oauth2/token` endpoint:
 ```shell
 curl -XPOST "http://localhost:8080/oauth2/token" \
   --data grant_type=client_credentials \
-  --user "oidc-client:secret"
+  --user "mcp-client:secret"
 # And copy-paste the access token
 # Or use JQ:
 curl -XPOST "http://localhost:8080/oauth2/token" \
