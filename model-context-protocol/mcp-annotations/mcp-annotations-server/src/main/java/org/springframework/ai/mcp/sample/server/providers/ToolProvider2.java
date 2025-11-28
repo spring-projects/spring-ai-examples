@@ -21,9 +21,6 @@ import java.util.Map;
 import org.springaicommunity.mcp.annotation.McpProgressToken;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springaicommunity.mcp.context.DefaultMcpSyncRequestContext;
-
-import org.springframework.stereotype.Service;
 
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
