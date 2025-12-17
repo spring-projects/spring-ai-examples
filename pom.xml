@@ -59,6 +59,7 @@
 
 		<!-- ADVISORS -->
 		<module>advisors/recursive-advisor-demo</module>
+		<module>advisors/recursive-advisor-with-memory</module>
 		<module>advisors/evaluation-recursive-advisor-demo</module>
 		
 	</modules>
