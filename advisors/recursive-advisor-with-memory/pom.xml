@@ -24,27 +24,6 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.logaritex.ai</groupId>
-			<artifactId>tool-augmenter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<!-- <dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-model</artifactId>			
-		</dependency> -->
-
-		<!-- <dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-client-chat</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-autoconfigure-model-chat-client</artifactId>
-		</dependency> -->
-
-		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai-sdk</artifactId>
 		</dependency>
