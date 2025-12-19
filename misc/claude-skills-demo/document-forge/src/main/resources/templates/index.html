@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Forge - AI Document Creation Studio</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',
+                        xlsx: '#22C55E',
+                        pptx: '#F97316',
+                        docx: '#3B82F6',
+                        pdf: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX -->
+    <script src="/webjars/htmx.org/2.0.4/dist/htmx.min.js"></script>
+
+    <style>
+        /* HTMX request states */
+        .htmx-request .loading-indicator { display: flex; }
+        .htmx-request .submit-text { display: none; }
+        .loading-indicator { display: none; }
+
+        /* Document type selection */
+        .doc-type-btn { transition: all 0.2s ease; }
+        .doc-type-btn:hover { transform: translateY(-2px); }
+        .doc-type-btn.selected { ring: 2px; ring-offset: 2px; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        /* Typing dots animation */
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+        .typing-dot {
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* History item hover */
+        .history-item {
+            transition: all 0.2s ease;
+        }
+        .history-item:hover {
+            background-color: #F3F4F6;
+        }
+
+        /* Sidebar transitions */
+        .sidebar-collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Progress bar animation */
+        @keyframes progress {
+            0% { width: 0%; }
+            20% { width: 20%; }
+            50% { width: 50%; }
+            80% { width: 80%; }
+            100% { width: 95%; }
+        }
+        .progress-bar-animate {
+            animation: progress 30s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Document Forge</h1>
+                        <p class="text-sm text-gray-500">AI-Powered Document Creation</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Toggle History Button (mobile) -->
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </button>
+                    <a href="https://github.com/spring-projects/spring-ai" target="_blank"
+                       class="text-gray-500 hover:text-gray-700 transition-colors hidden sm:block">
+                        <span class="text-sm">Powered by Spring AI</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex gap-6">
+
+            <!-- History Sidebar -->
+            <aside id="history-sidebar" class="hidden lg:block w-72 flex-shrink-0">
+                <div class="bg-white rounded-xl shadow-lg p-4 sticky top-24">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-900 flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>History</span>
+                        </h3>
+                        <button hx-delete="/history"
+                                hx-target="#history-list"
+                                hx-swap="innerHTML"
+                                hx-confirm="Clear all history?"
+                                class="text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                th:if="${!history.isEmpty()}">
+                            Clear
+                        </button>
+                    </div>
+
+                    <!-- History List -->
+                    <div id="history-list"
+                         hx-get="/history"
+                         hx-trigger="load, historyUpdated from:body"
+                         hx-swap="innerHTML"
+                         class="space-y-2 max-h-[60vh] overflow-y-auto">
+                        <!-- History items loaded via HTMX -->
+                        <div th:if="${history.isEmpty()}" class="text-center py-8 text-gray-400">
+                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            <p class="text-sm">No history yet</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 min-w-0">
+
+                <!-- Tagline -->
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Describe it. Download it.</h2>
+                    <p class="text-gray-600">Create real Excel, PowerPoint, Word, and PDF documents using AI</p>
+                </div>
+
+                <!-- Generation Form -->
+                <form id="generate-form"
+                      hx-post="/generate"
+                      hx-target="#response-area"
+                      hx-swap="innerHTML"
+                      hx-encoding="multipart/form-data"
+                      hx-on::before-request="showProgress()"
+                      hx-on::after-request="hideProgress(); htmx.trigger(document.body, 'historyUpdated');"
+                      class="bg-white rounded-xl shadow-lg p-6 mb-8">
+
+                    <!-- Document Type Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            What type of document do you want to create?
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <th:block th:each="type : ${documentTypes}">
+                                <label class="doc-type-btn cursor-pointer">
+                                    <input type="radio" name="documentType" th:value="${type}"
+                                           class="peer hidden" required>
+                                    <div th:class="'p-4 rounded-lg border-2 border-gray-200 text-center transition-all peer-checked:border-2 hover:border-gray-300 ' +
+                                                  'peer-checked:border-' + ${type.name().toLowerCase()}">
+                                        <div th:class="'w-12 h-12 mx-auto mb-2 rounded-lg flex items-center justify-center ' +
+                                                      'bg-' + ${type.name().toLowerCase()} + '/10'">
+                                            <!-- Excel Icon -->
+                                            <svg th:if="${type.name() == 'XLSX'}" class="w-6 h-6 text-xlsx" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <!-- PowerPoint Icon -->
+                                            <svg th:if="${type.name() == 'PPTX'}" class="w-6 h-6 text-pptx" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                            <!-- Word Icon -->
+                                            <svg th:if="${type.name() == 'DOCX'}" class="w-6 h-6 text-docx" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <!-- PDF Icon -->
+                                            <svg th:if="${type.name() == 'PDF'}" class="w-6 h-6 text-pdf" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-700" th:text="${type.displayName}">Excel</span>
+                                    </div>
+                                </label>
+                            </th:block>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Input -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="prompt" class="block text-sm font-medium text-gray-700">
+                                Describe the document you want to create
+                            </label>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" onclick="copyPrompt()" title="Copy prompt"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="clearForm()" title="Clear form"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="prompt"
+                                  name="prompt"
+                                  rows="4"
+                                  required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-shadow"
+                                  placeholder="Example: Create a sales report for Q4 2024 with monthly revenue, expenses, and profit columns. Include sample data for October, November, and December."></textarea>
+                        <p class="mt-2 text-xs text-gray-500">Tip: Be specific about structure, content, and formatting for better results.</p>
+                    </div>
+
+                    <!-- File Upload (Optional) -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Source Document <span class="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <div id="file-drop-zone"
+                             class="relative border-2 border-dashed border-gray-300 rounded-lg p-6 transition-colors hover:border-gray-400"
+                             ondrop="handleFileDrop(event)"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <input type="file"
+                                   id="sourceFile"
+                                   name="sourceFile"
+                                   accept=".pdf,.txt,.csv,.json,.xml,.md"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                   onchange="handleFileSelect(this)">
+                            <div id="file-upload-prompt" class="text-center">
+                                <svg class="w-10 h-10 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <p class="text-sm text-gray-600 mb-1">
+                                    <span class="text-primary font-medium">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-gray-400">PDF, TXT, CSV, JSON, XML, MD (max 10MB)</p>
+                            </div>
+                            <div id="file-selected" class="hidden">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p id="file-name" class="text-sm font-medium text-gray-900">filename.pdf</p>
+                                            <p id="file-size" class="text-xs text-gray-500">1.2 MB</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="removeFile()" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">Upload a document for Claude to analyze and transform into your desired format.</p>
+                    </div>
+
+                    <!-- Custom Skill Option (only shown if configured) -->
+                    <div th:if="${hasCustomSkill}" class="mb-6">
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox"
+                                   name="useWatermark"
+                                   value="true"
+                                   class="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer">
+                            <div>
+                                <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                                    Apply custom branding
+                                </span>
+                                <p class="text-xs text-gray-500">
+                                    Uses a custom skill to add branding to generated documents
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Estimated Time Hint -->
+                    <div id="time-estimate" class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg hidden">
+                        <div class="flex items-center space-x-2 text-amber-800">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span id="time-estimate-text" class="text-sm font-medium">Estimated time: ~30 seconds</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit"
+                            class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <span class="submit-text flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span>Generate Document</span>
+                        </span>
+                        <span class="loading-indicator items-center space-x-2">
+                            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Generating...</span>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Response Area -->
+                <div id="response-area">
+                    <!-- Initial empty state -->
+                    <div id="empty-state" class="text-center py-12 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p>Your generated documents will appear here</p>
+                    </div>
+
+                    <!-- Progress Indicator (shown during generation) -->
+                    <div id="progress-indicator" class="hidden">
+                        <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-900" id="progress-title">Generating your document...</h3>
+                                    <p class="text-sm text-gray-500" id="progress-subtitle">This may take a moment</p>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                                <div id="progress-bar" class="bg-primary h-2 rounded-full progress-bar-animate"></div>
+                            </div>
+
+                            <!-- Typing Indicator -->
+                            <div class="flex items-center space-x-2 text-gray-500">
+                                <span class="text-sm">Claude is working</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 text-center text-gray-500 text-sm">
+        <p>Built with <a href="https://spring.io/projects/spring-ai" class="text-primary hover:underline">Spring AI</a>
+           and <a href="https://www.anthropic.com/claude" class="text-primary hover:underline">Claude Skills</a></p>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // Progress indicator functions
+        function showProgress() {
+            const emptyState = document.getElementById('empty-state');
+            const progressIndicator = document.getElementById('progress-indicator');
+            const progressBar = document.getElementById('progress-bar');
+
+            if (emptyState) emptyState.classList.add('hidden');
+
+            // If progress indicator doesn't exist (replaced by response), recreate it
+            if (!progressIndicator) {
+                document.getElementById('response-area').innerHTML = `
+                    <div id="progress-indicator">
+                        <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">Generating your document...</h3>
+                                    <p class="text-sm text-gray-500">This may take a moment</p>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                                <div id="progress-bar" class="bg-primary h-2 rounded-full progress-bar-animate"></div>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-500">
+                                <span class="text-sm">Claude is working</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                    <div class="w-2 h-2 bg-primary rounded-full typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                progressIndicator.classList.remove('hidden');
+                // Reset progress bar animation
+                if (progressBar) {
+                    progressBar.style.animation = 'none';
+                    progressBar.offsetHeight; // Trigger reflow
+                    progressBar.style.animation = null;
+                }
+            }
+        }
+
+        function hideProgress() {
+            const progressIndicator = document.getElementById('progress-indicator');
+            if (progressIndicator) progressIndicator.classList.add('hidden');
+        }
+
+        // Copy prompt to clipboard
+        function copyPrompt() {
+            const prompt = document.getElementById('prompt').value;
+            if (prompt) {
+                navigator.clipboard.writeText(prompt).then(() => {
+                    showToast('Prompt copied to clipboard', 'success');
+                });
+            } else {
+                showToast('No prompt to copy', 'warning');
+            }
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('generate-form').reset();
+            document.getElementById('response-area').innerHTML = `
+                <div id="empty-state" class="text-center py-12 text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <p>Your generated documents will appear here</p>
+                </div>
+            `;
+            showToast('Form cleared', 'success');
+        }
+
+        // Load prompt from history (reads from data attributes)
+        function loadPromptFromHistory(element) {
+            const prompt = element.dataset.prompt;
+            const documentType = element.dataset.documentType;
+
+            if (prompt) {
+                document.getElementById('prompt').value = prompt;
+            }
+            // Select the document type radio
+            if (documentType) {
+                const radio = document.querySelector(`input[name="documentType"][value="${documentType}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            }
+            showToast('Prompt loaded from history', 'success');
+            // Scroll to form
+            document.getElementById('generate-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toggle sidebar (mobile)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('history-sidebar');
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('fixed');
+            sidebar.classList.toggle('inset-0');
+            sidebar.classList.toggle('z-40');
+            sidebar.classList.toggle('bg-gray-900/50');
+            sidebar.classList.toggle('p-4');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const bgColor = {
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'warning': 'bg-yellow-500',
+                'info': 'bg-blue-500'
+            }[type] || 'bg-gray-700';
+
+            toast.className = `${bgColor} text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in flex items-center space-x-2`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-2 hover:opacity-75">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Keyboard shortcut: Cmd/Ctrl + Enter to submit
+        document.addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                const form = document.getElementById('generate-form');
+                if (form.checkValidity()) {
+                    htmx.trigger(form, 'submit');
+                }
+            }
+        });
+
+        // Copy text to clipboard (used by response fragment)
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard', 'success');
+            }).catch(() => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+
+        // Copy prompt from result (reads from data attribute)
+        function copyPromptFromResult(button) {
+            const prompt = button.dataset.prompt;
+            if (prompt) {
+                copyToClipboard(prompt);
+            }
+        }
+
+        // File upload handling
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    showToast('File too large. Maximum size is 10MB.', 'error');
+                    input.value = '';
+                    return;
+                }
+                showFileSelected(file);
+            }
+        }
+
+        function handleFileDrop(event) {
+            event.preventDefault();
+            const dropZone = document.getElementById('file-drop-zone');
+            dropZone.classList.remove('border-primary', 'bg-primary/5');
+
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                const allowedTypes = ['.pdf', '.txt', '.csv', '.json', '.xml', '.md'];
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                if (!allowedTypes.includes(ext)) {
+                    showToast('Invalid file type. Please upload PDF, TXT, CSV, JSON, XML, or MD.', 'error');
+                    return;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast('File too large. Maximum size is 10MB.', 'error');
+                    return;
+                }
+                // Set the file to the input
+                const input = document.getElementById('sourceFile');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                showFileSelected(file);
+            }
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            const dropZone = document.getElementById('file-drop-zone');
+            dropZone.classList.add('border-primary', 'bg-primary/5');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            const dropZone = document.getElementById('file-drop-zone');
+            dropZone.classList.remove('border-primary', 'bg-primary/5');
+        }
+
+        function showFileSelected(file) {
+            document.getElementById('file-upload-prompt').classList.add('hidden');
+            document.getElementById('file-selected').classList.remove('hidden');
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-size').textContent = formatFileSize(file.size);
+            showToast('File attached: ' + file.name, 'success');
+        }
+
+        function removeFile() {
+            const input = document.getElementById('sourceFile');
+            input.value = '';
+            document.getElementById('file-upload-prompt').classList.remove('hidden');
+            document.getElementById('file-selected').classList.add('hidden');
+            showToast('File removed', 'info');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // ========================================
+        // Async Job Polling for Background Tasks
+        // ========================================
+
+        let pollingInterval = null;
+        let previousPendingIds = new Set();
+
+        // Start polling when there are pending jobs
+        function startPolling() {
+            if (pollingInterval) return; // Already polling
+
+            pollingInterval = setInterval(() => {
+                // Trigger HTMX to refresh history
+                htmx.trigger(document.body, 'historyUpdated');
+            }, 10000); // Poll every 10 seconds
+
+            console.log('Started polling for async job completion');
+        }
+
+        // Stop polling when no pending jobs
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                console.log('Stopped polling - no pending jobs');
+            }
+        }
+
+        // Check for pending jobs and manage polling
+        function checkPendingJobs() {
+            const historyList = document.getElementById('history-list');
+            if (!historyList) return;
+
+            // Find all pending items by looking for the "Generating..." badge
+            const pendingBadges = historyList.querySelectorAll('.bg-blue-100.text-blue-800');
+            const currentPendingIds = new Set();
+
+            pendingBadges.forEach(badge => {
+                // Find the parent history-item and get its ID
+                const historyItem = badge.closest('.history-item');
+                if (historyItem) {
+                    const itemId = historyItem.dataset.id;
+                    if (itemId) currentPendingIds.add(itemId);
+                }
+            });
+
+            // Check if any previously pending jobs have completed
+            previousPendingIds.forEach(id => {
+                if (!currentPendingIds.has(id)) {
+                    // This job is no longer pending - check if it succeeded or failed
+                    const completedItem = historyList.querySelector(`[data-id="${id}"]`);
+                    if (completedItem) {
+                        const successBadge = completedItem.querySelector('.bg-green-100');
+                        const failBadge = completedItem.querySelector('.bg-red-100');
+
+                        if (successBadge) {
+                            showToast('Your document is ready! Check the history.', 'success');
+                        } else if (failBadge) {
+                            showToast('Document generation failed. Check history for details.', 'error');
+                        }
+                    }
+                }
+            });
+
+            // Update tracking
+            previousPendingIds = currentPendingIds;
+
+            // Start or stop polling based on pending jobs
+            if (currentPendingIds.size > 0) {
+                startPolling();
+            } else {
+                stopPolling();
+            }
+        }
+
+        // Hook into HTMX after history loads to check for pending jobs
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'history-list') {
+                checkPendingJobs();
+            }
+        });
+    </script>
+
+</body>
+</html>

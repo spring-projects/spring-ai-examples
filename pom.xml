@@ -23,6 +23,7 @@
 
 		<module>misc/spring-ai-java-function-callback</module>
 		<module>misc/openai-streaming-response</module>
+		<module>misc/claude-skills-demo/document-forge</module>
 
 		<module>models/chat/helloworld</module>
 
