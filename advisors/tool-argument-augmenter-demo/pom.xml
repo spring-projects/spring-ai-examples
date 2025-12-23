@@ -6,14 +6,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version>
-		<!-- <version>3.5.8</version> -->
+		<version>4.0.0</version> <!-- compatible with Spring AI 2.x -->
+		<!-- <version>3.5.8</version> --> <!-- compatible with  Spring AI 1.1.x -->
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>recursive-advisor-with-memory</artifactId>
+	<artifactId>tool-argument-augmenter-demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>recursive-advisor-with-memory</name>
+	<name>tool-argument-augmenter-demo</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -39,18 +39,8 @@
 			<artifactId>netty-resolver-dns-native-macos</artifactId>
 			<classifier>osx-aarch_64</classifier>
 		</dependency>
-
-		<!-- <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency> -->
 	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

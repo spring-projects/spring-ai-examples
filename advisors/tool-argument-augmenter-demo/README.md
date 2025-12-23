@@ -4,7 +4,7 @@ This example demonstrates how to build **explainable AI agents** using Spring AI
 
 ## Overview
 
-When building AI agents with tool calling capabilities, understanding **why** an LLM chose a particular tool is crucial for debugging, observability, and building trustworthy AI systems. This demo showcases the [Tool Argument Augmenter](TODO) library which enables:
+When building AI agents with tool calling capabilities, understanding **why** an LLM chose a particular tool is crucial for debugging, observability, and building trustworthy AI systems. This demo showcases the Spring AI [Tool Argument Augmenter](https://docs.spring.io/spring-ai/reference/2.0-SNAPSHOT/api/tools.html#tool-argument-augmentation) utilities which enables:
 
 - **Capturing LLM Reasoning**: Extract inner thoughts, confidence levels, and memory notes during tool execution
 - **Transparent Schema Augmentation**: Dynamically extend tool schemas without modifying underlying tool implementations
@@ -151,3 +151,4 @@ RESPONSE: [{"output":{"text":"The current weather in Paris is sunny with a tempe
 - [Explainable AI Agents Blog Post](https://spring.io/blog/2025/12/21/explainable-ai-agents-capture-llm-tool-call-reasoning-with-spring-ai)
 - [Spring AI Tool Calling Documentation](https://docs.spring.io/spring-ai/reference/api/tools.html)
 - [Spring AI Advisors Guide](https://docs.spring.io/spring-ai/reference/api/advisors.html)
+- [Tool Argument Augmenter](https://docs.spring.io/spring-ai/reference/2.0-SNAPSHOT/api/tools.html#tool-argument-augmentation)
