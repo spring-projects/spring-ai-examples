@@ -21,7 +21,7 @@ curl -XPOST "http://localhost:8080/oauth2/token" \
 # Or use JQ:
 curl -XPOST "http://localhost:8080/oauth2/token" \
   --data grant_type=client_credentials \
-  --user "oidc-client:secret" | jq -r ".access_token"
+  --user "mcp-client:secret" | jq -r ".access_token"
 ```
 
 Store that token, and then boot up the MCP inspector:
