@@ -11,7 +11,7 @@
 #     Examples: "kotlin-hello-world", "chain-workflow", "weather"
 #
 #   - test_group: Run only tests in a specific group
-#     Options: all, mcp-servers, openai-1, openai-2, openai-3, anthropic-multi, docker-tests
+#     Options: all, mcp-servers, agentic, openai-2, openai-3, anthropic-multi, docker-tests
 #
 # TEST GROUPS:
 #   ┌─────────────────────┬────────────────────────────────────────────────────┐
@@ -21,8 +21,8 @@
 #   │                     │ weather/starter-webflux-server                     │
 #   │                     │ weather/starter-stdio-server                       │
 #   ├─────────────────────┼────────────────────────────────────────────────────┤
-#   │ openai-1            │ agentic-patterns/chain-workflow                    │
-#   │ (Agentic Patterns)  │ agentic-patterns/evaluator-optimizer               │
+#   │ agentic             │ agentic-patterns/chain-workflow                    │
+#   │ (OpenAI+Anthropic)  │ agentic-patterns/evaluator-optimizer               │
 #   │                     │ agentic-patterns/orchestrator-workers              │
 #   │                     │ agentic-patterns/parallelization-workflow          │
 #   │                     │ agentic-patterns/routing-workflow                  │
@@ -86,7 +86,7 @@ on:
         options:
           - all
           - mcp-servers
-          - openai-1
+          - agentic
           - openai-2
           - openai-3
           - anthropic-multi
@@ -116,9 +116,9 @@ jobs:
             needs_anthropic: false
             needs_brave: false
 
-          # Group 2: OpenAI - Agentic Patterns
-          - group: openai-1
-            group_name: "OpenAI - Agentic Patterns"
+          # Group 2: Agentic Patterns (OpenAI + Anthropic)
+          - group: agentic
+            group_name: "Agentic Patterns"
             tests: |
               agentic-patterns/chain-workflow
               agentic-patterns/evaluator-optimizer
@@ -127,7 +127,7 @@ jobs:
               agentic-patterns/routing-workflow
               agents/reflection
             needs_openai: true
-            needs_anthropic: false
+            needs_anthropic: true
             needs_brave: false
 
           # Group 3: OpenAI - Kotlin & Misc
