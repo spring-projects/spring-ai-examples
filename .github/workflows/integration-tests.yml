@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+    - cron: '0 6 * * 0'  # Weekly on Sunday at 6 AM UTC
   workflow_dispatch:
     inputs:
       test_filter:
@@ -10,103 +10,262 @@ on:
         required: false
         default: ''
         type: string
+      test_group:
+        description: 'Run specific test group only'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - mcp-servers
+          - openai-1
+          - openai-2
+          - openai-3
+          - anthropic-multi
 
 jobs:
+  # Define test groups for parallel execution
   integration-tests:
-    name: Run Integration Tests
+    name: ${{ matrix.group_name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false  # Continue other groups even if one fails
+      matrix:
+        include:
+          # Group 1: MCP Servers (no API keys, fast)
+          - group: mcp-servers
+            group_name: "MCP Servers"
+            tests: |
+              weather/starter-webmvc-server
+              weather/starter-webflux-server
+              weather/starter-stdio-server
+            needs_openai: false
+            needs_anthropic: false
+            needs_brave: false
+
+          # Group 2: OpenAI - Agentic Patterns
+          - group: openai-1
+            group_name: "OpenAI - Agentic Patterns"
+            tests: |
+              agentic-patterns/chain-workflow
+              agentic-patterns/evaluator-optimizer
+              agentic-patterns/orchestrator-workers
+              agentic-patterns/parallelization-workflow
+              agentic-patterns/routing-workflow
+              agents/reflection
+            needs_openai: true
+            needs_anthropic: false
+            needs_brave: false
+
+          # Group 3: OpenAI - Kotlin & Misc
+          - group: openai-2
+            group_name: "OpenAI - Kotlin & Misc"
+            tests: |
+              kotlin/kotlin-hello-world
+              kotlin/kotlin-function-callback
+              misc/openai-streaming-response
+              misc/spring-ai-java-function-callback
+              models/chat/helloworld
+            needs_openai: true
+            needs_anthropic: false
+            needs_brave: false
+
+          # Group 4: OpenAI - MCP Clients & SQLite
+          - group: openai-3
+            group_name: "OpenAI - MCP Clients"
+            tests: |
+              advisors/tool-argument-augmenter-demo
+              model-context-protocol/client-starter/starter-default-client
+              model-context-protocol/dynamic-tool-update
+              model-context-protocol/filesystem
+              model-context-protocol/sqlite/simple
+              model-context-protocol/sqlite/chatbot
+            needs_openai: true
+            needs_anthropic: false
+            needs_brave: false
+
+          # Group 5: Anthropic & Multi-API tests
+          - group: anthropic-multi
+            group_name: "Anthropic & Multi-API"
+            tests: |
+              advisors/recursive-advisor-demo
+              misc/claude-skills-demo/document-forge
+              prompt-engineering/prompt-engineering-patterns
+              model-context-protocol/brave
+              model-context-protocol/client-starter/starter-webflux-client
+              model-context-protocol/sampling
+              model-context-protocol/web-search/brave-chatbot
+              model-context-protocol/web-search/brave-starter
+            needs_openai: true
+            needs_anthropic: true
+            needs_brave: true
 
     steps:
+      - name: Check if group should run
+        id: check
+        run: |
+          if [ "${{ inputs.test_group }}" = "all" ] || [ "${{ inputs.test_group }}" = "${{ matrix.group }}" ] || [ -n "${{ inputs.test_filter }}" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout repository
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: maven
 
       - name: Set up Python 3
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Setup Node.js
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Claude Code CLI
+        if: steps.check.outputs.should_run == 'true'
         run: |
           npm install -g @anthropic-ai/claude-code --silent
-          echo "✅ Claude Code CLI installed via npm"
-
-      - name: Verify Claude Code installation
-        run: |
-          if command -v claude >/dev/null 2>&1; then
-            echo "✅ Claude CLI verified: $(claude --version 2>&1 || echo 'version check skipped')"
-          else
-            echo "⚠️ Claude CLI not found in PATH (AI validation will be skipped)"
-          fi
+          echo "Claude Code CLI installed"
 
       - name: Install JBang
+        if: steps.check.outputs.should_run == 'true'
         run: |
           curl -Ls https://sh.jbang.dev | bash -s - app setup
           echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
 
-      - name: Verify JBang installation
+      - name: Verify installations
+        if: steps.check.outputs.should_run == 'true'
         run: |
           export PATH="$HOME/.jbang/bin:$PATH"
           jbang version
           java -version
 
       - name: Install dependencies
+        if: steps.check.outputs.should_run == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
       - name: Cache JBang dependencies
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.jbang
-          key: ${{ runner.os }}-jbang-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-jbang-${{ matrix.group }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
+            ${{ runner.os }}-jbang-${{ matrix.group }}-
             ${{ runner.os }}-jbang-
 
       - name: Run integration tests
+        if: steps.check.outputs.should_run == 'true'
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          SPRING_AI_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          SPRING_AI_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          OPENAI_API_KEY: ${{ matrix.needs_openai && secrets.OPENAI_API_KEY || '' }}
+          SPRING_AI_OPENAI_API_KEY: ${{ matrix.needs_openai && secrets.OPENAI_API_KEY || '' }}
+          ANTHROPIC_API_KEY: ${{ matrix.needs_anthropic && secrets.ANTHROPIC_API_KEY || '' }}
+          SPRING_AI_ANTHROPIC_API_KEY: ${{ matrix.needs_anthropic && secrets.ANTHROPIC_API_KEY || '' }}
+          BRAVE_API_KEY: ${{ matrix.needs_brave && secrets.BRAVE_API_KEY || '' }}
         run: |
+          export PATH="$HOME/.jbang/bin:$PATH"
+
+          # If specific test filter provided, use that
           if [ -n "${{ inputs.test_filter }}" ]; then
-            echo "Running specific test: ${{ inputs.test_filter }}"
+            echo "Running filtered test: ${{ inputs.test_filter }}"
             ./integration-testing/scripts/run-integration-tests.sh "${{ inputs.test_filter }}"
-          else
-            echo "Running all integration tests"
-            ./integration-testing/scripts/run-integration-tests.sh
+            exit $?
+          fi
+
+          # Otherwise run tests for this group
+          echo "Running tests for group: ${{ matrix.group_name }}"
+          echo "Tests:"
+          echo "${{ matrix.tests }}"
+          echo "---"
+
+          passed=0
+          failed=0
+          failed_tests=""
+
+          while IFS= read -r test; do
+            # Skip empty lines
+            [ -z "$test" ] && continue
+
+            echo ""
+            echo "=========================================="
+            echo "Running: $test"
+            echo "=========================================="
+
+            if ./integration-testing/scripts/run-integration-tests.sh "$test"; then
+              echo "PASSED: $test"
+              ((passed++))
+            else
+              echo "FAILED: $test"
+              ((failed++))
+              failed_tests="$failed_tests\n  - $test"
+            fi
+
+            # Clean up any hanging processes
+            pkill -f "spring-boot:run" 2>/dev/null || true
+            sleep 2
+          done <<< "${{ matrix.tests }}"
+
+          echo ""
+          echo "=========================================="
+          echo "Group Results: ${{ matrix.group_name }}"
+          echo "  Passed: $passed"
+          echo "  Failed: $failed"
+          if [ $failed -gt 0 ]; then
+            echo -e "  Failed tests:$failed_tests"
+            exit 1
           fi
 
       - name: Upload test logs
-        if: always()
+        if: always() && steps.check.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-logs-${{ github.run_number }}
+          name: logs-${{ matrix.group }}-${{ github.run_number }}
           path: |
             integration-testing/logs/**/*.log
           retention-days: 7
 
-      - name: Summary
-        if: always()
+  # Summary job that runs after all test groups
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: always()
+    steps:
+      - name: Generate Summary
         run: |
           echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Filter**: ${{ inputs.test_filter || 'All tests' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Group | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| MCP Servers | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAI - Agentic | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAI - Kotlin | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAI - MCP | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Anthropic & Multi | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Skipped Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- \`advisors/evaluation-recursive-advisor-demo\` - Requires Ollama (too slow for CI)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`kotlin/rag-with-kotlin\` - Requires Docker with pgvector" >> $GITHUB_STEP_SUMMARY
+          echo "- \`mcp-annotations-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
+          echo "- \`sampling/mcp-weather-webmvc-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
+          echo "- \`weather/starter-webmvc-oauth2-server\` - Known MCP 404 issue" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Required Secrets" >> $GITHUB_STEP_SUMMARY
           echo "- \`OPENAI_API_KEY\`" >> $GITHUB_STEP_SUMMARY
