@@ -1,3 +1,71 @@
+# ============================================================================
+# Spring AI Examples - Integration Tests
+# ============================================================================
+#
+# This workflow runs integration tests for Spring AI examples in parallel groups.
+#
+# SCHEDULE: Weekly on Sundays at 6 AM UTC
+#
+# MANUAL TRIGGER OPTIONS:
+#   - test_filter: Run a specific test by name pattern
+#     Examples: "kotlin-hello-world", "chain-workflow", "weather"
+#
+#   - test_group: Run only tests in a specific group
+#     Options: all, mcp-servers, openai-1, openai-2, openai-3, anthropic-multi, docker-tests
+#
+# TEST GROUPS:
+#   ┌─────────────────────┬────────────────────────────────────────────────────┐
+#   │ Group               │ Tests                                              │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ mcp-servers         │ weather/starter-webmvc-server                      │
+#   │                     │ weather/starter-webflux-server                     │
+#   │                     │ weather/starter-stdio-server                       │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ openai-1            │ agentic-patterns/chain-workflow                    │
+#   │ (Agentic Patterns)  │ agentic-patterns/evaluator-optimizer               │
+#   │                     │ agentic-patterns/orchestrator-workers              │
+#   │                     │ agentic-patterns/parallelization-workflow          │
+#   │                     │ agentic-patterns/routing-workflow                  │
+#   │                     │ agents/reflection                                  │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ openai-2            │ kotlin/kotlin-hello-world                          │
+#   │ (Kotlin & Misc)     │ kotlin/kotlin-function-callback                    │
+#   │                     │ misc/openai-streaming-response                     │
+#   │                     │ misc/spring-ai-java-function-callback              │
+#   │                     │ models/chat/helloworld                             │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ openai-3            │ advisors/tool-argument-augmenter-demo              │
+#   │ (MCP Clients)       │ model-context-protocol/client-starter/starter-default-client │
+#   │                     │ model-context-protocol/dynamic-tool-update         │
+#   │                     │ model-context-protocol/filesystem                  │
+#   │                     │ model-context-protocol/sqlite/simple               │
+#   │                     │ model-context-protocol/sqlite/chatbot              │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ anthropic-multi     │ advisors/recursive-advisor-demo                    │
+#   │ (Multi-API)         │ misc/claude-skills-demo/document-forge             │
+#   │                     │ prompt-engineering/prompt-engineering-patterns     │
+#   │                     │ model-context-protocol/brave                       │
+#   │                     │ model-context-protocol/client-starter/starter-webflux-client │
+#   │                     │ model-context-protocol/sampling                    │
+#   │                     │ model-context-protocol/web-search/brave-chatbot    │
+#   │                     │ model-context-protocol/web-search/brave-starter    │
+#   ├─────────────────────┼────────────────────────────────────────────────────┤
+#   │ docker-tests        │ kotlin/rag-with-kotlin (requires pgvector)         │
+#   │                     │ advisors/evaluation-recursive-advisor-demo (Ollama)│
+#   └─────────────────────┴────────────────────────────────────────────────────┘
+#
+# SKIPPED TESTS (not in any group):
+#   - mcp-annotations-server: Orphaned directory
+#   - sampling/mcp-weather-webmvc-server: Orphaned directory
+#   - weather/starter-webmvc-oauth2-server: Known MCP 404 issue
+#
+# REQUIRED SECRETS:
+#   - OPENAI_API_KEY
+#   - ANTHROPIC_API_KEY
+#   - BRAVE_API_KEY
+#
+# ============================================================================
+
 name: Integration Tests
 
 on:
@@ -6,7 +74,7 @@ on:
   workflow_dispatch:
     inputs:
       test_filter:
-        description: 'Run specific test (e.g., kotlin-hello-world, agentic-patterns/chain-workflow)'
+        description: 'Run specific test (e.g., kotlin-hello-world, chain-workflow)'
         required: false
         default: ''
         type: string
@@ -22,16 +90,19 @@ on:
           - openai-2
           - openai-3
           - anthropic-multi
+          - docker-tests
 
 jobs:
-  # Define test groups for parallel execution
+  # ============================================================================
+  # Standard Integration Tests (no Docker services required)
+  # ============================================================================
   integration-tests:
     name: ${{ matrix.group_name }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
     strategy:
-      fail-fast: false  # Continue other groups even if one fails
+      fail-fast: false
       matrix:
         include:
           # Group 1: MCP Servers (no API keys, fast)
@@ -241,11 +312,122 @@ jobs:
             integration-testing/logs/**/*.log
           retention-days: 7
 
-  # Summary job that runs after all test groups
+  # ============================================================================
+  # Docker-based Tests (pgvector, Ollama)
+  # ============================================================================
+  docker-tests:
+    name: "Docker Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: ${{ inputs.test_group == 'all' || inputs.test_group == 'docker-tests' || inputs.test_group == '' }}
+
+    services:
+      pgvector:
+        image: pgvector/pgvector:pg16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      ollama:
+        image: ghcr.io/${{ github.repository }}/ollama-flow-judge:latest
+        ports:
+          - 11434:11434
+        options: >-
+          --health-cmd="curl -f http://localhost:11434/api/tags || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: |
+          npm install -g @anthropic-ai/claude-code --silent
+          echo "Claude Code CLI installed"
+
+      - name: Install JBang
+        run: |
+          curl -Ls https://sh.jbang.dev | bash -s - app setup
+          echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
+
+      - name: Verify services
+        run: |
+          echo "Checking pgvector..."
+          pg_isready -h localhost -p 5432 -U postgres
+          echo "pgvector is ready"
+
+          echo "Checking Ollama..."
+          curl -s http://localhost:11434/api/tags | head -c 200
+          echo ""
+          echo "Ollama is ready"
+
+      - name: Run rag-with-kotlin test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SPRING_AI_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # pgvector connection - override Docker Compose
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_DOCKER_COMPOSE_ENABLED: false
+        run: |
+          export PATH="$HOME/.jbang/bin:$PATH"
+          echo "Running: kotlin/rag-with-kotlin"
+          ./integration-testing/scripts/run-integration-tests.sh "rag-with-kotlin"
+
+      - name: Run evaluation-recursive-advisor-demo test
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SPRING_AI_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SPRING_AI_OLLAMA_BASE_URL: http://localhost:11434
+        run: |
+          export PATH="$HOME/.jbang/bin:$PATH"
+          echo "Running: advisors/evaluation-recursive-advisor-demo"
+          ./integration-testing/scripts/run-integration-tests.sh "evaluation-recursive"
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-docker-tests-${{ github.run_number }}
+          path: |
+            integration-testing/logs/**/*.log
+          retention-days: 7
+
+  # ============================================================================
+  # Summary
+  # ============================================================================
   summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: integration-tests
+    needs: [integration-tests, docker-tests]
     if: always()
     steps:
       - name: Generate Summary
@@ -259,10 +441,9 @@ jobs:
           echo "| OpenAI - Kotlin | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| OpenAI - MCP | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Anthropic & Multi | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Tests | ${{ needs.docker-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Skipped Tests" >> $GITHUB_STEP_SUMMARY
-          echo "- \`advisors/evaluation-recursive-advisor-demo\` - Requires Ollama (too slow for CI)" >> $GITHUB_STEP_SUMMARY
-          echo "- \`kotlin/rag-with-kotlin\` - Requires Docker with pgvector" >> $GITHUB_STEP_SUMMARY
           echo "- \`mcp-annotations-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
           echo "- \`sampling/mcp-weather-webmvc-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
           echo "- \`weather/starter-webmvc-oauth2-server\` - Known MCP 404 issue" >> $GITHUB_STEP_SUMMARY
