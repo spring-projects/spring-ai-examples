@@ -177,7 +177,14 @@ jobs:
       - name: Check if group should run
         id: check
         run: |
-          if [ "${{ inputs.test_group }}" = "all" ] || [ "${{ inputs.test_group }}" = "${{ matrix.group }}" ] || [ -n "${{ inputs.test_filter }}" ]; then
+          # If test_filter is specified, only run if this group contains the filtered test
+          if [ -n "${{ inputs.test_filter }}" ]; then
+            if echo "${{ matrix.tests }}" | grep -q "${{ inputs.test_filter }}"; then
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            else
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            fi
+          elif [ "${{ inputs.test_group }}" = "all" ] || [ "${{ inputs.test_group }}" = "${{ matrix.group }}" ]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
           else
             echo "should_run=false" >> $GITHUB_OUTPUT
@@ -319,7 +326,7 @@ jobs:
     name: "Docker Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    if: ${{ inputs.test_group == 'all' || inputs.test_group == 'docker-tests' || inputs.test_group == '' }}
+    if: ${{ (inputs.test_filter != '' && (contains(inputs.test_filter, 'rag-with-kotlin') || contains(inputs.test_filter, 'evaluation-recursive'))) || (inputs.test_filter == '' && (inputs.test_group == 'all' || inputs.test_group == 'docker-tests' || inputs.test_group == '')) }}
 
     services:
       pgvector:
