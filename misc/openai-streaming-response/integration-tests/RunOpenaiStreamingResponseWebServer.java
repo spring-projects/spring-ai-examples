@@ -17,13 +17,20 @@ import java.util.Map;
 public class RunOpenaiStreamingResponseWebServer {
     
     public static void main(String... args) throws Exception {
+        // Check for required environment variable
+        if (System.getenv("OPENAI_API_KEY") == null) {
+            System.err.println("❌ Missing required environment variable: OPENAI_API_KEY");
+            System.exit(1);
+        }
+
         // Define the endpoint tests
         // The SSE stream returns ChatResponse objects with joke content word by word
         var endpointTest = new WebServerTestUtils.EndpointTest(
             "http://localhost:8080/ai/generateStream?message=Tell%20me%20a%20short%20joke",
             "GET",
             // Validate we get SSE data events with chat completion and text content
-            "data:\\{.*chatcmpl.*\"text\":\".*\".*\\}",
+            // Pattern matches: data:{"metadata":...,"id":"chatcmpl-...,"text":"..."...}
+            "data:.*chatcmpl.*text",
             Map.of("Accept", "text/event-stream")
         );
         

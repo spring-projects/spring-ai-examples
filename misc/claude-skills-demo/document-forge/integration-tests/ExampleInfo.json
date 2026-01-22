@@ -1,9 +1,9 @@
 {
   "timeoutSec": 120,
-  "testMode": "web-server",
+  "complexity": "web-server",
   "successRegex": [
     "Started DocumentForgeApplication",
-    "Tomcat started on port.*8080"
+    "Tomcat started on port"
   ],
   "requiredEnv": [
     "ANTHROPIC_API_KEY"

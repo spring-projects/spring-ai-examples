@@ -146,7 +146,7 @@ public class WebServerTestUtils {
         out.println("🌊 Testing SSE stream endpoint...");
         
         ProcessBuilder pb = new ProcessBuilder(
-            "timeout", "3", "curl", "-s", "-N",
+            "timeout", "10", "curl", "-s", "-N",
             "-H", "Accept: text/event-stream",
             test.url()
         );

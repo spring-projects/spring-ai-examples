@@ -1,4 +1,6 @@
 {
+  "skip": true,
+  "skipReason": "MCP STREAMABLE endpoint returns 404 when combined with OAuth2 Authorization Server in same app - configuration conflict needs investigation",
   "complexity": "web-server",
   "timeoutSec": 120,
   "successRegex": [

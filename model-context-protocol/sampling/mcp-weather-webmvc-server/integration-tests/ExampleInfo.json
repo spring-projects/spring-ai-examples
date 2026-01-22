@@ -1,4 +1,6 @@
 {
+  "skip": true,
+  "skipReason": "Orphaned test directory - no matching buildable project exists",
   "complexity": "web-server",
   "timeoutSec": 120,
   "successRegex": [

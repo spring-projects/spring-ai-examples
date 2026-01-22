@@ -1,4 +1,6 @@
 {
+  "skip": true,
+  "skipReason": "Orphaned test directory - real project is at mcp-annotations/mcp-annotations-server/",
   "complexity": "web-server",
   "timeoutSec": 120,
   "successRegex": [

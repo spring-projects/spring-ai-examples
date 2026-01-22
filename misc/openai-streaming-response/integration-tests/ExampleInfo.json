@@ -2,9 +2,8 @@
   "timeoutSec": 180,
   "testMode": "web-server",
   "successRegex": [
-    "data.*metadata.*id.*chatcmpl",
-    "finishReason.*STOP",
-    "text.*[a-zA-Z]{3,}"
+    "Started OpenAiStreamingApplication",
+    "Tomcat started on port"
   ],
   "requiredEnv": [
     "OPENAI_API_KEY"

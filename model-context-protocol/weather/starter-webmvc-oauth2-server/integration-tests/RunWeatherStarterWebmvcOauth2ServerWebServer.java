@@ -69,37 +69,57 @@ public class RunWeatherStarterWebmvcOauth2ServerWebServer {
             if (token != null && !token.isEmpty()) {
                 out.println("✅ OAuth2 token obtained: " + token.substring(0, Math.min(20, token.length())) + "...");
                 
-                // For now, just verify we can get a token
-                // Full MCP protocol testing with OAuth2 would require updating McpTestUtils
-                // to support Bearer token authentication
-                out.println("\n🧪 Testing basic connectivity...");
-                
-                // Try to connect to the SSE endpoint with the token
+                // Test MCP STREAMABLE protocol with OAuth2 Bearer token
+                out.println("\n🧪 Testing MCP STREAMABLE protocol with OAuth2...");
+
+                // Create MCP initialize request
+                String initRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{" +
+                    "\"protocolVersion\":\"1.0\"," +
+                    "\"capabilities\":{}," +
+                    "\"clientInfo\":{\"name\":\"integration-test\",\"version\":\"1.0\"}" +
+                    "},\"id\":1}";
+
                 var client = HttpClient.newHttpClient();
                 var request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/mcp/message"))
-                    .header("Accept", "text/event-stream")
+                    .uri(URI.create("http://localhost:8080/mcp"))
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "text/event-stream, application/json")
                     .header("Authorization", "Bearer " + token)
-                    .timeout(Duration.ofSeconds(5))
-                    .GET()
+                    .timeout(Duration.ofSeconds(10))
+                    .POST(HttpRequest.BodyPublishers.ofString(initRequest))
                     .build();
-                
+
                 try {
                     var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    out.println("📡 SSE endpoint responded with status: " + response.statusCode());
-                    
+                    out.println("📡 MCP endpoint responded with status: " + response.statusCode());
+
                     if (response.statusCode() == 200) {
+                        String body = response.body();
                         out.println("✅ OAuth2 authentication successful!");
-                        out.println("\n🎉 MCP weather server test passed!");
-                        out.println("  Note: Full protocol testing with OAuth2 requires McpTestUtils enhancement");
+
+                        // Check if response contains server info
+                        if (body.contains("serverInfo") && body.contains("my-weather-server")) {
+                            out.println("✅ Server initialized: my-weather-server");
+                            out.println("\n🎉 MCP weather OAuth2 server test passed!");
+                        } else if (body.contains("result")) {
+                            out.println("✅ Server responded with valid MCP result");
+                            out.println("\n🎉 MCP weather OAuth2 server test passed!");
+                        } else {
+                            out.println("Response: " + body.substring(0, Math.min(300, body.length())));
+                            out.println("\n🎉 MCP weather OAuth2 server test passed!");
+                        }
+                    } else if (response.statusCode() == 401) {
+                        err.println("❌ OAuth2 authentication failed (401 Unauthorized)");
+                        err.println("Response: " + response.body());
+                        exit(1);
                     } else {
                         err.println("❌ Unexpected status code: " + response.statusCode());
+                        err.println("Response: " + response.body());
                         exit(1);
                     }
                 } catch (Exception e) {
-                    // Timeout is expected for SSE endpoint
-                    out.println("✅ SSE endpoint connected (timeout expected for GET without protocol messages)");
-                    out.println("\n🎉 MCP weather server test passed!");
+                    err.println("❌ Error connecting to MCP endpoint: " + e.getMessage());
+                    exit(1);
                 }
                 
             } else {
@@ -121,7 +141,7 @@ public class RunWeatherStarterWebmvcOauth2ServerWebServer {
             Process tokenProcess = new ProcessBuilder(
                 "curl", "-s", "-XPOST", "http://localhost:8080/oauth2/token",
                 "--data", "grant_type=client_credentials",
-                "--user", "oidc-client:secret"
+                "--user", "mcp-client:secret"
             ).start();
             
             String output = new String(tokenProcess.getInputStream().readAllBytes());
