@@ -168,11 +168,12 @@ public class IntegrationTestUtils {
         Path validatorScript = repoRoot.resolve("integration-testing/ai-validator/validate_example.py");
             
         String[] baseCmd = {
-            "python3", 
+            "python3",
             validatorScript.toString(),
             "--log-path", logFile.toAbsolutePath().toString(),
             "--example-name", moduleName,
-            "--output-format", "json"
+            "--output-format", "json",
+            "--verbose"  // Enable verbose output for debugging in CI
         };
         
         // Build dynamic command with optional parameters
@@ -208,14 +209,15 @@ public class IntegrationTestUtils {
                 .command(fullCmd)
                 .timeout(180, TimeUnit.SECONDS) // 3 minutes timeout for AI validation
                 .readOutput(true)
+                .redirectErrorStream(true) // Merge stderr into stdout for better error visibility
                 .execute();
-            
+
             String aiOutput = result.outputUTF8();
-            String aiError = ""; // Error capture not available with readOutput(true)
             int aiExitCode = result.getExitValue();
-            
+
             // Check exit code
             if (aiExitCode != 0) {
+                err.println("AI validation output: " + aiOutput);
                 throw new Exception("AI validation script failed with exit code: " + aiExitCode);
             }
             

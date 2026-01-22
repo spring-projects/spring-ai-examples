@@ -341,6 +341,18 @@ Examples:
     # Create validator and run validation
     try:
         validator = SpringAIExampleValidator()
+
+        # Debug: Check if Claude CLI is available
+        if args.verbose:
+            import subprocess
+            try:
+                which_result = subprocess.run(['which', 'claude'], capture_output=True, text=True)
+                print(f"DEBUG: which claude: {which_result.stdout.strip() or which_result.stderr.strip()}", file=sys.stderr)
+                version_result = subprocess.run(['claude', '--version'], capture_output=True, text=True, timeout=10)
+                print(f"DEBUG: claude version: {version_result.stdout.strip() or version_result.stderr.strip()}", file=sys.stderr)
+            except Exception as e:
+                print(f"DEBUG: Claude CLI check failed: {e}", file=sys.stderr)
+
         result = validator.validate_example(request)
         
         if args.output_format == "json":
