@@ -25,8 +25,8 @@ public class RunMcpAnnotationsServerWebServer {
         ProcessHandle serverHandle = null;
         
         try {
-            // Get the parent directory (the module root)
-            java.io.File moduleDir = new java.io.File("..").getAbsoluteFile();
+            // Get the module root (current directory when run from test runner)
+            java.io.File moduleDir = new java.io.File(".").getAbsoluteFile();
             
             // Build the application first
             out.println("🏗️  Building mcp-annotations-server...");

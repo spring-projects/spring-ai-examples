@@ -2,7 +2,7 @@ package com.example.kotlin_hello_world
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.boot.CommandLineRunner
 import org.springframework.test.context.TestPropertySource
 
@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource
 ])
 class KotlinHelloWorldApplicationTests {
 
-	@MockBean
+	@MockitoBean
 	private lateinit var jokeRunner: CommandLineRunner
 
 	@Test
