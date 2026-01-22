@@ -1,8 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS org.zeroturnaround:zt-exec:1.12
 //DEPS com.fasterxml.jackson.core:jackson-databind:2.17.1
-//DEPS io.modelcontextprotocol.sdk:mcp:0.10.0
-//DEPS io.modelcontextprotocol.sdk:mcp-spring-webflux:0.10.0
 //JAVA 17
 //FILES ExampleInfo.json
 //SOURCES ../../../../integration-testing/jbang-lib/IntegrationTestUtils.java

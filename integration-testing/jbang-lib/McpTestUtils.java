@@ -2,17 +2,16 @@
  * MCP Protocol Testing Utilities
  * Provides comprehensive testing for Model Context Protocol servers
  * including initialization, tool discovery, and invocation
+ * Uses HTTP client directly to support the new STREAMABLE protocol
  */
 
-import io.modelcontextprotocol.client.McpClient;
-import io.modelcontextprotocol.client.McpSyncClient;
-import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
-import io.modelcontextprotocol.client.transport.StdioClientTransport;
-import io.modelcontextprotocol.client.transport.ServerParameters;
-import io.modelcontextprotocol.spec.McpClientTransport;
-import io.modelcontextprotocol.spec.McpSchema.*;
+import java.net.http.*;
+import java.net.URI;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import static java.lang.System.*;
 
 public class McpTestUtils {
@@ -39,54 +38,67 @@ public class McpTestUtils {
         String errorMessage
     ) {}
     
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static int requestId = 1;
+    private static String sessionId = null;
+
     /**
-     * Test an MCP server over SSE transport
-     * @param baseUrl The base URL of the MCP server (e.g., "http://localhost:8080")
+     * Test an MCP server over HTTP STREAMABLE transport
+     * @param baseUrl The base URL of the MCP server (e.g., "http://localhost:8080/mcp")
      * @param toolTests List of tools to test with their parameters
      * @return Test result with details about the server and tool invocations
      */
     public static McpTestResult testMcpSseServer(String baseUrl, List<ToolTest> toolTests) {
-        out.println("🔌 Testing MCP server via SSE transport at: " + baseUrl);
-        
-        McpSyncClient mcpClient = null;
+        out.println("🔌 Testing MCP server via HTTP STREAMABLE transport at: " + baseUrl);
+
+        HttpClient client = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+
+        sessionId = null;  // Reset session for each test
+
         try {
-            // Create SSE transport and client
-            var transport = HttpClientSseClientTransport.builder(baseUrl).build();
-            mcpClient = McpClient.sync(transport).build();
-            
             // Initialize MCP connection
             out.println("🤝 Initializing MCP connection...");
-            var initResult = mcpClient.initialize();
-            String serverInfo = String.format("Server: %s %s", 
-                initResult.serverInfo().name(), 
-                initResult.serverInfo().version());
+            String initRequest = createJsonRpcRequest("initialize", Map.of(
+                "protocolVersion", "1.0",
+                "capabilities", Map.of(),
+                "clientInfo", Map.of("name", "integration-test", "version", "1.0")
+            ));
+
+            JsonNode initResponse = sendMcpRequest(client, baseUrl, initRequest, true);
+            JsonNode result = initResponse.get("result");
+            JsonNode serverInfoNode = result.get("serverInfo");
+            String serverInfo = String.format("Server: %s %s",
+                serverInfoNode.get("name").asText(),
+                serverInfoNode.get("version").asText());
             out.println("✅ Connected to: " + serverInfo);
-            
-            // Ping test
-            out.println("🏓 Testing ping...");
-            mcpClient.ping();
-            out.println("✅ Ping successful");
-            
+            out.println("📋 Session ID: " + sessionId);
+
             // List available tools
             out.println("🔧 Discovering available tools...");
-            ListToolsResult toolsList = mcpClient.listTools();
+            String listToolsRequest = createJsonRpcRequest("tools/list", Map.of());
+            JsonNode toolsResponse = sendMcpRequest(client, baseUrl, listToolsRequest, false);
+
             List<String> availableTools = new ArrayList<>();
-            
-            if (toolsList.tools() != null) {
-                for (var tool : toolsList.tools()) {
-                    availableTools.add(tool.name());
-                    out.println("  - " + tool.name() + ": " + tool.description());
+            JsonNode toolsResult = toolsResponse.get("result");
+            if (toolsResult != null && toolsResult.has("tools")) {
+                for (JsonNode tool : toolsResult.get("tools")) {
+                    String toolName = tool.get("name").asText();
+                    String description = tool.has("description") ? tool.get("description").asText() : "No description";
+                    availableTools.add(toolName);
+                    out.println("  - " + toolName + ": " + description);
                 }
             }
             out.println("✅ Found " + availableTools.size() + " tools");
-            
+
             // Test each requested tool
             Map<String, String> toolResults = new HashMap<>();
             boolean allTestsPassed = true;
-            
+
             for (ToolTest test : toolTests) {
                 out.println("\n🧪 Testing tool: " + test.toolName());
-                
+
                 // Check if tool is available
                 if (!availableTools.contains(test.toolName())) {
                     if (test.optional()) {
@@ -98,54 +110,58 @@ public class McpTestUtils {
                         continue;
                     }
                 }
-                
+
                 try {
                     // Call the tool
                     out.println("  Parameters: " + test.parameters());
-                    CallToolRequest request = new CallToolRequest(test.toolName(), test.parameters());
-                    CallToolResult result = mcpClient.callTool(request);
-                    
+                    String callRequest = createJsonRpcRequest("tools/call", Map.of(
+                        "name", test.toolName(),
+                        "arguments", test.parameters()
+                    ));
+                    JsonNode callResponse = sendMcpRequest(client, baseUrl, callRequest, false);
+
                     // Extract result content
                     String resultContent = "";
-                    if (result.content() != null && !result.content().isEmpty()) {
-                        var firstContent = result.content().get(0);
-                        if (firstContent instanceof TextContent) {
-                            resultContent = ((TextContent) firstContent).text();
-                        } else {
-                            resultContent = firstContent.toString();
+                    JsonNode callResult = callResponse.get("result");
+                    if (callResult != null && callResult.has("content")) {
+                        JsonNode content = callResult.get("content");
+                        if (content.isArray() && content.size() > 0) {
+                            JsonNode firstContent = content.get(0);
+                            if (firstContent.has("text")) {
+                                resultContent = firstContent.get("text").asText();
+                            } else {
+                                resultContent = firstContent.toString();
+                            }
                         }
                     }
-                    
+
                     // Store result
                     toolResults.put(test.toolName(), resultContent);
                     out.println("  Response length: " + resultContent.length() + " chars");
-                    
+
                     // Validate expected content if provided
                     if (test.expectedContent() != null && !test.expectedContent().isEmpty()) {
                         if (resultContent.toLowerCase().contains(test.expectedContent().toLowerCase())) {
                             out.println("✅ Tool response contains expected content: " + test.expectedContent());
                         } else {
                             err.println("❌ Tool response missing expected content: " + test.expectedContent());
-                            out.println("  Actual response (first 200 chars): " + 
+                            out.println("  Actual response (first 200 chars): " +
                                 resultContent.substring(0, Math.min(200, resultContent.length())));
                             allTestsPassed = false;
                         }
                     } else {
                         out.println("✅ Tool invoked successfully");
                     }
-                    
+
                 } catch (Exception e) {
                     err.println("❌ Error calling tool " + test.toolName() + ": " + e.getMessage());
                     toolResults.put(test.toolName(), "ERROR: " + e.getMessage());
                     allTestsPassed = false;
                 }
             }
-            
-            // Graceful shutdown
-            out.println("\n🛑 Closing MCP connection...");
-            mcpClient.closeGracefully();
-            out.println("✅ Connection closed gracefully");
-            
+
+            out.println("\n✅ MCP protocol test completed");
+
             return new McpTestResult(
                 allTestsPassed,
                 serverInfo,
@@ -153,7 +169,7 @@ public class McpTestUtils {
                 toolResults,
                 allTestsPassed ? "All tests passed" : "Some tests failed"
             );
-            
+
         } catch (Exception e) {
             err.println("❌ MCP test failed: " + e.getMessage());
             e.printStackTrace();
@@ -164,172 +180,69 @@ public class McpTestUtils {
                 Map.of(),
                 "Connection error: " + e.getMessage()
             );
-        } finally {
-            // Ensure client is closed
-            if (mcpClient != null) {
-                try {
-                    mcpClient.closeGracefully();
-                } catch (Exception e) {
-                    // Ignore cleanup errors
+        }
+    }
+
+    private static String createJsonRpcRequest(String method, Map<String, Object> params) throws Exception {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("jsonrpc", "2.0");
+        request.put("method", method);
+        request.put("params", params);
+        request.put("id", requestId++);
+        return mapper.writeValueAsString(request);
+    }
+
+    private static JsonNode sendMcpRequest(HttpClient client, String baseUrl, String jsonBody, boolean isInit) throws Exception {
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl))
+            .header("Content-Type", "application/json")
+            .header("Accept", "text/event-stream, application/json")
+            .timeout(Duration.ofSeconds(30))
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+
+        // Add session ID header for non-init requests
+        if (!isInit && sessionId != null) {
+            requestBuilder.header("mcp-session-id", sessionId);
+        }
+
+        HttpRequest request = requestBuilder.build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Capture session ID from init response
+        if (isInit) {
+            response.headers().firstValue("mcp-session-id").ifPresent(id -> sessionId = id);
+        }
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("HTTP " + response.statusCode() + ": " + response.body());
+        }
+
+        String body = response.body();
+
+        // Init returns plain JSON, other requests return SSE format
+        if (isInit) {
+            return mapper.readTree(body);
+        } else {
+            // Parse SSE format: extract JSON from "data:" lines
+            return parseSseResponse(body);
+        }
+    }
+
+    private static JsonNode parseSseResponse(String sseBody) throws Exception {
+        // SSE format: "id: X\ndata: {...}\n\n"
+        StringBuilder jsonData = new StringBuilder();
+        for (String line : sseBody.split("\n")) {
+            if (line.startsWith("data:")) {
+                String data = line.substring(5).trim();
+                if (!data.isEmpty()) {
+                    jsonData.append(data);
                 }
             }
         }
-    }
-    
-    /**
-     * Test an MCP server over STDIO transport
-     * @param command The command to launch the MCP server
-     * @param args Arguments for the server command
-     * @param toolTests List of tools to test
-     * @return Test result
-     */
-    public static McpTestResult testMcpStdioServer(
-            String command, 
-            List<String> args, 
-            List<ToolTest> toolTests) {
-        
-        out.println("🔌 Testing MCP server via STDIO transport");
-        out.println("  Command: " + command + " " + String.join(" ", args));
-        
-        McpSyncClient mcpClient = null;
-        try {
-            // Create STDIO transport
-            var serverParams = ServerParameters.builder(command)
-                .args(args.toArray(new String[0]))
-                .build();
-            
-            var transport = new StdioClientTransport(serverParams);
-            mcpClient = McpClient.sync(transport).build();
-            
-            // Initialize MCP connection
-            out.println("🤝 Initializing MCP connection...");
-            var initResult = mcpClient.initialize();
-            String serverInfo = String.format("Server: %s %s", 
-                initResult.serverInfo().name(), 
-                initResult.serverInfo().version());
-            out.println("✅ Connected to: " + serverInfo);
-            
-            // Ping test
-            out.println("🏓 Testing ping...");
-            mcpClient.ping();
-            out.println("✅ Ping successful");
-            
-            // List available tools
-            out.println("🔧 Discovering available tools...");
-            ListToolsResult toolsList = mcpClient.listTools();
-            List<String> availableTools = new ArrayList<>();
-            
-            if (toolsList.tools() != null) {
-                for (var tool : toolsList.tools()) {
-                    availableTools.add(tool.name());
-                    out.println("  - " + tool.name() + ": " + tool.description());
-                }
-            }
-            out.println("✅ Found " + availableTools.size() + " tools");
-            
-            // Test each requested tool
-            Map<String, String> toolResults = new HashMap<>();
-            boolean allTestsPassed = true;
-            
-            for (ToolTest test : toolTests) {
-                out.println("\n🧪 Testing tool: " + test.toolName());
-                
-                // Check if tool is available
-                if (!availableTools.contains(test.toolName())) {
-                    if (test.optional()) {
-                        out.println("⚠️ Tool not available (optional): " + test.toolName());
-                        continue;
-                    } else {
-                        err.println("❌ Required tool not found: " + test.toolName());
-                        allTestsPassed = false;
-                        continue;
-                    }
-                }
-                
-                try {
-                    // Call the tool
-                    out.println("  Parameters: " + test.parameters());
-                    CallToolRequest request = new CallToolRequest(test.toolName(), test.parameters());
-                    CallToolResult result = mcpClient.callTool(request);
-                    
-                    // Extract result content
-                    String resultContent = "";
-                    if (result.content() != null && !result.content().isEmpty()) {
-                        var firstContent = result.content().get(0);
-                        if (firstContent instanceof TextContent) {
-                            resultContent = ((TextContent) firstContent).text();
-                        } else {
-                            resultContent = firstContent.toString();
-                        }
-                    }
-                    
-                    // Store result
-                    toolResults.put(test.toolName(), resultContent);
-                    out.println("  Response length: " + resultContent.length() + " chars");
-                    
-                    // Validate expected content if provided
-                    if (test.expectedContent() != null && !test.expectedContent().isEmpty()) {
-                        if (resultContent.toLowerCase().contains(test.expectedContent().toLowerCase())) {
-                            out.println("✅ Tool response contains expected content: " + test.expectedContent());
-                        } else {
-                            err.println("❌ Tool response missing expected content: " + test.expectedContent());
-                            out.println("  Actual response (first 200 chars): " + 
-                                resultContent.substring(0, Math.min(200, resultContent.length())));
-                            allTestsPassed = false;
-                        }
-                    } else {
-                        out.println("✅ Tool invoked successfully");
-                    }
-                    
-                } catch (Exception e) {
-                    err.println("❌ Error calling tool " + test.toolName() + ": " + e.getMessage());
-                    toolResults.put(test.toolName(), "ERROR: " + e.getMessage());
-                    allTestsPassed = false;
-                }
-            }
-            
-            // Return result
-            return new McpTestResult(
-                allTestsPassed,
-                serverInfo,
-                availableTools,
-                toolResults,
-                allTestsPassed ? "All tests passed" : "Some tests failed"
-            );
-            
-        } catch (Exception e) {
-            err.println("❌ STDIO MCP test failed: " + e.getMessage());
-            e.printStackTrace();
-            return new McpTestResult(
-                false,
-                "Unknown",
-                List.of(),
-                Map.of(),
-                "STDIO error: " + e.getMessage()
-            );
-        } finally {
-            // Ensure client is closed
-            if (mcpClient != null) {
-                try {
-                    out.println("\n🛑 Closing MCP connection...");
-                    mcpClient.closeGracefully();
-                    out.println("✅ Connection closed gracefully");
-                } catch (Exception e) {
-                    // Ignore cleanup errors
-                }
-            }
+        if (jsonData.length() == 0) {
+            throw new RuntimeException("No data found in SSE response: " + sseBody);
         }
-    }
-    
-    /**
-     * Test an MCP STDIO server JAR file
-     * @param jarPath Path to the server JAR file
-     * @param toolTests List of tools to test
-     * @return Test result
-     */
-    public static McpTestResult testMcpStdioServerJar(String jarPath, List<ToolTest> toolTests) {
-        List<String> args = Arrays.asList("-jar", jarPath);
-        return testMcpStdioServer("java", args, toolTests);
+        return mapper.readTree(jsonData.toString());
     }
     
     /**
