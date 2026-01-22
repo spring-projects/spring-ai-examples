@@ -65,3 +65,4 @@ logs/
 test-report.md
 integration-results.md
 integration-testing/supporting-repos/
+test.db
