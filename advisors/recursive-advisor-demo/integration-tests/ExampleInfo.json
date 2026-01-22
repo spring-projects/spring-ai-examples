@@ -1,0 +1,20 @@
+{
+  "timeoutSec": 180,
+  "successRegex": [
+    "Started RecursiveAdvisorDemoApplication",
+    "What is current weather in Paris",
+    "REQUEST",
+    "RESPONSE",
+    "weather"
+  ],
+  "requiredEnv": [
+    "ANTHROPIC_API_KEY"
+  ],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "hybrid",
+    "readmeFile": "../README.md",
+    "expectedBehavior": "Demonstrate recursive advisor pattern with tool calling. The ToolCallAdvisor should loop through the advisor chain multiple times - first to call the weather tool, then to generate the final response with weather information for Paris.",
+    "promptTemplate": "workflow_validation"
+  }
+}

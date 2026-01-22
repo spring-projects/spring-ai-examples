@@ -1,0 +1,20 @@
+{
+  "timeoutSec": 300,
+  "successRegex": [
+    "Started EvaluationAdvisorDemoApplication",
+    "What is current weather in Paris",
+    "REQUEST",
+    "RESPONSE"
+  ],
+  "requiredEnv": [
+    "ANTHROPIC_API_KEY"
+  ],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "primary",
+    "readmeFile": "../README.md",
+    "expectedBehavior": "Demonstrate LLM-as-a-Judge pattern with self-refining recursive advisors. Uses Claude for generation and Ollama for evaluation. Should show multiple evaluation attempts with feedback until response quality threshold is met.",
+    "promptTemplate": "workflow_validation"
+  },
+  "notes": "Requires Ollama with flow-judge model running locally. May timeout if Ollama is not available."
+}

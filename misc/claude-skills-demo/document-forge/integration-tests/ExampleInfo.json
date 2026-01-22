@@ -1,0 +1,27 @@
+{
+  "timeoutSec": 120,
+  "testMode": "web-server",
+  "successRegex": [
+    "Started DocumentForgeApplication",
+    "Tomcat started on port.*8080"
+  ],
+  "requiredEnv": [
+    "ANTHROPIC_API_KEY"
+  ],
+  "webServerConfig": {
+    "startupTime": 15,
+    "testEndpoints": [
+      {
+        "url": "http://localhost:8080/",
+        "method": "GET",
+        "expectedPattern": "Document Forge|document-forge|Generate"
+      }
+    ]
+  },
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "hybrid",
+    "readmeFile": "../README.md",
+    "expectedBehavior": "Web application for AI-powered document generation using Claude Skills. Should serve a UI for generating Excel, PowerPoint, Word, and PDF documents from natural language descriptions."
+  }
+}
