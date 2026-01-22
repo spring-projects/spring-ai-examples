@@ -143,7 +143,7 @@ User Prompt → Spring AI → Claude Skills → File Generated → Download
 2. Spring AI sends the request to Claude with the appropriate skill enabled
 3. Optionally, a custom skill is added for branding or formatting
 4. Claude generates the actual document file using code execution
-5. `SkillsResponseHelper` extracts file IDs from the response
+5. `AnthropicSkillsResponseHelper` extracts file IDs from the response
 6. Files are downloaded via Anthropic's Files API and served to the user
 
 ---

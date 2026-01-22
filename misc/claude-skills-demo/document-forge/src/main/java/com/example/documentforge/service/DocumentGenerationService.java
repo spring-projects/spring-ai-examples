@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.SkillsResponseHelper;
+import org.springframework.ai.anthropic.AnthropicSkillsResponseHelper;
 import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -78,13 +78,13 @@ public class DocumentGenerationService {
 
 			// Configure options with the appropriate skill(s)
 			AnthropicChatOptions.Builder optionsBuilder = AnthropicChatOptions.builder()
-					.anthropicSkill(request.documentType().getSkill())
+					.skill(request.documentType().getSkill())
 					.maxTokens(8192);
 
 			// Add custom skill if requested and configured
 			if (request.useWatermark() && hasCustomSkill()) {
 				logger.info("Adding custom skill: {}", customSkillId);
-				optionsBuilder.customSkill(customSkillId);
+				optionsBuilder.skill(customSkillId);
 			}
 
 			AnthropicChatOptions options = optionsBuilder.build();
@@ -98,7 +98,7 @@ public class DocumentGenerationService {
 			logger.debug("Response text: {}", responseText);
 
 			// Extract file IDs from the response
-			List<String> fileIds = SkillsResponseHelper.extractFileIds(response);
+			List<String> fileIds = AnthropicSkillsResponseHelper.extractFileIds(response);
 			logger.info("Extracted {} file(s) from response", fileIds.size());
 
 			// Get file metadata for each file
@@ -157,13 +157,13 @@ public class DocumentGenerationService {
 
 			// Configure options with the appropriate skill(s)
 			AnthropicChatOptions.Builder optionsBuilder = AnthropicChatOptions.builder()
-					.anthropicSkill(request.documentType().getSkill())
+					.skill(request.documentType().getSkill())
 					.maxTokens(8192);
 
 			// Add custom skill if requested and configured
 			if (request.useWatermark() && hasCustomSkill()) {
 				logger.info("Adding custom skill: {}", customSkillId);
-				optionsBuilder.customSkill(customSkillId);
+				optionsBuilder.skill(customSkillId);
 			}
 
 			AnthropicChatOptions options = optionsBuilder.build();
@@ -199,7 +199,7 @@ public class DocumentGenerationService {
 			logger.debug("Response text: {}", responseText);
 
 			// Extract file IDs from the response
-			List<String> fileIds = SkillsResponseHelper.extractFileIds(response);
+			List<String> fileIds = AnthropicSkillsResponseHelper.extractFileIds(response);
 			logger.info("Extracted {} file(s) from response", fileIds.size());
 
 			// Get file metadata for each file
@@ -303,13 +303,13 @@ public class DocumentGenerationService {
 			String enhancedPrompt = buildEnhancedPrompt(request);
 
 			AnthropicChatOptions.Builder optionsBuilder = AnthropicChatOptions.builder()
-					.anthropicSkill(request.documentType().getSkill())
+					.skill(request.documentType().getSkill())
 					.maxTokens(8192);
 
 			// Add custom skill if requested and configured
 			if (request.useWatermark() && hasCustomSkill()) {
 				logger.info("Adding custom skill (async): {}", customSkillId);
-				optionsBuilder.customSkill(customSkillId);
+				optionsBuilder.skill(customSkillId);
 			}
 
 			AnthropicChatOptions options = optionsBuilder.build();
@@ -318,7 +318,7 @@ public class DocumentGenerationService {
 			ChatResponse response = chatModel.call(prompt);
 
 			String responseText = response.getResult().getOutput().getText();
-			List<String> fileIds = SkillsResponseHelper.extractFileIds(response);
+			List<String> fileIds = AnthropicSkillsResponseHelper.extractFileIds(response);
 
 			List<GeneratedFile> files = extractFiles(fileIds, request.documentType());
 
@@ -339,13 +339,13 @@ public class DocumentGenerationService {
 			String enhancedPrompt = buildEnhancedPromptWithFileContent(request, fileContent, fileName, contentType);
 
 			AnthropicChatOptions.Builder optionsBuilder = AnthropicChatOptions.builder()
-					.anthropicSkill(request.documentType().getSkill())
+					.skill(request.documentType().getSkill())
 					.maxTokens(8192);
 
 			// Add custom skill if requested and configured
 			if (request.useWatermark() && hasCustomSkill()) {
 				logger.info("Adding custom skill (async with file): {}", customSkillId);
-				optionsBuilder.customSkill(customSkillId);
+				optionsBuilder.skill(customSkillId);
 			}
 
 			AnthropicChatOptions options = optionsBuilder.build();
@@ -365,7 +365,7 @@ public class DocumentGenerationService {
 			ChatResponse response = chatModel.call(prompt);
 
 			String responseText = response.getResult().getOutput().getText();
-			List<String> fileIds = SkillsResponseHelper.extractFileIds(response);
+			List<String> fileIds = AnthropicSkillsResponseHelper.extractFileIds(response);
 
 			List<GeneratedFile> files = extractFiles(fileIds, request.documentType());
 
