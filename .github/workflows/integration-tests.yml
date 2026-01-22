@@ -218,7 +218,7 @@ jobs:
         if: steps.check.outputs.should_run == 'true'
         run: |
           npm install -g @anthropic-ai/claude-code --silent
-          echo "Claude Code CLI installed"
+          echo "✅ Claude Code CLI installed via npm"
 
       - name: Install JBang
         if: steps.check.outputs.should_run == 'true'
@@ -230,6 +230,15 @@ jobs:
         if: steps.check.outputs.should_run == 'true'
         run: |
           export PATH="$HOME/.jbang/bin:$PATH"
+          echo "=== Verifying CLI installations ==="
+          if command -v claude >/dev/null 2>&1; then
+            echo "✅ Claude CLI verified: $(claude --version 2>&1)"
+          else
+            echo "❌ Claude CLI not found in PATH"
+            echo "PATH: $PATH"
+            ls -la /usr/local/bin/ | grep claude || echo "No claude in /usr/local/bin/"
+            exit 1
+          fi
           jbang version
           java -version
 
@@ -377,12 +386,27 @@ jobs:
       - name: Install Claude Code CLI
         run: |
           npm install -g @anthropic-ai/claude-code --silent
-          echo "Claude Code CLI installed"
+          echo "✅ Claude Code CLI installed via npm"
 
       - name: Install JBang
         run: |
           curl -Ls https://sh.jbang.dev | bash -s - app setup
           echo "$HOME/.jbang/bin" >> "$GITHUB_PATH"
+
+      - name: Verify CLI installations
+        run: |
+          export PATH="$HOME/.jbang/bin:$PATH"
+          echo "=== Verifying CLI installations ==="
+          if command -v claude >/dev/null 2>&1; then
+            echo "✅ Claude CLI verified: $(claude --version 2>&1)"
+          else
+            echo "❌ Claude CLI not found in PATH"
+            echo "PATH: $PATH"
+            ls -la /usr/local/bin/ | grep claude || echo "No claude in /usr/local/bin/"
+            exit 1
+          fi
+          jbang version
+          java -version
 
       - name: Verify services
         run: |
