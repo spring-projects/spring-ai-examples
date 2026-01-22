@@ -1,22 +1,28 @@
 {
-  "timeoutSec": 300,
+  "timeoutSec": 120,
+  "testMode": "web-server",
   "successRegex": [
-    "BUILD SUCCESS",
-    "Started.*Application",
-    "EVALUATION:\\\\s+PASS"
+    "Started RagWithKotlin",
+    "got a dog",
+    "DogAdoptionSuggestion"
   ],
   "requiredEnv": [
     "OPENAI_API_KEY"
   ],
+  "webServerConfig": {
+    "startupTime": 45,
+    "testEndpoints": [
+      {
+        "url": "http://localhost:8090/dogs",
+        "method": "GET",
+        "expectedPattern": "name.*description"
+      }
+    ]
+  },
   "aiValidation": {
     "enabled": true,
-    "validationMode": "primary",
-    "readmeFile": "../README.md",
-    "expectedBehavior": "Complex AI workflow should execute successfully with multi-step processing and produce evaluation results",
-    "promptTemplate": "workflow_validation",
-    "successCriteria": {
-      "expectedSteps": 3,
-      "evaluationRequired": true
-    }
+    "validationMode": "hybrid",
+    "expectedBehavior": "RAG-powered dog adoption app should load dogs into vector store, run a natural language query about neurotic dogs, and return a DogAdoptionSuggestion response",
+    "promptTemplate": "workflow_validation"
   }
 }
