@@ -1,0 +1,18 @@
+{
+  "timeoutSec": 180,
+  "testMode": "composite",
+  "successRegex": [
+    "Server started",
+    "Tools updated",
+    "Tool change notification"
+  ],
+  "requiredEnv": [
+    "OPENAI_API_KEY"
+  ],
+  "aiValidation": {
+    "enabled": true,
+    "validationMode": "primary",
+    "expectedBehavior": "Demonstrate dynamic MCP tool updates. Server starts first with initial tools, client connects and queries tools, then server updates tools dynamically and client receives notification of the change.",
+    "promptTemplate": "workflow_validation"
+  }
+}
