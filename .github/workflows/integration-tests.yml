@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Group 1: MCP Servers (no API keys, fast)
+          # Group 1: MCP Servers (no API keys for app, but needs Anthropic for AI validation)
           - group: mcp-servers
             group_name: "MCP Servers"
             tests: |
@@ -113,7 +113,7 @@ jobs:
               weather/starter-webflux-server
               weather/starter-stdio-server
             needs_openai: false
-            needs_anthropic: false
+            needs_anthropic: true
             needs_brave: false
 
           # Group 2: Agentic Patterns (OpenAI + Anthropic)
@@ -130,7 +130,7 @@ jobs:
             needs_anthropic: true
             needs_brave: false
 
-          # Group 3: OpenAI - Kotlin & Misc
+          # Group 3: OpenAI - Kotlin & Misc (needs Anthropic for AI validation)
           - group: openai-2
             group_name: "OpenAI - Kotlin & Misc"
             tests: |
@@ -140,10 +140,10 @@ jobs:
               misc/spring-ai-java-function-callback
               models/chat/helloworld
             needs_openai: true
-            needs_anthropic: false
+            needs_anthropic: true
             needs_brave: false
 
-          # Group 4: OpenAI - MCP Clients & SQLite
+          # Group 4: OpenAI - MCP Clients & SQLite (needs Anthropic for AI validation)
           - group: openai-3
             group_name: "OpenAI - MCP Clients"
             tests: |
@@ -154,7 +154,7 @@ jobs:
               model-context-protocol/sqlite/simple
               model-context-protocol/sqlite/chatbot
             needs_openai: true
-            needs_anthropic: false
+            needs_anthropic: true
             needs_brave: false
 
           # Group 5: Anthropic & Multi-API tests
