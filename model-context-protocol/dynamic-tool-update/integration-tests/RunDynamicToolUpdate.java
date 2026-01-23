@@ -21,8 +21,9 @@ public class RunDynamicToolUpdate {
         out.println("🚀 Starting Dynamic Tool Update Composite Test");
 
         ProcessHandle serverHandle = null;
-        File serverDir = new File("../server").getAbsoluteFile();
-        File clientDir = new File("../client").getAbsoluteFile();
+        // When run from test runner, CWD is model-context-protocol/dynamic-tool-update
+        File serverDir = new File("server").getAbsoluteFile();
+        File clientDir = new File("client").getAbsoluteFile();
 
         try {
             // Step 1: Build server

@@ -258,7 +258,7 @@ public class McpTestUtils {
             new ToolTest(
                 "getAlerts",
                 Map.of("state", "NY"),
-                "alert"  // Should contain alert information or "no alerts"
+                "Event"  // Alert responses contain "Event:" followed by alert type (Watch, Warning, etc.)
             )
         );
     }
