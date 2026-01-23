@@ -19,6 +19,7 @@
 #   ├─────────────────────┼────────────────────────────────────────────────────┤
 #   │ mcp-servers         │ weather/starter-webmvc-server                      │
 #   │                     │ weather/starter-webflux-server                     │
+#   │                     │ weather/starter-webmvc-oauth2-server               │
 #   │                     │ weather/starter-stdio-server                       │
 #   ├─────────────────────┼────────────────────────────────────────────────────┤
 #   │ agentic             │ agentic-patterns/chain-workflow                    │
@@ -57,7 +58,6 @@
 # SKIPPED TESTS (not in any group):
 #   - mcp-annotations-server: Orphaned directory
 #   - sampling/mcp-weather-webmvc-server: Orphaned directory
-#   - weather/starter-webmvc-oauth2-server: Known MCP 404 issue
 #
 # REQUIRED SECRETS:
 #   - OPENAI_API_KEY
@@ -111,6 +111,7 @@ jobs:
             tests: |
               weather/starter-webmvc-server
               weather/starter-webflux-server
+              weather/starter-webmvc-oauth2-server
               weather/starter-stdio-server
             needs_openai: false
             needs_anthropic: true
@@ -520,7 +521,6 @@ jobs:
           echo "### Skipped Tests" >> $GITHUB_STEP_SUMMARY
           echo "- \`mcp-annotations-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
           echo "- \`sampling/mcp-weather-webmvc-server\` - Orphaned directory" >> $GITHUB_STEP_SUMMARY
-          echo "- \`weather/starter-webmvc-oauth2-server\` - Known MCP 404 issue" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Required Secrets" >> $GITHUB_STEP_SUMMARY
           echo "- \`OPENAI_API_KEY\`" >> $GITHUB_STEP_SUMMARY
