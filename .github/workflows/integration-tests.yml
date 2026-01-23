@@ -370,11 +370,13 @@ jobs:
         image: ghcr.io/${{ github.repository }}/ollama-flow-judge:latest
         ports:
           - 11434:11434
+        # Note: Ollama can take several minutes to initialize models
+        # Using simple process check here, then manual wait step below
         options: >-
-          --health-cmd="curl -f http://localhost:11434/api/tags || exit 1"
-          --health-interval=15s
-          --health-timeout=10s
-          --health-retries=20
+          --health-cmd="pgrep ollama || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - name: Checkout repository
@@ -426,19 +428,35 @@ jobs:
         run: |
           echo "Checking pgvector..."
           pg_isready -h localhost -p 5432 -U postgres
-          echo "pgvector is ready"
+          echo "✅ pgvector is ready"
 
-          echo "Checking Ollama API..."
-          curl -s http://localhost:11434/api/tags | head -c 200
-          echo ""
+          echo "Waiting for Ollama API to be ready..."
+          # Ollama can take several minutes to initialize models
+          # Poll with exponential backoff up to 5 minutes
+          max_attempts=30
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            attempt=$((attempt + 1))
+            if curl -s --max-time 5 http://localhost:11434/api/tags > /dev/null 2>&1; then
+              echo "✅ Ollama API is responding"
+              break
+            fi
+            echo "⏳ Attempt $attempt/$max_attempts - Ollama not ready yet, waiting 10s..."
+            sleep 10
+          done
+
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Ollama failed to become ready after $max_attempts attempts"
+            exit 1
+          fi
 
           echo "Warming up Ollama model (this may take a moment)..."
           # Make a small inference request to ensure the model is fully loaded
           curl -s http://localhost:11434/api/generate \
             -d '{"model": "flow-judge", "prompt": "Hello", "stream": false}' \
-            --max-time 120 | head -c 200
+            --max-time 180 | head -c 200
           echo ""
-          echo "Ollama is ready with model loaded"
+          echo "✅ Ollama is ready with model loaded"
 
       - name: Run rag-with-kotlin test
         env:
