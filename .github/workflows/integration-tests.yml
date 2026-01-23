@@ -450,10 +450,14 @@ jobs:
             exit 1
           fi
 
+          echo "Listing available Ollama models..."
+          curl -s http://localhost:11434/api/tags | jq . || curl -s http://localhost:11434/api/tags
+
           echo "Warming up Ollama model (this may take a moment)..."
           # Make a small inference request to ensure the model is fully loaded
+          # Model name must match what was pulled in the Docker image
           curl -s http://localhost:11434/api/generate \
-            -d '{"model": "flow-judge", "prompt": "Hello", "stream": false}' \
+            -d '{"model": "avcodes/flowaicom-flow-judge:q4", "prompt": "Hello", "stream": false}' \
             --max-time 180 | head -c 200
           echo ""
           echo "✅ Ollama is ready with model loaded"
