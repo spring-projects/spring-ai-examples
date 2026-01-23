@@ -297,10 +297,10 @@ jobs:
 
             if ./integration-testing/scripts/run-integration-tests.sh "$test"; then
               echo "PASSED: $test"
-              ((passed++))
+              passed=$((passed + 1))
             else
               echo "FAILED: $test"
-              ((failed++))
+              failed=$((failed + 1))
               failed_tests="$failed_tests\n  - $test"
             fi
 
