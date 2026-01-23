@@ -256,11 +256,11 @@ jobs:
 
           # Install uv for Python package management (provides uvx)
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          source $HOME/.local/bin/env
+          export PATH="$HOME/.local/bin:$PATH"
 
           # Pre-install Python-based MCP server (used by sqlite tests)
-          uvx --version || echo "uvx not in path, checking..."
-          $HOME/.local/bin/uvx mcp-server-sqlite --help || echo "Pre-warming mcp-server-sqlite..."
+          uvx --version || echo "uvx not available"
+          uvx mcp-server-sqlite --help 2>/dev/null || echo "Pre-warming mcp-server-sqlite..."
 
       - name: Cache JBang dependencies
         if: steps.check.outputs.should_run == 'true'
