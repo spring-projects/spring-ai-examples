@@ -148,7 +148,6 @@ jobs:
             group_name: "OpenAI - MCP Clients"
             tests: |
               advisors/tool-argument-augmenter-demo
-              model-context-protocol/client-starter/starter-default-client
               model-context-protocol/dynamic-tool-update
               model-context-protocol/filesystem
               model-context-protocol/sqlite/simple
@@ -165,6 +164,7 @@ jobs:
               misc/claude-skills-demo/document-forge
               prompt-engineering/prompt-engineering-patterns
               model-context-protocol/brave
+              model-context-protocol/client-starter/starter-default-client
               model-context-protocol/client-starter/starter-webflux-client
               model-context-protocol/sampling
               model-context-protocol/web-search/brave-chatbot
