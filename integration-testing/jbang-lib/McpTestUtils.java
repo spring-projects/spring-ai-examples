@@ -298,4 +298,40 @@ public class McpTestUtils {
             )
         );
     }
+
+    /**
+     * Run a complete MCP weather server integration test.
+     * This is a one-liner for testing standard MCP weather servers.
+     *
+     * @param moduleName Name of the module for logging
+     * @param startupSeconds Seconds to wait for server startup
+     * @param mcpEndpoint The MCP endpoint URL (e.g., "http://localhost:8080/mcp")
+     */
+    public static void runMcpWeatherServerTest(String moduleName, int startupSeconds, String mcpEndpoint) throws Exception {
+        WebServerTestUtils.runSimpleWebServerTest(
+            WebServerTestUtils.WebServerTestConfig.withWait(
+                moduleName,
+                startupSeconds,
+                () -> {
+                    try {
+                        var toolTests = createWeatherTests();
+                        var mcpResult = testMcpSseServer(mcpEndpoint, toolTests);
+
+                        if (mcpResult.success()) {
+                            out.println("  Server: " + mcpResult.serverInfo());
+                            out.println("  Available tools: " + mcpResult.availableTools());
+                            out.println("  Tool tests: " + mcpResult.toolResults().size() + " passed");
+                            return true;
+                        } else {
+                            err.println("  Error: " + mcpResult.errorMessage());
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        err.println("  Exception: " + e.getMessage());
+                        return false;
+                    }
+                }
+            )
+        );
+    }
 }
