@@ -248,6 +248,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
+          # Pre-install MCP server packages to avoid download delays during tests
+          echo "📦 Pre-installing MCP server packages..."
+
+          # Install npm-based MCP servers globally
+          npm install -g @modelcontextprotocol/server-brave-search @modelcontextprotocol/server-filesystem
+
+          # Install uv for Python package management (provides uvx)
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          source $HOME/.local/bin/env
+
+          # Pre-install Python-based MCP server (used by sqlite tests)
+          uvx --version || echo "uvx not in path, checking..."
+          $HOME/.local/bin/uvx mcp-server-sqlite --help || echo "Pre-warming mcp-server-sqlite..."
+
       - name: Cache JBang dependencies
         if: steps.check.outputs.should_run == 'true'
         uses: actions/cache@v4
@@ -358,9 +372,9 @@ jobs:
           - 11434:11434
         options: >-
           --health-cmd="curl -f http://localhost:11434/api/tags || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --health-interval=15s
+          --health-timeout=10s
+          --health-retries=20
 
     steps:
       - name: Checkout repository
@@ -414,10 +428,17 @@ jobs:
           pg_isready -h localhost -p 5432 -U postgres
           echo "pgvector is ready"
 
-          echo "Checking Ollama..."
+          echo "Checking Ollama API..."
           curl -s http://localhost:11434/api/tags | head -c 200
           echo ""
-          echo "Ollama is ready"
+
+          echo "Warming up Ollama model (this may take a moment)..."
+          # Make a small inference request to ensure the model is fully loaded
+          curl -s http://localhost:11434/api/generate \
+            -d '{"model": "flow-judge", "prompt": "Hello", "stream": false}' \
+            --max-time 120 | head -c 200
+          echo ""
+          echo "Ollama is ready with model loaded"
 
       - name: Run rag-with-kotlin test
         env:
