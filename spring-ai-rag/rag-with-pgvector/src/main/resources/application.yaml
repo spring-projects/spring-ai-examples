@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: rag-with-pgvector
+  ai:
+    vectorstore:
+      pgvector:
+        remove-existing-vector-store-table: true
+        initialize-schema: true
+    ollama:
+      init:
+      chat:
+        options:
+          model: gemma3:4b #Defind your local downloaded model here otherwise spring application load default model mistral
+          temperature: 0.5
+        pull-model-strategy: never #Alwway use never if you don't want to download at application load/run time
+      embedding:
+        options:
+          model: nomic-embed-text:latest  # or mxbai-embed-large
+
+
