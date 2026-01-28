@@ -15,7 +15,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>parallelization-workflow</name>
-	<description>Agentic Parallelization Worflow Pattern with Spring AI</description>
+	<description>Agentic Parallelization Workflow Pattern with Spring AI</description>
 
 	<properties>
 		<java.version>17</java.version>
