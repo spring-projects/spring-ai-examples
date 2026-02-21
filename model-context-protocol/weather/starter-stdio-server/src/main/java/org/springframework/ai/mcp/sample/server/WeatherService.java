@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -91,7 +91,7 @@ public class WeatherService {
 	 * @return The forecast for the given location
 	 * @throws RestClientException if the request fails
 	 */
-	@Tool(description = "Get weather forecast for a specific latitude/longitude")
+	@McpTool(description = "Get weather forecast for a specific latitude/longitude")
 	public String getWeatherForecastByLocation(double latitude, double longitude) {
 
 		var points = restClient.get()
@@ -120,8 +120,8 @@ public class WeatherService {
 	 * @return Human readable alert information
 	 * @throws RestClientException if the request fails
 	 */
-	@Tool(description = "Get weather alerts for a US state. Input is Two-letter US state code (e.g. CA, NY)")
-	public String getAlerts(@ToolParam( description =  "Two-letter US state code (e.g. CA, NY") String state) {
+	@McpTool(description = "Get weather alerts for a US state. Input is Two-letter US state code (e.g. CA, NY)")
+	public String getAlerts(@McpToolParam( description =  "Two-letter US state code (e.g. CA, NY") String state) {
 		Alert alert = restClient.get().uri("/alerts/active/area/{state}", state).retrieve().body(Alert.class);
 
 		return alert.features()
