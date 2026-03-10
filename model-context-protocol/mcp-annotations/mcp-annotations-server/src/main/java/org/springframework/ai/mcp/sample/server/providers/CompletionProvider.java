@@ -22,7 +22,7 @@ import java.util.Map;
 import io.modelcontextprotocol.spec.McpSchema.CompleteRequest;
 import io.modelcontextprotocol.spec.McpSchema.CompleteResult;
 import io.modelcontextprotocol.spec.McpSchema.CompleteResult.CompleteCompletion;
-import org.springaicommunity.mcp.annotation.McpComplete;
+import org.springframework.ai.mcp.annotation.McpComplete;
 
 import org.springframework.stereotype.Service;
 

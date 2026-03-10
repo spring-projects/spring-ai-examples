@@ -18,10 +18,10 @@ package org.springframework.ai.mcp.sample.server.providers;
 import java.util.List;
 import java.util.Map;
 
-import org.springaicommunity.mcp.annotation.McpProgressToken;
-import org.springaicommunity.mcp.annotation.McpTool;
-import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springaicommunity.mcp.context.DefaultMcpSyncRequestContext;
+import org.springframework.ai.mcp.annotation.McpProgressToken;
+import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
+import org.springframework.ai.mcp.annotation.context.DefaultMcpSyncRequestContext;
 
 import org.springframework.stereotype.Service;
 

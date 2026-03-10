@@ -1,7 +1,6 @@
 package org.springframework.ai.example.prompt_engineering;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -17,7 +16,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class PromptEngineeringApplication {
 
-	ObjectMapper objectMapper = new ObjectMapper();
+	JsonMapper jsonMapper = new JsonMapper();
 
 	public static void main(String[] args) {
 		SpringApplication.run(PromptEngineeringApplication.class, args);
@@ -58,7 +57,7 @@ public class PromptEngineeringApplication {
 		};
 	}
 
-	private void runBasicPatterns(ChatClient chatClient) throws JsonProcessingException {
+	private void runBasicPatterns(ChatClient chatClient) {
 		System.out.println("=== Running Basic Patterns ===");
 		// 2.1 General prompting / zero shot
 		pt_zero_shot(chatClient);
@@ -66,7 +65,7 @@ public class PromptEngineeringApplication {
 		pt_ones_shot_few_shots(chatClient);
 	}
 
-	private void runSystemPatterns(ChatClient chatClient) throws JsonProcessingException {
+	private void runSystemPatterns(ChatClient chatClient) {
 		System.out.println("=== Running System/Role Patterns ===");
 		// 2.3.1 System prompting
 		pt_system_prompting_1(chatClient);
@@ -75,13 +74,13 @@ public class PromptEngineeringApplication {
 		pt_role_prompting_1(chatClient);
 	}
 
-	private void runAdvancedPatterns(ChatClient chatClient) throws JsonProcessingException {
+	private void runAdvancedPatterns(ChatClient chatClient) {
 		System.out.println("=== Running Advanced Patterns ===");
 		// 2.6 Self-consistency (simplified - just one iteration)
 		pt_self_consistency_simple(chatClient);
 	}
 
-	private void runAllPatterns(ChatClient chatClient) throws JsonProcessingException {
+	private void runAllPatterns(ChatClient chatClient) {
 		//@formatter:off
 		// 2. Prompting techniques (page 13)
 
@@ -312,7 +311,7 @@ public class PromptEngineeringApplication {
 	}
 
 	// 2.3.1 (3) spring-ai System prompting - SpringAI style
-	public void pt_system_prompting_2_springai_style(ChatClient chatClient) throws JsonProcessingException {
+	public void pt_system_prompting_2_springai_style(ChatClient chatClient) {
 
 		record MovieReviews(Movie[] movie_reviews) {
 			enum Sentiment {
@@ -346,7 +345,7 @@ public class PromptEngineeringApplication {
 				.call()
 				.entity(MovieReviews.class);
 
-		System.out.println("Output: " + objectMapper.writeValueAsString(movieReviews));
+		System.out.println("Output: " + jsonMapper.writeValueAsString(movieReviews));
 	}
 
 	// 2.3.2 Role prompting (1)

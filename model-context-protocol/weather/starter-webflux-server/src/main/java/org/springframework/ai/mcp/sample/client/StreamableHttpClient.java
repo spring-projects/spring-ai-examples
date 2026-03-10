@@ -18,7 +18,7 @@ package org.springframework.ai.mcp.sample.client;
 import java.util.Map;
 
 import io.modelcontextprotocol.client.McpClient;
-import io.modelcontextprotocol.client.transport.WebClientStreamableHttpTransport;
+import org.springframework.ai.mcp.client.webflux.transport.WebClientStreamableHttpTransport;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;

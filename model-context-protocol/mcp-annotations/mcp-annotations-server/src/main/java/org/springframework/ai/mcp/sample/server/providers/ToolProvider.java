@@ -18,8 +18,8 @@ package org.springframework.ai.mcp.sample.server.providers;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
-import org.springaicommunity.mcp.annotation.McpTool;
-import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;

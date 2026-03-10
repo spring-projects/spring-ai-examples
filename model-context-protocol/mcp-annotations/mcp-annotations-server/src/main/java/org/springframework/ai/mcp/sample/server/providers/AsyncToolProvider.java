@@ -16,10 +16,10 @@
 package org.springframework.ai.mcp.sample.server.providers;
 
 import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
-import org.springaicommunity.mcp.annotation.McpTool;
-import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springaicommunity.mcp.context.McpAsyncRequestContext;
-import org.springaicommunity.mcp.context.StructuredElicitResult;
+import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
+import org.springframework.ai.mcp.annotation.context.McpAsyncRequestContext;
+import org.springframework.ai.mcp.annotation.context.StructuredElicitResult;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;

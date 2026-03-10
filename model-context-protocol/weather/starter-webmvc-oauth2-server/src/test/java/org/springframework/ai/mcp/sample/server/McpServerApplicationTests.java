@@ -15,7 +15,6 @@
  */
 package org.springframework.ai.mcp.sample.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,7 +25,10 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import io.modelcontextprotocol.json.McpJsonDefaults;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -43,8 +45,8 @@ class McpServerApplicationTests {
 	@LocalServerPort
 	private int port;
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
+	private final JsonMapper jsonMapper = new JsonMapper();
+	
 	@Test
 	void whenTokenThenConnects() throws IOException, InterruptedException {
 		var accessToken = obtainAccessToken();
@@ -101,7 +103,7 @@ class McpServerApplicationTests {
 
 		var rawResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
 
-		Map<String, String> response = objectMapper.readValue(rawResponse, Map.class);
+		Map<String, String> response = jsonMapper.readValue(rawResponse, Map.class);
 		return response.get("access_token");
 	}
 
