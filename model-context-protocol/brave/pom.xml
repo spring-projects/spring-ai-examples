@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
@@ -47,6 +47,13 @@
 			<artifactId>spring-ai-starter-mcp-client</artifactId>
 		</dependency>
 
+		<!-- Netty DNS resolver for macOS -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-resolver-dns-native-macos</artifactId>
+			<classifier>osx-aarch_64</classifier>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -75,7 +82,7 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-			<repository>
+		<repository>
 			<id>central-portal-snapshots</id>
 			<name>Central Portal Snapshots</name>
 			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
