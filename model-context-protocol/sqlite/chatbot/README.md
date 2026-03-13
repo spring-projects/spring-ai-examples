@@ -2,7 +2,7 @@
 
 A demo application showcasing the integration of Spring AI with SQLite databases using the Model Context Protocol (MCP). This application enables natural language interactions with your SQLite database through a command-line interface.
 
-It uses the [SQLite MCP-Server](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite) to enable running SQL queries, analyzing business data, and automatically generating business insight memos.
+It uses the [SQLite MCP-Server](https://pypi.org/project/mcp-server-sqlite/) to enable running SQL queries, analyzing business data, and automatically generating business insight memos.
 
 The demo starts a simple chatbot where your can ask qustions about the data  stored in the database.
 
@@ -68,7 +68,7 @@ It has a `PRODUCTS` table and was created using the script `create-database.sh`
 Enables real-time conversation with your database:
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=chat
+./mvnw spring-boot:run
 ```
 
 ## Architecture Overview
@@ -85,8 +85,8 @@ public McpSyncClient mcpClient() {
             .args("mcp-server-sqlite", "--db-path", getDbPath())
             .build();
 
-    var mcpClient = McpClient.sync(new StdioServerTransport(stdioParams),
-            Duration.ofSeconds(10), new ObjectMapper());
+   var mcpClient = McpClient.sync(new StdioClientTransport(stdioParams, McpJsonMapper.createDefault()))
+           .requestTimeout(Duration.ofSeconds(10)).build();
 
     var init = mcpClient.initialize();
 
@@ -104,39 +104,6 @@ This configuration:
 5. Initializes the connection to the MCP server
 
 The `destroyMethod = "close"` annotation ensures proper cleanup when the application shuts down.
-
-### Function Callbacks
-
-The application registers MCP tools with Spring AI using function callbacks:
-
-```java
-@Bean
-public List<McpFunctionCallback> functionCallbacks(McpSyncClient mcpClient) {
-    return mcpClient.listTools(null)
-            .tools()
-            .stream()
-            .map(tool -> new McpFunctionCallback(mcpClient, tool))
-            .toList();
-}
-```
-
-#### Purpose
-
-This bean is responsible for:
-1. Discovering available MCP tools from the client
-2. Converting each tool into a Spring AI function callback
-3. Making these callbacks available for use with the ChatClient
-
-
-#### How It Works
-
-1. `mcpClient.listTools(null)` queries the MCP server for all available tools
-    - The `null` parameter represents a pagination cursor
-    - When null, returns the first page of results
-    - A cursor string can be provided to get results after that position
-2. `.tools()` extracts the tool list from the response
-3. Each tool is transformed into a `McpFunctionCallback` using `.map()`
-4. These callbacks are collected into an array using `.toArray(McpFunctionCallback[]::new)`
 
 #### Usage
 
