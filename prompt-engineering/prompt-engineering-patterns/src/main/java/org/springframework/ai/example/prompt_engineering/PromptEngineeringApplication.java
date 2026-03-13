@@ -23,14 +23,15 @@ public class PromptEngineeringApplication {
 	}
 
 	@Bean
-	public CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder, ConfigurableApplicationContext context) {
+	public CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder,
+			ConfigurableApplicationContext context) {
 		return args -> {
 			try {
 				ChatClient chatClient = chatClientBuilder.build();
 
 				// Check if specific pattern is requested via command line argument
 				String pattern = args.length > 0 ? args[0] : "all";
-				
+
 				switch (pattern.toLowerCase()) {
 					case "basic":
 						runBasicPatterns(chatClient);
@@ -46,10 +47,11 @@ public class PromptEngineeringApplication {
 						runAllPatterns(chatClient);
 						break;
 				}
-				
+
 				System.out.println("Prompt engineering patterns demonstration completed!");
 				context.close();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				System.err.println("Error during prompt engineering execution: " + e.getMessage());
 				e.printStackTrace();
 				context.close();
@@ -139,7 +141,9 @@ public class PromptEngineeringApplication {
 		// General prompting / zero shot (page 15)
 
 		enum Sentiment {
+
 			POSITIVE, NEUTRAL, NEGATIVE
+
 		}
 
 		Sentiment reviewSentiment = chatClient.prompt("""
@@ -149,13 +153,9 @@ public class PromptEngineeringApplication {
 				unchecked. I wish there were more movies like this masterpiece.
 				Sentiment:
 				""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(0.1)
-						.maxTokens(5)
-						.build())
-				.call()
-				.entity(Sentiment.class);
+			.options(ChatOptions.builder().temperature(0.1).maxTokens(5).build())
+			.call()
+			.entity(Sentiment.class);
 
 		System.out.println("Output: " + reviewSentiment);
 	}
@@ -203,14 +203,14 @@ public class PromptEngineeringApplication {
 				And the other tomato sauce, ham and pineapple.
 
 				""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(0.1)
-						// Increasing the token limit to accommodate the need for a longer response.
-						.maxTokens(250)
-						.build())
-				.call()
-				.content();
+			.options(ChatOptions.builder()
+				.temperature(0.1)
+				// Increasing the token limit to accommodate the need for a longer
+				// response.
+				.maxTokens(250)
+				.build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + pizzaOrder);
 
@@ -235,25 +235,18 @@ public class PromptEngineeringApplication {
 	// 2.3.1 System prompting (1)
 	public void pt_system_prompting_1(ChatClient chatClient) {
 
-		String movieReview = chatClient
-				.prompt()
-				.system("Classify movie reviews as positive, neutral or negative. Only return the label in uppercase.")
-				.user("""
-						Review: "Her" is a disturbing study revealing the direction
-						humanity is headed if AI is allowed to keep evolving,
-						unchecked. It's so disturbing I couldn't watch it.
+		String movieReview = chatClient.prompt()
+			.system("Classify movie reviews as positive, neutral or negative. Only return the label in uppercase.")
+			.user("""
+					Review: "Her" is a disturbing study revealing the direction
+					humanity is headed if AI is allowed to keep evolving,
+					unchecked. It's so disturbing I couldn't watch it.
 
-						Sentiment:
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(5)
-						.build())
-				.call()
-				.content();
+					Sentiment:
+					""")
+			.options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(5).build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + movieReview);
 
@@ -269,42 +262,30 @@ public class PromptEngineeringApplication {
 	// 2.3.1 System prompting (2)
 	public void pt_system_prompting_2(ChatClient chatClient) {
 
-		String movieReview = chatClient
-				.prompt()
-				.system("""
-						Classify movie reviews as positive, neutral or negative. Return
-						valid JSON.
+		String movieReview = chatClient.prompt().system("""
+				Classify movie reviews as positive, neutral or negative. Return
+				valid JSON.
 
-						Use the Schema:
+				Use the Schema:
 
-						```
-						MOVIE:
-						{
-						"sentiment": String "POSITIVE" | "NEGATIVE" | "NEUTRAL",
-						"name": String
-						}
-						MOVIE REVIEWS:
-						{
-						"movie_reviews": [MOVIE]
-						}
-						```
-						""")
-				.user("""
-						Review: "Her" is a disturbing study revealing the direction
-						humanity is headed if AI is allowed to keep evolving,
-						unchecked. It's so disturbing I couldn't watch it.
+				```
+				MOVIE:
+				{
+				"sentiment": String "POSITIVE" | "NEGATIVE" | "NEUTRAL",
+				"name": String
+				}
+				MOVIE REVIEWS:
+				{
+				"movie_reviews": [MOVIE]
+				}
+				```
+				""").user("""
+				Review: "Her" is a disturbing study revealing the direction
+				humanity is headed if AI is allowed to keep evolving,
+				unchecked. It's so disturbing I couldn't watch it.
 
-						JSON Response:
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+				JSON Response:
+				""").options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build()).call().content();
 
 		System.out.println("Output: " + movieReview);
 
@@ -315,35 +296,30 @@ public class PromptEngineeringApplication {
 
 		record MovieReviews(Movie[] movie_reviews) {
 			enum Sentiment {
+
 				POSITIVE, NEUTRAL, NEGATIVE
+
 			}
 
 			record Movie(Sentiment sentiment, String name) {
 			}
 		}
 
-		MovieReviews movieReviews = chatClient
-				.prompt()
-				.system("""
-						Classify movie reviews as positive, neutral or negative. Return
-						valid JSON.
-						""")
-				.user("""
-						Review: "Her" is a disturbing study revealing the direction
-						humanity is headed if AI is allowed to keep evolving,
-						unchecked. It's so disturbing I couldn't watch it.
+		MovieReviews movieReviews = chatClient.prompt()
+			.system("""
+					Classify movie reviews as positive, neutral or negative. Return
+					valid JSON.
+					""")
+			.user("""
+					Review: "Her" is a disturbing study revealing the direction
+					humanity is headed if AI is allowed to keep evolving,
+					unchecked. It's so disturbing I couldn't watch it.
 
-						JSON Response:
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.entity(MovieReviews.class);
+					JSON Response:
+					""")
+			.options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build())
+			.call()
+			.entity(MovieReviews.class);
 
 		System.out.println("Output: " + jsonMapper.writeValueAsString(movieReviews));
 	}
@@ -353,27 +329,15 @@ public class PromptEngineeringApplication {
 
 		// Goal Act as travel guide and provide 3 travel suggestions
 
-		String movieReview = chatClient
-				.prompt()
-				.system("""
-						I want you to act as a travel guide. I will write to you
-						about my location and you will suggest 3 places to visit near
-						me. In some cases, I will also give you the type of places I
-						will visit.
-						""")
-				.user("""
-						My suggestion: "I am in Amsterdam and I want to visit only museums."
-						Travel Suggestions:
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String movieReview = chatClient.prompt().system("""
+				I want you to act as a travel guide. I will write to you
+				about my location and you will suggest 3 places to visit near
+				me. In some cases, I will also give you the type of places I
+				will visit.
+				""").user("""
+				My suggestion: "I am in Amsterdam and I want to visit only museums."
+				Travel Suggestions:
+				""").options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build()).call().content();
 
 		System.out.println("Output: " + movieReview);
 
@@ -386,26 +350,14 @@ public class PromptEngineeringApplication {
 		//
 		// In a humorous style.
 
-		String movieReview = chatClient
-				.prompt()
-				.system("""
-						I want you to act as a travel guide. I will write to you about
-						my location and you will suggest 3 places to visit near me in
-						a humorous style.
-						""")
-				.user("""
-						My suggestion: "I am in Amsterdam and I want to visit only museums."
-						Travel Suggestions:
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String movieReview = chatClient.prompt().system("""
+				I want you to act as a travel guide. I will write to you about
+				my location and you will suggest 3 places to visit near me in
+				a humorous style.
+				""").user("""
+				My suggestion: "I am in Amsterdam and I want to visit only museums."
+				Travel Suggestions:
+				""").options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build()).call().content();
 
 		System.out.println("Output: " + movieReview);
 	}
@@ -415,24 +367,16 @@ public class PromptEngineeringApplication {
 
 		// Goal: Suggest articles for a blog about retro games
 
-		String movieReview = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Suggest 3 topics to write an article about with a few lines of
-						description of what this article should contain.
+		String movieReview = chatClient.prompt()
+			.user(u -> u.text("""
+					Suggest 3 topics to write an article about with a few lines of
+					description of what this article should contain.
 
-						Context: {context}
-						""")
-						.param("context", "You are writing for a blog about retro 80's arcade video games."))
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+					Context: {context}
+					""").param("context", "You are writing for a blog about retro 80's arcade video games."))
+			.options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + movieReview);
 
@@ -443,39 +387,25 @@ public class PromptEngineeringApplication {
 
 		// (SpringAI tip) Set common options for the chat client.
 		var chatClient = chatClientBuilder
-				.defaultOptions(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.8)
-						.maxTokens(1024)
-						.build())
-				.build();
+			.defaultOptions(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build())
+			.build();
 
 		// Goal: Write a storyline for a level of a first-person shooter video game.
 
-		String stepBack = chatClient
-				.prompt("""
-						Based on popular first-person shooter action games, what are
-						5 fictional key settings that contribute to a challenging and
-						engaging level storyline in a first-person shooter video game?
-						""")
-				.call()
-				.content();
+		String stepBack = chatClient.prompt("""
+				Based on popular first-person shooter action games, what are
+				5 fictional key settings that contribute to a challenging and
+				engaging level storyline in a first-person shooter video game?
+				""").call().content();
 
 		System.out.println("StepBack Output: " + stepBack + "\n");
 
-		String story = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Write a one paragraph storyline for a new level of a first-
-						person shooter video game that is challenging and engaging.
+		String story = chatClient.prompt().user(u -> u.text("""
+				Write a one paragraph storyline for a new level of a first-
+				person shooter video game that is challenging and engaging.
 
-						Context: {step-back}
-						""")
-						.param("step-back", stepBack))
-				.call()
-				.content();
+				Context: {step-back}
+				""").param("step-back", stepBack)).call().content();
 
 		System.out.println("Output: " + story);
 
@@ -486,15 +416,12 @@ public class PromptEngineeringApplication {
 	// 'zero-shot' Chain of thought.
 	public void pt_chain_of_thought_zero_shot(ChatClient chatClient) {
 
-		String output = chatClient
-				.prompt("""
-						When I was 3 years old, my partner was 3 times my age. Now,
-						I am 20 years old. How old is my partner?
+		String output = chatClient.prompt("""
+				When I was 3 years old, my partner was 3 times my age. Now,
+				I am 20 years old. How old is my partner?
 
-						Let's think step by step.
-						""")
-				.call()
-				.content();
+				Let's think step by step.
+				""").call().content();
 
 		System.out.println("Output: " + output + "\n");
 
@@ -502,22 +429,19 @@ public class PromptEngineeringApplication {
 
 	public void pt_chain_of_thought_singleshot_fewshots(ChatClient chatClient) {
 
-		String output = chatClient
-				.prompt("""
-						Q: When my brother was 2 years old, I was double his age. Now
-						I am 40 years old. How old is my brother? Let's think step
-						by step.
-						A: When my brother was 2 years, I was 2 * 2 = 4 years old.
-						That's an age difference of 2 years and I am older. Now I am 40
-						years old, so my brother is 40 - 2 = 38 years old. The answer
-						is 38.
-						Q: When I was 3 years old, my partner was 3 times my age. Now,
-						I am 20 years old. How old is my partner? Let's think step
-						by step.
-						A:
-						""")
-				.call()
-				.content();
+		String output = chatClient.prompt("""
+				Q: When my brother was 2 years old, I was double his age. Now
+				I am 40 years old. How old is my brother? Let's think step
+				by step.
+				A: When my brother was 2 years, I was 2 * 2 = 4 years old.
+				That's an age difference of 2 years and I am older. Now I am 40
+				years old, so my brother is 40 - 2 = 38 years old. The answer
+				is 38.
+				Q: When I was 3 years old, my partner was 3 times my age. Now,
+				I am 20 years old. How old is my partner? Let's think step
+				by step.
+				A:
+				""").call().content();
 
 		System.out.println("Output: " + output + "\n");
 
@@ -544,28 +468,22 @@ public class PromptEngineeringApplication {
 
 		record EmailClassification(Classification classification, String reasoning) {
 			enum Classification {
+
 				IMPORTANT, NOT_IMPORTANT
+
 			}
 		}
 
 		// Simplified version - only one classification for basic testing
-		EmailClassification output = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Email: {email}
-						Classify the above email as IMPORTANT or NOT IMPORTANT. Let's
-						think step by step and explain why.
-						""")
-						.param("email", email))
-				.options(ChatOptions.builder()
-						.model("claude-3-5-haiku-latest")
-						.temperature(1.0)
-						.topK(60)
-						.topP(0.9)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.entity(EmailClassification.class);
+		EmailClassification output = chatClient.prompt()
+			.user(u -> u.text("""
+					Email: {email}
+					Classify the above email as IMPORTANT or NOT IMPORTANT. Let's
+					think step by step and explain why.
+					""").param("email", email))
+			.options(ChatOptions.builder().temperature(1.0).topK(60).maxTokens(1024).build())
+			.call()
+			.entity(EmailClassification.class);
 
 		System.out.println("Classification: [" + output.classification() + "], Reason: " + output.reasoning());
 		System.out.println("The email is " + output.classification() + ".");
@@ -593,7 +511,9 @@ public class PromptEngineeringApplication {
 
 		record EmailClassification(Classification classification, String reasoning) {
 			enum Classification {
+
 				IMPORTANT, NOT_IMPORTANT
+
 			}
 		}
 
@@ -602,37 +522,31 @@ public class PromptEngineeringApplication {
 
 		for (int i = 0; i < 5; i++) {
 
-			EmailClassification output = chatClient
-					.prompt()
-					.user(u -> u.text("""
-							Email: {email}
-							Classify the above email as IMPORTANT or NOT IMPORTANT. Let's
-							think step by step and explain why.
-							""")
-							.param("email", email))
-					.options(ChatOptions.builder()
-							.model("claude-3-5-haiku-latest")
-							.temperature(1.0)
-							.topK(60)
-							.topP(0.9)
-							.maxTokens(1024)
-							.build())
-					.call()
-					.entity(EmailClassification.class);
+			EmailClassification output = chatClient.prompt()
+				.user(u -> u.text("""
+						Email: {email}
+						Classify the above email as IMPORTANT or NOT IMPORTANT. Let's
+						think step by step and explain why.
+						""").param("email", email))
+				.options(ChatOptions.builder().temperature(1.0).topK(60).maxTokens(1024).build())
+				.call()
+				.entity(EmailClassification.class);
 
 			if (output.classification() == EmailClassification.Classification.IMPORTANT) {
 				importantCount++;
-			} else {
+			}
+			else {
 				notImportantCount++;
 			}
 
 			System.out
-					.println("Classification: [" + output.classification() + "], Reason: " + output.reasoning() + "\n");
+				.println("Classification: [" + output.classification() + "], Reason: " + output.reasoning() + "\n");
 		}
 
 		if (importantCount > notImportantCount) {
 			System.out.println("The email is IMPORTANT. Count: " + importantCount);
-		} else {
+		}
+		else {
 			System.out.println("The email is NOT IMPORTANT. Count: " + notImportantCount);
 		}
 
@@ -642,57 +556,43 @@ public class PromptEngineeringApplication {
 	// Implementation of Section 2.7: Tree of Thoughts (ToT) - Game solving example
 	public void pt_tree_of_thoughts_game(ChatClient chatClient) {
 		// Step 1: Generate multiple initial moves
-		String initialMoves = chatClient
-				.prompt("""
-						You are playing a game of chess. The board is in the starting position.
-						Generate 3 different possible opening moves. For each move:
-						1. Describe the move in algebraic notation
-						2. Explain the strategic thinking behind this move
-						3. Rate the move's strength from 1-10
-						""")
-				.options(ChatOptions.builder()
-						.temperature(0.7)
-						.build())
-				.call()
-				.content();
+		String initialMoves = chatClient.prompt("""
+				You are playing a game of chess. The board is in the starting position.
+				Generate 3 different possible opening moves. For each move:
+				1. Describe the move in algebraic notation
+				2. Explain the strategic thinking behind this move
+				3. Rate the move's strength from 1-10
+				""").options(ChatOptions.builder().temperature(0.7).build()).call().content();
 
 		System.out.println("Initial Moves: " + initialMoves + "\n");
 
 		// Step 2: Evaluate and select the most promising move
-		String bestMove = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Analyze these opening moves and select the strongest one:
-						{moves}
+		String bestMove = chatClient.prompt().user(u -> u.text("""
+				Analyze these opening moves and select the strongest one:
+				{moves}
 
-						Explain your reasoning step by step, considering:
-						1. Position control
-						2. Development potential
-						3. Long-term strategic advantage
+				Explain your reasoning step by step, considering:
+				1. Position control
+				2. Development potential
+				3. Long-term strategic advantage
 
-						Then select the single best move.
-						""").param("moves", initialMoves))
-				.call()
-				.content();
+				Then select the single best move.
+				""").param("moves", initialMoves)).call().content();
 
 		System.out.println("Best Move: " + bestMove + "\n");
 
 		// Step 3: Explore future game states from the best move
-		String gameProjection = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Based on this selected opening move:
-						{best_move}
+		String gameProjection = chatClient.prompt().user(u -> u.text("""
+				Based on this selected opening move:
+				{best_move}
 
-						Project the next 3 moves for both players. For each potential branch:
-						1. Describe the move and counter-move
-						2. Evaluate the resulting position
-						3. Identify the most promising continuation
+				Project the next 3 moves for both players. For each potential branch:
+				1. Describe the move and counter-move
+				2. Evaluate the resulting position
+				3. Identify the most promising continuation
 
-						Finally, determine the most advantageous sequence of moves.
-						""").param("best_move", bestMove))
-				.call()
-				.content();
+				Finally, determine the most advantageous sequence of moves.
+				""").param("best_move", bestMove)).call().content();
 
 		System.out.println("Game Projection: " + gameProjection + "\n");
 	}
@@ -702,108 +602,79 @@ public class PromptEngineeringApplication {
 		String problem = "Design a system to recommend movies to users based on their viewing history.";
 
 		// Step 1: Generate multiple solution approaches
-		String approaches = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Problem: {problem}
+		String approaches = chatClient.prompt().user(u -> u.text("""
+				Problem: {problem}
 
-						Generate 3 different approaches to solve this problem:
-						1. A content-based filtering approach
-						2. A collaborative filtering approach
-						3. A hybrid approach
+				Generate 3 different approaches to solve this problem:
+				1. A content-based filtering approach
+				2. A collaborative filtering approach
+				3. A hybrid approach
 
-						For each approach, describe:
-						- The core algorithm/technique
-						- Key data requirements
-						- Potential advantages and limitations
-						""").param("problem", problem))
-				.call()
-				.content();
+				For each approach, describe:
+				- The core algorithm/technique
+				- Key data requirements
+				- Potential advantages and limitations
+				""").param("problem", problem)).call().content();
 
 		System.out.println("Approaches: " + approaches + "\n");
 
 		// Step 2: Evaluate approaches and select the most promising
-		String bestApproach = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Evaluate these solution approaches:
-						{approaches}
+		String bestApproach = chatClient.prompt().user(u -> u.text("""
+				Evaluate these solution approaches:
+				{approaches}
 
-						Compare them based on:
-						1. Scalability
-						2. Accuracy
-						3. Implementation complexity
-						4. Cold-start handling
+				Compare them based on:
+				1. Scalability
+				2. Accuracy
+				3. Implementation complexity
+				4. Cold-start handling
 
-						Select the most promising approach with detailed reasoning.
-						""").param("approaches", approaches))
-				.call()
-				.content();
-		
+				Select the most promising approach with detailed reasoning.
+				""").param("approaches", approaches)).call().content();
+
 		System.out.println("Best Approach: " + bestApproach + "\n");
 
 		// Step 3: Refine and elaborate on the selected approach
-		String refinedSolution = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Based on the selected approach:
-						{best_approach}
+		String refinedSolution = chatClient.prompt().user(u -> u.text("""
+				Based on the selected approach:
+				{best_approach}
 
-						Develop a detailed implementation plan:
-						1. System architecture
-						2. Data processing pipeline
-						3. Algorithm implementation details
-						4. Evaluation methodology
+				Develop a detailed implementation plan:
+				1. System architecture
+				2. Data processing pipeline
+				3. Algorithm implementation details
+				4. Evaluation methodology
 
-						Address any limitations identified earlier and propose solutions.
-						""").param("best_approach", bestApproach))
-				.call()
-				.content();
-		
+				Address any limitations identified earlier and propose solutions.
+				""").param("best_approach", bestApproach)).call().content();
+
 		System.out.println("Refined Solution: " + refinedSolution + "\n");
 	}
 	// 2.8 Automatic Prompt Engineering
 
 	public void pt_automatic_prompt_engineering(ChatClient chatClient) {
 
-		String orderVariants = chatClient
-				.prompt("""
-						We have a band merchandise t-shirt webshop, and to train a
-						chatbot we need various ways to order: "One Metallica t-shirt
-						size S". Generate 10 variants, with the same semantics but keep
-						the same meaning.
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.9)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String orderVariants = chatClient.prompt("""
+				We have a band merchandise t-shirt webshop, and to train a
+				chatbot we need various ways to order: "One Metallica t-shirt
+				size S". Generate 10 variants, with the same semantics but keep
+				the same meaning.
+				""").options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build()).call().content();
 
 		System.out.println("Variants: " + orderVariants + "\n");
 
-		String output = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Please perform BLEU (Bilingual Evaluation Understudy) evaluation on the following variants:
-						----
-						{variants}
-						----
+		String output = chatClient.prompt()
+			.user(u -> u.text("""
+					Please perform BLEU (Bilingual Evaluation Understudy) evaluation on the following variants:
+					----
+					{variants}
+					----
 
-						Select the instruction candidate with the highest evaluation score.
-						""").param("variants", orderVariants))
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(1.0)
-						.topK(40)
-						.topP(0.9)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+					Select the instruction candidate with the highest evaluation score.
+					""").param("variants", orderVariants))
+			.options(ChatOptions.builder().temperature(1.0).topK(40).maxTokens(1024).build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + output + "\n");
 
@@ -814,20 +685,11 @@ public class PromptEngineeringApplication {
 
 		// Goal: Write a prompt to write code in Bash to rename files in a folder.
 
-		String output = chatClient
-				.prompt("""
-						Write a code snippet in Bash, which asks for a folder name.
-						Then it takes the contents of the folder and renames all the
-						files inside by prepending the name draft to the file name.
-						""")
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(0.1)
-						.topP(1.0)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String output = chatClient.prompt("""
+				Write a code snippet in Bash, which asks for a folder name.
+				Then it takes the contents of the folder and renames all the
+				files inside by prepending the name draft to the file name.
+				""").options(ChatOptions.builder().temperature(0.1).maxTokens(1024).build()).call().content();
 
 		System.out.println("Output: " + output + "\n");
 
@@ -854,22 +716,16 @@ public class PromptEngineeringApplication {
 				echo "Files renamed successfully."
 				""";
 
-		String output = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Explain to me the below Bash code:
-						```
-						{code}
-						```
-						""").param("code", code))
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(0.1)
-						.topP(1.0)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String output = chatClient.prompt()
+			.user(u -> u.text("""
+					Explain to me the below Bash code:
+					```
+					{code}
+					```
+					""").param("code", code))
+			.options(ChatOptions.builder().temperature(0.1).maxTokens(1024).build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + output + "\n");
 
@@ -898,20 +754,14 @@ public class PromptEngineeringApplication {
 				```
 				""";
 
-		String output = chatClient
-				.prompt()
-				.user(u -> u.text("""
-						Translate the below Bash code to a Python snippet:
-						{code}
-						""").param("code", bashCode))
-				.options(ChatOptions.builder()
-						.model("claude-3-7-sonnet-latest")
-						.temperature(0.1)
-						.topP(1.0)
-						.maxTokens(1024)
-						.build())
-				.call()
-				.content();
+		String output = chatClient.prompt()
+			.user(u -> u.text("""
+					Translate the below Bash code to a Python snippet:
+					{code}
+					""").param("code", bashCode))
+			.options(ChatOptions.builder().temperature(0.1).maxTokens(1024).build())
+			.call()
+			.content();
 
 		System.out.println("Output: " + output + "\n");
 
