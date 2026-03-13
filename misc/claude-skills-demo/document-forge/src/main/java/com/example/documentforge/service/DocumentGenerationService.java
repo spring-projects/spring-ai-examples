@@ -14,10 +14,13 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.core.http.HttpResponse;
+import com.anthropic.models.beta.files.FileMetadata;
+
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.anthropic.AnthropicSkillsResponseHelper;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -41,7 +44,7 @@ public class DocumentGenerationService {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentGenerationService.class);
 
 	private final AnthropicChatModel chatModel;
-	private final AnthropicApi anthropicApi;
+	private final AnthropicClient anthropicClient;
 	private final String customSkillId;
 
 	// In-memory storage for generation history (session-based in real app)
@@ -51,10 +54,9 @@ public class DocumentGenerationService {
 
 	public DocumentGenerationService(
 			AnthropicChatModel chatModel,
-			AnthropicApi anthropicApi,
 			@org.springframework.beans.factory.annotation.Value("${document-forge.custom-skill-id:}") String customSkillId) {
 		this.chatModel = chatModel;
-		this.anthropicApi = anthropicApi;
+		this.anthropicClient = chatModel.getAnthropicClient();
 		this.customSkillId = customSkillId;
 	}
 
@@ -105,24 +107,14 @@ public class DocumentGenerationService {
 			List<GeneratedFile> files = new ArrayList<>();
 			for (String fileId : fileIds) {
 				try {
-					AnthropicApi.FileMetadata metadata = anthropicApi.getFileMetadata(fileId);
-					// Handle null size gracefully
-					long fileSize = metadata.size() != null ? metadata.size() : 0L;
-					String filename = metadata.filename() != null ? metadata.filename() : "document." + request.documentType().getExtension();
-					String mimeType = metadata.mimeType() != null ? metadata.mimeType() : "application/octet-stream";
-
-					files.add(new GeneratedFile(fileId, filename, fileSize, mimeType));
-					logger.info("File: {} ({} bytes)", filename, fileSize);
+					FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+					files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
+					logger.info("File: {} ({} bytes)", metadata.filename(), metadata.sizeBytes());
 				}
 				catch (Exception e) {
 					logger.warn("Failed to get metadata for file {}: {}", fileId, e.getMessage());
-					// Still add the file with minimal info so user can download it
-					files.add(new GeneratedFile(
-							fileId,
-							"document." + request.documentType().getExtension(),
-							0L,
-							"application/octet-stream"
-					));
+					files.add(new GeneratedFile(fileId, "document." + request.documentType().getExtension(), 0L,
+							"application/octet-stream"));
 				}
 			}
 
@@ -206,15 +198,9 @@ public class DocumentGenerationService {
 			List<GeneratedFile> files = new ArrayList<>();
 			for (String fileId : fileIds) {
 				try {
-					AnthropicApi.FileMetadata metadata = anthropicApi.getFileMetadata(fileId);
-					long fileSize = metadata.size() != null ? metadata.size() : 0L;
-					String outputFilename = metadata.filename() != null ? metadata.filename()
-							: "document." + request.documentType().getExtension();
-					String mimeTypeStr = metadata.mimeType() != null ? metadata.mimeType()
-							: "application/octet-stream";
-
-					files.add(new GeneratedFile(fileId, outputFilename, fileSize, mimeTypeStr));
-					logger.info("File: {} ({} bytes)", outputFilename, fileSize);
+					FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+					files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
+					logger.info("File: {} ({} bytes)", metadata.filename(), metadata.sizeBytes());
 				}
 				catch (Exception e) {
 					logger.warn("Failed to get metadata for file {}: {}", fileId, e.getMessage());
@@ -384,13 +370,8 @@ public class DocumentGenerationService {
 		List<GeneratedFile> files = new ArrayList<>();
 		for (String fileId : fileIds) {
 			try {
-				AnthropicApi.FileMetadata metadata = anthropicApi.getFileMetadata(fileId);
-				long fileSize = metadata.size() != null ? metadata.size() : 0L;
-				String filename = metadata.filename() != null ? metadata.filename()
-						: "document." + documentType.getExtension();
-				String mimeType = metadata.mimeType() != null ? metadata.mimeType() : "application/octet-stream";
-
-				files.add(new GeneratedFile(fileId, filename, fileSize, mimeType));
+				FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+				files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
 			}
 			catch (Exception e) {
 				logger.warn("Failed to get metadata for file {}: {}", fileId, e.getMessage());
@@ -441,14 +422,19 @@ public class DocumentGenerationService {
 	 */
 	public byte[] downloadFile(String fileId) {
 		logger.info("Downloading file: {}", fileId);
-		return anthropicApi.downloadFile(fileId);
+		try (HttpResponse httpResponse = anthropicClient.beta().files().download(fileId)) {
+			return httpResponse.body().readAllBytes();
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Failed to download file: " + fileId, e);
+		}
 	}
 
 	/**
 	 * Get file metadata.
 	 */
-	public AnthropicApi.FileMetadata getFileMetadata(String fileId) {
-		return anthropicApi.getFileMetadata(fileId);
+	public FileMetadata getFileMetadata(String fileId) {
+		return anthropicClient.beta().files().retrieveMetadata(fileId);
 	}
 
 	/**

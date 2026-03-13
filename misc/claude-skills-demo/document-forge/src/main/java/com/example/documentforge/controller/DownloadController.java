@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.documentforge.service.DocumentGenerationService;
+import com.anthropic.models.beta.files.FileMetadata;
 
-import org.springframework.ai.anthropic.api.AnthropicApi;
+import com.example.documentforge.service.DocumentGenerationService;
 
 /**
  * Controller for file downloads.
@@ -37,7 +37,7 @@ public class DownloadController {
 
 		try {
 			// Get file metadata
-			AnthropicApi.FileMetadata metadata = generationService.getFileMetadata(fileId);
+			FileMetadata metadata = generationService.getFileMetadata(fileId);
 
 			// Download file content
 			byte[] content = generationService.downloadFile(fileId);

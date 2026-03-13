@@ -1,6 +1,6 @@
 package com.example.documentforge.model;
 
-import org.springframework.ai.anthropic.api.AnthropicApi.AnthropicSkill;
+import org.springframework.ai.anthropic.AnthropicSkill;
 
 /**
  * Supported document types for generation.
