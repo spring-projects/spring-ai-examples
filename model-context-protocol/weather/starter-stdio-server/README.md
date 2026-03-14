@@ -138,7 +138,6 @@ CallToolResult alerts = client.callTool(
 ServerParameters stdioParams = ServerParameters.builder("java")
     .args("-Dspring.ai.mcp.server.transport=STDIO",
           "-Dspring.main.web-application-type=none",
-          "-Dlogging.pattern.console=",
           "-jar",
           "target/mcp-weather-stdio-server-0.0.1-SNAPSHOT.jar")
     .build();
@@ -164,7 +163,6 @@ Use the [starter-default-client](../../client-starter/starter-default-client) to
 java -Dspring.ai.mcp.client.stdio.connections.server1.command=java \
      -Dspring.ai.mcp.client.stdio.connections.server1.args=-jar,/Users/christiantzolov/Dev/projects/spring-ai-examples/model-context-protocol/weather/starter-stdio-server/target/mcp-weather-stdio-server-0.0.1-SNAPSHOT.jar \
      -Dai.user.input='What is the weather in NY?' \
-     -Dlogging.pattern.console= \
      -jar mcp-starter-default-client-0.0.1-SNAPSHOT.jar
 ```
 
@@ -180,7 +178,6 @@ To integrate with Claude Desktop, add the following configuration to your Claude
       "args": [
         "-Dspring.ai.mcp.server.stdio=true",
         "-Dspring.main.web-application-type=none",
-        "-Dlogging.pattern.console=",
         "-jar",
         "/absolute/path/to/mcp-weather-stdio-server-0.0.1-SNAPSHOT.jar"
       ]
@@ -201,7 +198,6 @@ All properties are prefixed with `spring.ai.mcp.server`:
 # Required STDIO Configuration
 spring.main.web-application-type=none
 spring.main.banner-mode=off
-logging.pattern.console=
 
 # Server Configuration
 spring.ai.mcp.server.enabled=true
@@ -217,12 +213,35 @@ spring.ai.mcp.server.prompt-change-notification=true
 logging.file.name=mcp-weather-stdio-server.log
 ```
 
+### Logback Configuration
+
+Redirect all console logs to stderr with `logback-spring.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+    <appender name="CONSOLE_LOG_STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${CONSOLE_LOG_CHARSET}</charset>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE_LOG_STDERR" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
+```
+
 ### Key Configuration Notes
 
 1. **STDIO Mode Requirements**
    - Disable web application type (`spring.main.web-application-type=none`)
    - Disable Spring banner (`spring.main.banner-mode=off`)
-   - Clear console logging pattern (`logging.pattern.console=`)
+   - Configure Logback to output to stderr (`logback-spring.xml`)
 
 2. **Server Type**
    - `SYNC` (default): Uses `McpSyncServer` for straightforward request-response patterns
