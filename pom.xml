@@ -10,7 +10,7 @@
 	<packaging>pom</packaging>
 	<url>https://github.com/spring-projects/spring-ai</url>
 
-	<name>Spring AI</name>
+    <name>Spring AI</name>
 	<description>Building AI applications with Spring Boot</description>
 
 	<modules>
@@ -26,6 +26,7 @@
 		<module>misc/claude-skills-demo/document-forge</module>
 
 		<module>models/chat/helloworld</module>
+        <module>models/chat/ollama-chat</module>
 
 		<module>model-context-protocol/sqlite/simple</module>
 		<module>model-context-protocol/sqlite/chatbot</module>
