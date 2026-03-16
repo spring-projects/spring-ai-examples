@@ -1,11 +1,11 @@
 package org.springframework.ai.mcp.sample.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.modelcontextprotocol.json.McpJsonDefaults;
 import io.modelcontextprotocol.json.McpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
-import io.modelcontextprotocol.server.transport.WebFluxSseServerTransportProvider;
+import org.springframework.ai.mcp.server.webflux.transport.WebFluxSseServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
@@ -23,7 +23,7 @@ public class McpServerConfig {
 	@Bean
 	@ConditionalOnProperty(prefix = "transport", name = "mode", havingValue = "stdio")
 	public StdioServerTransportProvider stdioServerTransportProvider() {
-		return new StdioServerTransportProvider(McpJsonMapper.createDefault());
+		return new StdioServerTransportProvider(McpJsonDefaults.getMapper());
 	}
 
 	// SSE transport

@@ -20,6 +20,7 @@ import java.io.File;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
 
+import io.modelcontextprotocol.json.McpJsonDefaults;
 import io.modelcontextprotocol.json.McpJsonMapper;
 
 /**
@@ -38,7 +39,7 @@ public class ClientStdio {
 					"model-context-protocol/weather/manual-webflux-server/target/mcp-weather-server-0.0.1-SNAPSHOT.jar")
 			.build();
 
-		var transport = new StdioClientTransport(stdioParams, McpJsonMapper.createDefault());
+		var transport = new StdioClientTransport(stdioParams, McpJsonDefaults.getMapper());
 
 		new SampleClient(transport).run();
 	}

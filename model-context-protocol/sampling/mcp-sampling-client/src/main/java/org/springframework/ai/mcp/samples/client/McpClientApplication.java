@@ -26,7 +26,8 @@ import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
-import org.springframework.ai.mcp.customizer.McpSyncClientCustomizer;
+import io.modelcontextprotocol.client.McpClient;
+import org.springframework.ai.mcp.customizer.McpClientCustomizer;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -62,7 +63,7 @@ public class McpClientApplication {
 	}
 
 	@Bean
-	McpSyncClientCustomizer samplingCustomizer(Map<String, ChatClient> chatClients) {
+	McpClientCustomizer<McpClient.SyncSpec> samplingCustomizer(Map<String, ChatClient> chatClients) {
 
 		return (name, mcpClientSpec) -> {
 			
