@@ -62,6 +62,7 @@
 		<module>advisors/recursive-advisor-demo</module>
 		<module>advisors/tool-argument-augmenter-demo</module>
 		<module>advisors/evaluation-recursive-advisor-demo</module>
+		<module>advisors/jamjet-durable-agent-demo</module>
 		
 	</modules>
 
