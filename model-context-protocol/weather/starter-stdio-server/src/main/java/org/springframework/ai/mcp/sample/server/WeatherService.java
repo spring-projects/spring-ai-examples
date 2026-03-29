@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -45,42 +44,42 @@ public class WeatherService {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record Points(@JsonProperty("properties") Props properties) {
+	public record Points(Props properties) {
 		@JsonIgnoreProperties(ignoreUnknown = true)
-		public record Props(@JsonProperty("forecast") String forecast) {
+		public record Props(String forecast) {
 		}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record Forecast(@JsonProperty("properties") Props properties) {
+	public record Forecast(Props properties) {
 		@JsonIgnoreProperties(ignoreUnknown = true)
-		public record Props(@JsonProperty("periods") List<Period> periods) {
+		public record Props(List<Period> periods) {
 		}
 
 		@JsonIgnoreProperties(ignoreUnknown = true)
-		public record Period(@JsonProperty("number") Integer number, @JsonProperty("name") String name,
-				@JsonProperty("startTime") String startTime, @JsonProperty("endTime") String endTime,
-				@JsonProperty("isDaytime") Boolean isDayTime, @JsonProperty("temperature") Integer temperature,
-				@JsonProperty("temperatureUnit") String temperatureUnit,
-				@JsonProperty("temperatureTrend") String temperatureTrend,
-				@JsonProperty("probabilityOfPrecipitation") Map probabilityOfPrecipitation,
-				@JsonProperty("windSpeed") String windSpeed, @JsonProperty("windDirection") String windDirection,
-				@JsonProperty("icon") String icon, @JsonProperty("shortForecast") String shortForecast,
-				@JsonProperty("detailedForecast") String detailedForecast) {
+		public record Period(Integer number, String name,
+				String startTime, String endTime,
+				Boolean isDayTime, Integer temperature,
+				String temperatureUnit,
+				String temperatureTrend,
+				Map probabilityOfPrecipitation,
+				String windSpeed, String windDirection,
+				String icon, String shortForecast,
+				String detailedForecast) {
 		}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public record Alert(@JsonProperty("features") List<Feature> features) {
+	public record Alert(List<Feature> features) {
 
 		@JsonIgnoreProperties(ignoreUnknown = true)
-		public record Feature(@JsonProperty("properties") Properties properties) {
+		public record Feature(Properties properties) {
 		}
 
 		@JsonIgnoreProperties(ignoreUnknown = true)
-		public record Properties(@JsonProperty("event") String event, @JsonProperty("areaDesc") String areaDesc,
-				@JsonProperty("severity") String severity, @JsonProperty("description") String description,
-				@JsonProperty("instruction") String instruction) {
+		public record Properties(String event, String areaDesc,
+				String severity, String description,
+				String instruction) {
 		}
 	}
 
