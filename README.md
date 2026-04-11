@@ -30,3 +30,10 @@
 - Install dependencies for this module before execution.
 - Use the standard project command to build and run (for example Maven, Gradle, npm, or Python entrypoint scripts in this repository).
 
+
+## Contributor Quick Verification
+<!-- clean-diff-b30-readme -->
+
+- Build with the project-recommended command
+- Run tests before opening PR
+- Keep each PR scoped to one concern
