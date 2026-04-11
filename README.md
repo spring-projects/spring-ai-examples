@@ -30,3 +30,13 @@
 - Install dependencies for this module before execution.
 - Use the standard project command to build and run (for example Maven, Gradle, npm, or Python entrypoint scripts in this repository).
 
+
+## Contributor Quick Verification
+<!-- codex-batch30-readme -->
+
+Before opening a PR, run these quick checks locally:
+
+- Build: `git status`
+- Tests: `(no dedicated test command documented)`
+- Keep changes focused: one topic per PR with a clear title
+
