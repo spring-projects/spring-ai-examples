@@ -6,6 +6,16 @@ This project demonstrates practical implementations of the workflow patterns for
 
 The project provides concrete implementations of five fundamental workflow patterns that can be used to build effective LLM-based systems. Each pattern is implemented as a separate module with its own specific use cases and benefits.
 
+## Workflow Quick Reference
+
+| Pattern | Best for | Module |
+| --- | --- | --- |
+| Chain Workflow | Sequential, step-by-step transformations | [chain-workflow/](chain-workflow/) |
+| Parallelization Workflow | Concurrent processing or voting across independent tasks | [parallelization-workflow/](parallelization-workflow/) |
+| Routing Workflow | Classifying requests before sending them to specialized handlers | [routing-workflow/](routing-workflow/) |
+| Orchestrator-Workers | Dynamic task decomposition with specialist workers | [orchestrator-workers/](orchestrator-workers/) |
+| Evaluator-Optimizer | Iterative refinement with explicit evaluation feedback | [evaluator-optimizer/](evaluator-optimizer/) |
+
 ## Workflow Patterns
 
 ### 1. Chain Workflow
@@ -24,7 +34,7 @@ Implements prompt chaining to decompose tasks into a sequence of LLM calls where
 - Document generation with structured steps
 
 ### 2. Parallelization Workflow
-[parallelization-worflow/](parallelization-worflow/)
+[parallelization-workflow/](parallelization-workflow/)
 
 Enables concurrent processing of multiple LLM operations with two key variations:
 - **Sectioning**: Breaking tasks into independent subtasks run in parallel
