@@ -22,6 +22,34 @@ This workflow is particularly effective when:
 - Classification can be handled accurately by an LLM
 - Different types of input require different expertise or processing approaches
 
+## Technical Requirements
+
+- Java 17 or higher
+- Maven 3.6+
+- Anthropic API key exported as `ANTHROPIC_API_KEY`
+
+## Getting Started
+
+1. Export your Anthropic API key:
+
+   ```bash
+   export ANTHROPIC_API_KEY=<INSERT KEY HERE>
+   ```
+
+2. Build the module:
+
+   ```bash
+   ./mvnw clean install
+   ```
+
+3. Run the example:
+
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+The sample application routes example support tickets to different specialized handlers and prints the selected responses to the console.
+
 ## Usage Example
 
 ```java
@@ -69,7 +97,7 @@ The implementation consists of two main components:
    - Selects appropriate route
    - Processes input with specialized prompt
 
-2. `RouteResponse`: Record class that encapsulates routing decisions
+2. `RoutingResponse`: Record class that encapsulates routing decisions
    - Stores reasoning behind route selection
    - Maintains selected route information
 
