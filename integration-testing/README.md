@@ -13,10 +13,9 @@ integration-testing/
 │   └── IntegrationTestUtils.java  # Common testing functionality
 ├── docs/                      # Integration testing documentation
 │   └── README.md             # Detailed integration testing guide
-└── logs/                     # Centralized log storage
-    ├── background-runs/      # Main test run logs from rit-direct.sh
-    └── integration-tests/    # Individual JBang test logs
 ```
+
+Runtime log directories are created on demand by `run-integration-tests.sh` under `integration-testing/logs/` and are not committed to the repository tree.
 
 ## Quick Start
 
@@ -24,9 +23,6 @@ integration-testing/
 ```bash
 # Recommended: Direct execution with reliable port cleanup
 ./integration-testing/scripts/run-integration-tests.sh
-
-# Alternative: Use the legacy Python orchestrator (may have hanging issues - use run-integration-tests.sh instead)
-# python3 integration-testing/scripts/run_integration_tests.py  # REMOVED - obsolete
 ```
 
 ### Create New Integration Test
@@ -141,6 +137,8 @@ logs/
 └── integration-tests/         # Individual Spring Boot application logs
     └── MODULE-spring-boot-TIMESTAMP.log
 ```
+
+These directories are created the first time `run-integration-tests.sh` is executed.
 
 ### **Persistent Logging Template** (JBang Scripts)
 ```java
