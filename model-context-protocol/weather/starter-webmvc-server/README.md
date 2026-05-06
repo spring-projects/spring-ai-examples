@@ -7,7 +7,7 @@ For more information, see the [MCP Server Boot Starter](https://docs.spring.io/s
 ## Overview
 
 The sample showcases:
-- Integration with `spring-ai-mcp-server-webmvc-spring-boot-starter`
+- Integration with `spring-ai-starter-mcp-server-webmvc`
 - Support for both SSE (Server-Sent Events) and STDIO transports
 - Automatic tool registration using Spring AI's `@Tool` annotation
 - Two weather-related tools:
@@ -21,7 +21,7 @@ The project requires the Spring AI MCP Server WebMVC Boot Starter:
 ```xml
 <dependency>
     <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-mcp-server-webmvc-spring-boot-starter</artifactId>
+    <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
 </dependency>
 ```
 
