@@ -6,24 +6,29 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.7</version>
+        <version>4.0.1</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>com.example</groupId>
 
-    <artifactId>mcp-server-starter</artifactId>
+    <artifactId>mcp-sampling-server-annotations</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>Spring AI MCP Server Starer</name>
-    <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
+    <name>Spring AI MCP Sampling - Weather Server</name>
+    <description>Sample Spring Boot application demonstrating MCP client and server sampling usage</description>
+
+	<properties>
+		<java.version>17</java.version>
+		<spring-ai.version>2.0.0</spring-ai.version>
+	</properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>2.0.0</version>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -33,14 +38,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-mcp-server-webflux</artifactId>
-        </dependency>
-
-        <!-- Netty DNS resolver for macOS -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-resolver-dns-native-macos</artifactId>
-            <classifier>osx-aarch_64</classifier>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
         </dependency>
     </dependencies>
 

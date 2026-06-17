@@ -19,11 +19,12 @@ import java.util.Map;
 
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.spec.McpClientTransport;
-import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;
+import io.modelcontextprotocol.spec.McpSchema.Role;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 import org.springframework.ai.chat.model.ToolContext;
 
@@ -41,14 +42,11 @@ public class SampleClient {
 
 	public void run() {
 
-		var client = McpClient.sync(this.transport)
-				.sampling(request -> {
-					System.out.println("Received a new message: " + request);
-					return CreateMessageResult.builder()
-							.content(new McpSchema.TextContent("Bla bla bla"))
-							.build();
-				})
+		var client = McpClient.sync(this.transport).sampling(request -> {
+			System.out.println("Received a new message: " + request);
+			return CreateMessageResult.builder(Role.ASSISTANT, TextContent.builder("Bla bla bla").build(), "some")
 				.build();
+		}).build();
 
 		client.initialize();
 
@@ -58,8 +56,11 @@ public class SampleClient {
 		ListToolsResult toolsList = client.listTools();
 		System.out.println("Available Tools = " + toolsList);
 
-		CallToolResult weatherForcastResult = client.callTool(new CallToolRequest("getTemperature",
-				Map.of("latitude", "47.6062", "longitude", "-122.3321", "toolContext", new ToolContext(Map.of()))));
+		var callToolRequest = CallToolRequest.builder("getTemperature")
+			.arguments(
+					Map.of("latitude", "47.6062", "longitude", "-122.3321", "toolContext", new ToolContext(Map.of())))
+			.build();
+		CallToolResult weatherForcastResult = client.callTool(callToolRequest);
 		System.out.println("Weather Forcast: " + weatherForcastResult);
 
 		client.closeGracefully();

@@ -19,17 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.modelcontextprotocol.client.McpClient;
-import io.modelcontextprotocol.client.McpSyncClient;
-import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
-import io.modelcontextprotocol.spec.McpSchema.Role;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
-
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
-import org.springframework.ai.mcp.customizer.McpClientCustomizer;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -40,17 +33,15 @@ public class McpClientApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(McpClientApplication.class, args).close();
-		;
 	}
 
 	@Bean
-	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel, List<McpSyncClient> mcpClients) {
+	public CommandLineRunner predefinedQuestions(OpenAiChatModel openAiChatModel,
+			ToolCallbackProvider toolCallbackProvider) {
 
 		return args -> {
 
-			var mcpToolProvider = SyncMcpToolCallbackProvider.builder().mcpClients(mcpClients).build();
-
-			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultTools(mcpToolProvider).build();
+			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultTools(toolCallbackProvider).build();
 
 			String userQuestion = """
 					What is the weather in Amsterdam right now?
@@ -64,44 +55,10 @@ public class McpClientApplication {
 	}
 
 	@Bean
-	McpClientCustomizer<McpClient.SyncSpec> samplingCustomizer(Map<String, ChatClient> chatClients) {
-
-		return (name, mcpClientSpec) -> {
-
-			mcpClientSpec = mcpClientSpec.loggingConsumer(logingMessage -> {
-				System.out.println("MCP LOGGING: [" + logingMessage.level() + "] " + logingMessage.data());
-			});
-
-			mcpClientSpec.sampling(llmRequest -> {
-				var userPrompt = ((TextContent) llmRequest.messages().get(0).content()).text();
-				String modelHint = llmRequest.modelPreferences().hints().get(0).name();
-
-				ChatClient hintedChatClient = chatClients.entrySet()
-					.stream()
-					.filter(e -> e.getKey().contains(modelHint))
-					.findFirst()
-					.orElseThrow()
-					.getValue();
-
-				String response = hintedChatClient.prompt()
-					.system(llmRequest.systemPrompt())
-					.user(userPrompt)
-					.call()
-					.content();
-
-				return CreateMessageResult.builder(Role.ASSISTANT, TextContent.builder(response).build(), modelHint)
-					.build();
-			});
-		};
-	}
-
-	@Bean
 	public Map<String, ChatClient> chatClients(List<ChatModel> chatModels) {
-
 		return chatModels.stream()
 			.collect(Collectors.toMap(model -> model.getClass().getSimpleName().toLowerCase(),
 					model -> ChatClient.builder(model).build()));
-
 	}
 
 }

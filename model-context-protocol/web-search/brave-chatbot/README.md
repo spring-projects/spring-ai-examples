@@ -1,61 +1,42 @@
-# Spring AI - Model Context Protocol (MCP) Brave Search Chatbot
+# Spring AI - MCP Brave Search Chatbot
 
-This example demonstrates how to build an interactive chatbot that combines Spring AI's Model Context Protocol (MCP) with the [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search). The application creates a persistent chatbot that maintains conversation history using Spring AI's Memory Advisor, allowing for contextual interactions across multiple exchanges. Users can engage in an ongoing conversation with the bot, which can perform internet searches through Brave Search to provide up-to-date information. The chatbot runs continuously until terminated with Ctrl-C, maintaining conversational state throughout the session.
-
-The application is powered by Anthropic's Claude AI model and can perform internet searches through Brave Search, enabling natural language interactions with real-time web data while maintaining context of the conversation.
+Interactive chatbot combining Spring AI's Model Context Protocol (MCP) with the [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search). Maintains conversation history via `MessageChatMemoryAdvisor` with an explicit conversation ID, and performs real-time web searches through Brave Search.
 
 <img src="spring-ai-mcp-brave.jpg" width="600"/>
 
 ## Prerequisites
 
-- Java 17 or higher
+- Java 17+
 - Maven 3.6+
-- npx package manager
-- Anthropic API key (Claude) (Get one at https://docs.anthropic.com/en/docs/initial-setup)
-- Brave Search API key (Get one at https://brave.com/search/api/)
+- npx (via [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm))
+- Anthropic API key — [get one here](https://docs.anthropic.com/en/docs/initial-setup)
+- Brave Search API key — [get one here](https://brave.com/search/api/)
 
 ## Setup
 
-1. Install npx (Node Package eXecute):
-   First, make sure to install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-   and then run:
-   ```bash
-   npm install -g npx
-   ```
+```bash
+npm install -g npx
 
-2. Clone the repository:
-   ```bash
-   git clone https://github.com/spring-projects/spring-ai-examples.git
-   cd spring-ai-examples/model-context-protocol/web-search/brave-chatbot
-   ```
+git clone https://github.com/spring-projects/spring-ai-examples.git
+cd spring-ai-examples/model-context-protocol/web-search/brave-chatbot
 
-3. Set up your API keys:
-   ```bash
-   export ANTHROPIC_API_KEY='your-anthropic-api-key-here'
-   export BRAVE_API_KEY='your-brave-api-key-here'
-   ```
+export ANTHROPIC_API_KEY='your-anthropic-api-key'
+export BRAVE_API_KEY='your-brave-api-key'
 
-4. Build the application:
-   ```bash
-   ./mvnw clean install
-   ```
+./mvnw clean install
+```
 
-## Running the Application
+## Running
 
-Run the application using Maven:
 ```bash
 ./mvnw spring-boot:run
 ```
 
-The application will start an interactive chat session where you can ask questions. The chatbot will use Brave Search when it needs to find information from the internet to answer your queries.
+An interactive chat session starts. Ask anything — the bot uses Brave Search for real-time web data and remembers prior turns in the session.
 
-## How it Works
+## How It Works
 
-The application integrates Spring AI with the Brave Search MCP server through several components:
-
-### MCP Client Configuration
-
-1. Required dependencies in pom.xml:
+**Dependencies** (`pom.xml`):
 ```xml
 <dependency>
     <groupId>org.springframework.ai</groupId>
@@ -67,91 +48,43 @@ The application integrates Spring AI with the Brave Search MCP server through se
 </dependency>
 ```
 
-2. Application properties (application.yml):
-```yaml
-spring:
-  ai:
-    mcp:
-      client:
-        enabled: true
-        name: brave-search-client
-        version: 1.0.0
-        type: SYNC  # or ASYNC for reactive applications
-        request-timeout: 20s
-        stdio:
-          root-change-notification: true
-          servers-configuration: classpath:/mcp-servers-config.json
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
-```
-
-3. MCP Server Configuration (mcp-servers-config.json):
+**MCP server config** (`mcp-servers-config.json`):
 ```json
 {
   "mcpServers": {
     "brave-search": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-brave-search"
-      ],
-      "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      }
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
     }
   }
 }
 ```
 
-### Client Types
-
-The MCP client supports two types of implementations:
-
-- **Synchronous (default)**: Uses blocking operations, suitable for traditional request-response patterns
-- **Asynchronous**: Uses non-blocking operations, suitable for reactive applications
-
-You can switch between these types using the `spring.ai.mcp.client.type` property (SYNC or ASYNC).
-
-### Chat Implementation
-
-The chatbot is implemented using Spring AI's ChatClient with MCP tool integration:
-
+**Chat client setup**:
 ```java
 var chatClient = chatClientBuilder
-    .defaultSystem("You are a useful assistant, expert in AI and Java.")
-    .defaultToolCallbacks((Object[]) mcpToolAdapter.toolCallbacks())
-    .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
+    .defaultSystem("You are a useful assistant that can perform web searches via Brave's search API.")
+    .defaultTools(SyncMcpToolCallbackProvider.builder().mcpClients(mcpSyncClients).build())
+    .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
     .build();
+
+var conversationId = UUID.randomUUID().toString();
+
+chatClient.prompt(userInput)
+    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+    .call()
+    .content();
 ```
 
-Key features:
-- Uses Claude AI model for natural language understanding
-- Integrates Brave Search through MCP for real-time web search capabilities
-- Maintains conversation memory using InMemoryChatMemory
-- Runs as an interactive command-line application
+Key points:
+- Uses `SyncMcpToolCallbackProvider.builder()` (Spring AI 2.0.0 API)
+- A stable `conversationId` keeps memory scoped to the current session
+- Runs until Ctrl-C
 
-The chatbot can:
-- Answer questions using its built-in knowledge
-- Perform web searches when needed using Brave Search
-- Remember context from previous messages in the conversation
-- Combine information from multiple sources to provide comprehensive answers
+## Versions
 
-### Advanced Configuration
-
-The MCP client supports additional configuration options:
-
-- Client customization through `McpSyncClientCustomizer` or `McpAsyncClientCustomizer`
-- Multiple transport types: STDIO and SSE (Server-Sent Events)
-- Integration with Spring AI's tool execution framework
-- Automatic client initialization and lifecycle management
-
-For WebFlux-based applications, you can use the WebFlux starter instead:
-
-```xml
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>
-</dependency>
-```
-
-This provides similar functionality but uses a WebFlux-based SSE transport implementation, recommended for production deployments.
+| Dependency | Version |
+|---|---|
+| Spring Boot | 4.0.7 |
+| Spring AI | 2.0.0 |

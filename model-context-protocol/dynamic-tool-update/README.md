@@ -90,7 +90,7 @@ The client retrieves the available tools before and after the update:
 // Get initial tools
 List<ToolDescription> toolDescriptions = chatClientBuilder.build()
         .prompt("What tools are available?")
-        .toolCallbacks(tools)
+        .tools(tools)
         .call()
         .entity(new ParameterizedTypeReference<List<ToolDescription>>() {});
 
@@ -104,7 +104,7 @@ latch.await();
 // Get updated tools
 toolDescriptions = chatClientBuilder.build()
         .prompt("What tools are available?")
-        .toolCallbacks(tools)
+        .tools(tools)
         .call()
         .entity(new ParameterizedTypeReference<List<ToolDescription>>() {});
 ```

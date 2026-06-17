@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import io.modelcontextprotocol.client.McpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.ai.chat.client.ChatClient;
-import io.modelcontextprotocol.client.McpClient;
 import org.springframework.ai.mcp.customizer.McpClientCustomizer;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
@@ -46,7 +46,7 @@ public class ClientApplication {
 
 	public static record ToolDescription(String toolName, String toolDescription) {
 		@Override
-		public final String toString() {			
+		public final String toString() {
 			return "Tool: " + toolName + " -> " + toolDescription;
 		}
 	}
@@ -59,18 +59,21 @@ public class ClientApplication {
 			logger.info("1) Get Available Tools: ");
 
 			List<ToolDescription> toolDescriptions = chatClientBuilder.build()
-					.prompt("What tools are available? Please list them and avoid any additional comments. Only JSON format.")
-					.toolCallbacks(tools)
-					.call()
-					.entity(new ParameterizedTypeReference<List<ToolDescription>>() {
-					});
+				.prompt("What tools are available? Please list them and avoid any additional comments. Only JSON format.")
+				.tools(tools)
+				.call()
+				.entity(new ParameterizedTypeReference<List<ToolDescription>>() {
+				});
 
-		
 			logger.info(toolDescriptions.stream().map(td -> td.toString()).collect(Collectors.joining("\n")));
 
 			// signal the server to update the tools
-			String signal = RestClient.builder().build().get()
-					.uri("http://localhost:8080/updateTools").retrieve().body(String.class);
+			String signal = RestClient.builder()
+				.build()
+				.get()
+				.uri("http://localhost:8080/updateTools")
+				.retrieve()
+				.body(String.class);
 			logger.info("Server tool update response: " + signal);
 
 			latch.await();
@@ -78,11 +81,11 @@ public class ClientApplication {
 			logger.info("2) Get Available Tools: ");
 
 			toolDescriptions = chatClientBuilder.build()
-					.prompt("What tools are available? Please list them and avoid any additional comments. Only JSON format.")
-					.toolCallbacks(tools)
-					.call()
-					.entity(new ParameterizedTypeReference<List<ToolDescription>>() {
-					});
+				.prompt("What tools are available? Please list them and avoid any additional comments. Only JSON format.")
+				.tools(tools)
+				.call()
+				.entity(new ParameterizedTypeReference<List<ToolDescription>>() {
+				});
 			logger.info(toolDescriptions.stream().map(td -> td.toString()).collect(Collectors.joining("\n")));
 		};
 	}
@@ -96,4 +99,5 @@ public class ClientApplication {
 			});
 		};
 	}
+
 }

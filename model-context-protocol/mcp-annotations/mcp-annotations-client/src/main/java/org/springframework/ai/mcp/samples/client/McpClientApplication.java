@@ -43,8 +43,7 @@ public class McpClientApplication {
 	}
 
 	@Bean
-	public CommandLineRunner predefinedQuestions(
-			List<McpSyncClient> mcpClients) {
+	public CommandLineRunner predefinedQuestions(List<McpSyncClient> mcpClients) {
 
 		return args -> {
 
@@ -52,18 +51,16 @@ public class McpClientApplication {
 				System.out.println(">>> MCP Client: " + mcpClient.getClientInfo());
 
 				// Call a tool that sends progress notifications
-				CallToolRequest toolRequest = CallToolRequest.builder()
-						.name("tool1")
-						.arguments(Map.of("input", "test input"))
-						.progressToken(666)
-						.build();
+				CallToolRequest toolRequest = CallToolRequest.builder("tool1")
+					.arguments(Map.of("input", "test input"))
+					.progressToken(666)
+					.build();
 				CallToolResult response = mcpClient.callTool(toolRequest);
 				System.out.println("Tool response: " + response);
 
-				CompleteResult nameCompletion = mcpClient.completeCompletion(
-					new CompleteRequest(
-						new PromptReference("personalized-message"), 
-						new CompleteArgument("name", "J")));
+				CompleteResult nameCompletion = mcpClient.completeCompletion(CompleteRequest
+					.builder(new PromptReference("personalized-message"), new CompleteArgument("name", "J"))
+					.build());
 
 				System.out.println("Name completions: " + nameCompletion.completion());
 
@@ -71,25 +68,30 @@ public class McpClientApplication {
 
 				try {
 					GetPromptResult promptResponse = mcpClient
-						.getPrompt(new GetPromptRequest("personalized-message", Map.of("name", nameValue)));
+						.getPrompt(GetPromptRequest.builder("personalized-message")
+							.arguments(Map.of("name", nameValue))
+							.build());
 
 					System.out.println("Prompt response: " + promptResponse);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Error getting prompt: " + e.getMessage());
 				}
 
-				nameCompletion = mcpClient.completeCompletion(
-					new CompleteRequest(
-						new ResourceReference("user-status://{username}"), 
-						new CompleteArgument("username", "J")));
+				nameCompletion = mcpClient.completeCompletion(CompleteRequest
+					.builder(new ResourceReference("user-status://{username}"), new CompleteArgument("username", "J"))
+					.build());
 
 				System.out.println("Name completions: " + nameCompletion.completion());
 
-				var resourceResponse = mcpClient.readResource(new ReadResourceRequest("user-status://" + nameCompletion.completion().values().get(0)));
+				var resourceResponse = mcpClient.readResource(
+						ReadResourceRequest.builder("user-status://" + nameCompletion.completion().values().get(0))
+							.build());
 
 				System.out.println("Resource response: " + resourceResponse);
-				
+
 			}
 		};
 	}
+
 }

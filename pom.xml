@@ -45,8 +45,8 @@
 		<!-- SAMPLING -->
 		<module>model-context-protocol/sampling/mcp-sampling-server</module>
 		<module>model-context-protocol/sampling/mcp-sampling-client</module>
-		<module>model-context-protocol/sampling/annotations/mcp-sampling-server-annotations</module>
-		<module>model-context-protocol/sampling/annotations/mcp-sampling-client-annotations</module>
+		<module>model-context-protocol/sampling-annotations/mcp-sampling-server-annotations</module>
+		<module>model-context-protocol/sampling-annotations/mcp-sampling-client-annotations</module>
 
 		<!-- MCP ANNOTATIONS -->
 		<module>model-context-protocol/mcp-annotations/mcp-annotations-server</module>

@@ -1,12 +1,12 @@
-/* 
+/*
 * Copyright 2025 - 2025 the original author or authors.
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 * https://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserProfileResourceProvider {
-	
+
 	private final Map<String, Map<String, String>> userProfiles = new HashMap<>();
 
 	public UserProfileResourceProvider() {
@@ -69,61 +69,79 @@ public class UserProfileResourceProvider {
 	}
 
 	@McpResource(uri = "static://hello", name = "Static Resource", description = "Example static resource")
-	public String staticResource() { 
+	public String staticResource() {
 		return "Hello World!";
 	}
-
 
 	/**
 	 * Resource method that takes a ReadResourceRequest parameter and URI variable.
 	 */
-	@McpResource(uri = "user-profile://{username}", name = "User Profile", description = "Provides user profile information for a specific user")
+	@McpResource(uri = "user-profile://{username}", name = "User Profile",
+			description = "Provides user profile information for a specific user")
 	public ReadResourceResult getUserProfile(ReadResourceRequest request, String username) {
 		String profileInfo = formatProfileInfo(userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>()));
 
-		return new ReadResourceResult(List.of(new TextResourceContents(request.uri(), "text/plain", profileInfo)));
+		return ReadResourceResult
+			.builder(List.of(TextResourceContents.builder(request.uri(), profileInfo).mimeType("text/plain").build()))
+			.build();
 	}
 
 	/**
-	 * Resource method that takes URI variables directly as parameters. The URI
-	 * template in the annotation defines the variables that will be extracted.
+	 * Resource method that takes URI variables directly as parameters. The URI template
+	 * in the annotation defines the variables that will be extracted.
 	 */
-	@McpResource(uri = "user-profile://{username}", name = "User Details", description = "Provides user details for a specific user using URI variables")
+	@McpResource(uri = "user-profile://{username}", name = "User Details",
+			description = "Provides user details for a specific user using URI variables")
 	public ReadResourceResult getUserDetails(String username) {
 		String profileInfo = formatProfileInfo(userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>()));
 
-		return new ReadResourceResult(
-				List.of(new TextResourceContents("user-profile://" + username, "text/plain", profileInfo)));
+		return ReadResourceResult.builder(List
+			.of(TextResourceContents.builder("user-profile://" + username, profileInfo).mimeType("text/plain").build()))
+			.build();
 	}
 
 	/**
 	 * Resource method that takes multiple URI variables as parameters.
 	 */
-	@McpResource(uri = "user-attribute://{username}/{attribute}", name = "User Attribute", description = "Provides a specific attribute from a user's profile")
+	@McpResource(uri = "user-attribute://{username}/{attribute}", name = "User Attribute",
+			description = "Provides a specific attribute from a user's profile")
 	public ReadResourceResult getUserAttribute(String username, String attribute) {
 		Map<String, String> profile = userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>());
 		String attributeValue = profile.getOrDefault(attribute, "Attribute not found");
 
-		return new ReadResourceResult(
-				List.of(new TextResourceContents("user-attribute://" + username + "/" + attribute, "text/plain",
-						username + "'s " + attribute + ": " + attributeValue)));
+		return ReadResourceResult
+			.builder(
+					List.of(TextResourceContents
+						.builder("user-attribute://" + username + "/" + attribute,
+								username + "'s " + attribute + ": " + attributeValue)
+						.mimeType("text/plain")
+						.build()))
+			.build();
 	}
 
 	/**
 	 * Resource method that takes an exchange and URI variables.
 	 */
-	@McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange", description = "Provides user profile information with server exchange context")
+	@McpResource(uri = "user-profile-exchange://{username}", name = "User Profile with Exchange",
+			description = "Provides user profile information with server exchange context")
 	public ReadResourceResult getProfileWithExchange(McpSyncServerExchange exchange, String username) {
 		String profileInfo = formatProfileInfo(userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>()));
 
-		return new ReadResourceResult(List.of(new TextResourceContents("user-profile-exchange://" + username,
-				"text/plain", "Profile with exchange for " + username + ": " + profileInfo)));
+		return ReadResourceResult
+			.builder(
+					List.of(TextResourceContents
+						.builder("user-profile-exchange://" + username,
+								"Profile with exchange for " + username + ": " + profileInfo)
+						.mimeType("text/plain")
+						.build()))
+			.build();
 	}
 
 	/**
 	 * Resource method that takes a String URI variable parameter.
 	 */
-	@McpResource(uri = "user-connections://{username}", name = "User Connections", description = "Provides a list of connections for a specific user")
+	@McpResource(uri = "user-connections://{username}", name = "User Connections",
+			description = "Provides a list of connections for a specific user")
 	public List<String> getUserConnections(String username) {
 		// Generate a simple list of connections based on username
 		return List.of(username + " is connected with Alice", username + " is connected with Bob",
@@ -131,34 +149,35 @@ public class UserProfileResourceProvider {
 	}
 
 	/**
-	 * Resource method that takes both McpSyncServerExchange, ReadResourceRequest
-	 * and
-	 * URI variable parameters.
+	 * Resource method that takes both McpSyncServerExchange, ReadResourceRequest and URI
+	 * variable parameters.
 	 */
-	@McpResource(uri = "user-notifications://{username}", name = "User Notifications", description = "Provides notifications for a specific user")
+	@McpResource(uri = "user-notifications://{username}", name = "User Notifications",
+			description = "Provides notifications for a specific user")
 	public List<ResourceContents> getUserNotifications(ReadResourceRequest request, String username) {
 		// Generate notifications based on username
 		String notifications = generateNotifications(username);
 
-		return List.of(new TextResourceContents(request.uri(), "text/plain", notifications));
+		return List.of(TextResourceContents.builder(request.uri(), notifications).mimeType("text/plain").build());
 	}
 
 	/**
-	 * Resource method that returns a single ResourceContents with TEXT content
-	 * type.
+	 * Resource method that returns a single ResourceContents with TEXT content type.
 	 */
-	@McpResource(uri = "user-status://{username}", name = "User Status", description = "Provides the current status for a specific user")
+	@McpResource(uri = "user-status://{username}", name = "User Status",
+			description = "Provides the current status for a specific user")
 	public ResourceContents getUserStatus(ReadResourceRequest request, String username) {
 		// Generate a simple status based on username
 		String status = generateUserStatus(username);
 
-		return new TextResourceContents(request.uri(), "text/plain", status);
+		return TextResourceContents.builder(request.uri(), status).mimeType("text/plain").build();
 	}
 
 	/**
 	 * Resource method that returns a single String with TEXT content type.
 	 */
-	@McpResource(uri = "user-location://{username}", name = "User Location", description = "Provides the current location for a specific user")
+	@McpResource(uri = "user-location://{username}", name = "User Location",
+			description = "Provides the current location for a specific user")
 	public String getUserLocation(String username) {
 		Map<String, String> profile = userProfiles.getOrDefault(username.toLowerCase(), new HashMap<>());
 
@@ -170,7 +189,8 @@ public class UserProfileResourceProvider {
 	 * Resource method that returns a single String with BLOB content type. This
 	 * demonstrates how a String can be treated as binary data.
 	 */
-	@McpResource(uri = "user-avatar://{username}", name = "User Avatar", description = "Provides a base64-encoded avatar image for a specific user", mimeType = "image/png")
+	@McpResource(uri = "user-avatar://{username}", name = "User Avatar",
+			description = "Provides a base64-encoded avatar image for a specific user", mimeType = "image/png")
 	public String getUserAvatar(ReadResourceRequest request, String username) {
 		// In a real implementation, this would be a base64-encoded image
 		// For this example, we're just returning a placeholder string
@@ -198,13 +218,17 @@ public class UserProfileResourceProvider {
 		// Simple logic to generate a status
 		if (username.equals("john")) {
 			return "🟢 Online";
-		} else if (username.equals("jane")) {
+		}
+		else if (username.equals("jane")) {
 			return "🟠 Away";
-		} else if (username.equals("bob")) {
+		}
+		else if (username.equals("bob")) {
 			return "⚪ Offline";
-		} else if (username.equals("alice")) {
+		}
+		else if (username.equals("alice")) {
 			return "🔴 Busy";
-		} else {
+		}
+		else {
 			return "⚪ Offline";
 		}
 	}

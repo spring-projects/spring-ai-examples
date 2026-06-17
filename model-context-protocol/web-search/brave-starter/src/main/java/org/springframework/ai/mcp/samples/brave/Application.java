@@ -32,17 +32,17 @@ public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
-	}	
+	}
 
 	@Bean
-	public CommandLineRunner predefinedQuestions(ChatClient.Builder chatClientBuilder, List<McpSyncClient> mcpSyncClients,
-			ConfigurableApplicationContext context) {
+	public CommandLineRunner predefinedQuestions(ChatClient.Builder chatClientBuilder,
+			List<McpSyncClient> mcpSyncClients, ConfigurableApplicationContext context) {
 
 		return args -> {
 
 			var chatClient = chatClientBuilder
-					.defaultToolCallbacks(new SyncMcpToolCallbackProvider(mcpSyncClients))
-					.build();
+				.defaultTools(SyncMcpToolCallbackProvider.builder().mcpClients(mcpSyncClients).build())
+				.build();
 
 			String question = "Does Spring AI support the Model Context Protocol? Please provide some references.";
 
@@ -52,4 +52,5 @@ public class Application {
 			context.close();
 		};
 	}
+
 }
