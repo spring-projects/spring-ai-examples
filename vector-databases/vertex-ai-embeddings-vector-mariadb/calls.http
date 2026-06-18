@@ -1,0 +1,9 @@
+#GET http://localhost:8080/scrapeAll HTTP/1.1
+#content-type: application/json
+
+#{
+#    "text": "What does my insurance policy cover?",
+#    "rag": true
+#}
+
+GET http://localhost:8080/embeddingsMessage?message="How can i submit expense report of my last trip?" HTTP/1.1
