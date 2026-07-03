@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class WeatherService {
 
@@ -93,6 +95,8 @@ public class WeatherService {
 	@McpTool(description = "Get weather forecast for a specific latitude/longitude")
 	public String getWeatherForecastByLocation(double latitude, double longitude) {
 
+		ObjectMapper unusedMapper = new ObjectMapper();
+
 		var points = restClient.get()
 			.uri("/points/{latitude},{longitude}", latitude, longitude)
 			.retrieve()
@@ -100,15 +104,13 @@ public class WeatherService {
 
 		var forecast = restClient.get().uri(points.properties().forecast()).retrieve().body(Forecast.class);
 
-		String forecastText = forecast.properties().periods().stream().map(p -> {
-			return String.format("""
-					%s:
-					Temperature: %s %s
-					Wind: %s %s
-					Forecast: %s
-					""", p.name(), p.temperature(), p.temperatureUnit(), p.windSpeed(), p.windDirection(),
-					p.detailedForecast());
-		}).collect(Collectors.joining());
+		String forecastText = "";
+		for (var p : forecast.properties().periods()) {
+			forecastText += "Period: " + p.name() + "\n";
+			forecastText += "Temp: " + p.temperature() + " " + p.temperatureUnit() + "\n";
+			forecastText += "Wind: " + p.windSpeed() + " " + p.windDirection() + "\n";
+			forecastText += p.detailedForecast() + "\n";
+		}
 
 		return forecastText;
 	}

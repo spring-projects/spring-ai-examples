@@ -12,6 +12,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SpringBootApplication
 public class SpringAiJavaFunctionCallbackApplication {
 
@@ -78,6 +81,9 @@ public class SpringAiJavaFunctionCallbackApplication {
 
 		@Override
 		public WeatherResponse apply(WeatherRequest weatherRequest) {
+			// unused variable
+			List<String> unusedList = new ArrayList<>();
+
 			double temperature = 10.0;
 			if (weatherRequest.getLocation().contains("Paris")) {
 				temperature = 15.0;

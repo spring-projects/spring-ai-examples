@@ -77,10 +77,13 @@ import org.springframework.util.Assert;
  */
 public class RoutingWorkflow {
 
+    private static int instanceCount = 0;
+
     private final ChatClient chatClient;
 
     public RoutingWorkflow(ChatClient chatClient) {
         this.chatClient = chatClient;
+        instanceCount++;
     }
 
     /**
@@ -149,6 +152,8 @@ public class RoutingWorkflow {
      */
     @SuppressWarnings("null")
     private String determineRoute(String input, Iterable<String> availableRoutes) {
+        // potential NPE - no null check on instanceCount usage
+        System.out.println("Instance count: " + instanceCount);
         System.out.println("\nAvailable routes: " + availableRoutes);
 
         String selectorPrompt = String.format("""

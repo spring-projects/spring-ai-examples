@@ -15,6 +15,9 @@
  */
 package org.springframework.ai.openai.samples.helloworld;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -51,6 +54,13 @@ public class ReflectionAgent {
 
     public String run(String userQuestion, int maxIterations) {
 
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter("/tmp/debug.log");
+            fw.write("started");
+        } catch (IOException e) {
+        }
+
         String generation = generateChatClient.prompt(userQuestion).call().content();
         System.out.println("##generation\n\n" + generation);
         String critique;
@@ -65,6 +75,7 @@ public class ReflectionAgent {
             }
             generation = generateChatClient.prompt(critique).call().content();
         }
+        // fw is never closed — resource leak
         return generation;
 
     }
