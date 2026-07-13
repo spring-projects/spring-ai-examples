@@ -39,7 +39,14 @@ public class Application {
 	public CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder) {
 		
 		return args -> {
-			Map<String, String> supportRoutes = Map.of("billing",
+			Map<String, String> routeMap = Map.of(
+					"billing", "Billing and money related problem handling",
+					"technical", "Technical level problem handling",
+					"account", "Account security related problem handling",
+					"product", "Product and feature related problem handling"
+			);
+
+			Map<String, String> promptMap = Map.of("billing",
 					"""
 							You are a billing support specialist. Follow these guidelines:
 							1. Always start with "Billing Support Response:"
@@ -113,7 +120,13 @@ public class Application {
 							Best regards,
 							Mike""");
 
-			var routerWorkflow = new RoutingWorkflow(chatClientBuilder.build());
+			// Select a proper chat client for responses
+			ChatClient chatClient = chatClientBuilder.build();
+
+			// Select a proper chat client for routing task
+			ChatClient routingChatClient = chatClientBuilder.build();
+
+			var routerWorkflow = new RoutingWorkflow(routingChatClient);
 
 			int i = 1;
 			for (String ticket : tickets) {
@@ -121,7 +134,11 @@ public class Application {
 				System.out.println("------------------------------------------------------------");
 				System.out.println(ticket);
 				System.out.println("------------------------------------------------------------");
-				System.out.println(routerWorkflow.route(ticket, supportRoutes));
+				String route = routerWorkflow.route(ticket, routeMap);
+				String prompt = promptMap.get(route);
+
+				String response = chatClient.prompt(prompt + "\nInput: " + ticket).call().content();
+				System.out.println(response);
 			}
 
 		};
