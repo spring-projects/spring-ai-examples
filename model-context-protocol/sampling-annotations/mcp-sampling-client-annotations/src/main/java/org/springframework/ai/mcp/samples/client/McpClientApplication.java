@@ -46,7 +46,7 @@ public class McpClientApplication {
 			String userQuestion = """
 					What is the weather in Amsterdam right now?
 					Please incorporate all createive responses from all LLM providers.
-					After the other providers add a poem that synthesizes the the poems from all the other providers.
+					After the other providers add a poem that synthesizes the poems from all the other providers.
 					""";
 
 			System.out.println("> USER: " + userQuestion);
