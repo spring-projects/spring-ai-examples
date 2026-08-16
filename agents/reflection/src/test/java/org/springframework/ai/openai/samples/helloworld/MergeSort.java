@@ -27,7 +27,7 @@ public class MergeSort {
 
     private static void mergeSort(int[] array, int[] tempArray, int start, int end) {
         if (start < end) {
-            int mid = (start + end) / 2;
+            int mid = start + (end - start) / 2;
 
             // Recursively sort the two halves
             mergeSort(array, tempArray, start, mid);
