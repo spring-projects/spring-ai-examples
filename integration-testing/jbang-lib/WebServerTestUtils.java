@@ -267,11 +267,12 @@ public class WebServerTestUtils {
     // Test SSE endpoint by capturing a few seconds of stream
     private static boolean testSSEEndpoint(EndpointTest test) throws Exception {
         out.println("🌊 Testing SSE stream endpoint...");
-        
+
         ProcessBuilder pb = new ProcessBuilder(
-            "timeout", "10", "curl", "-s", "-N",
-            "-H", "Accept: text/event-stream",
-            test.url()
+                "curl", "-s", "-N",
+                "--max-time", "10",
+                "-H", "Accept: text/event-stream",
+                test.url()
         );
         
         Process process = pb.start();
