@@ -17,11 +17,6 @@ This project uses Maven with the Maven Wrapper (mvnw). Each module can be built 
 
 ### Common Development Commands
 
-**Build entire project:**
-```bash
-./mvnw clean package
-```
-
 **Run a specific example:**
 ```bash
 ./run-example.sh <project-directory-name>
