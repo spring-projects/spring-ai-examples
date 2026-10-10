@@ -15,6 +15,10 @@
     <artifactId>mcp-weather-starter-webmvc-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <properties>
+        <java.version>25</java.version>
+    </properties>
+
     <name>Spring AI MCP Weather Sample</name>
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
 

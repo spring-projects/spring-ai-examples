@@ -15,6 +15,10 @@
     <artifactId>mcp-annotations-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <properties>
+        <java.version>25</java.version>
+    </properties>
+
     <name>Spring AI MCP Annotations Sample</name>
     <description>Sample Spring Boot application demonstrating MCP client and server usage</description>
 
