@@ -5,7 +5,7 @@ This guide explains how to create, run, and maintain integration tests for Sprin
 ## Quick Start
 
 ### Prerequisites
-- Java 17+
+- Java 25+
 - JBang (`curl -Ls https://sh.jbang.dev | bash -s - app setup`)
 - Required API keys (e.g., `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`)
 - Claude Code CLI (for AI validation): `npm install -g @anthropic-ai/claude-code`

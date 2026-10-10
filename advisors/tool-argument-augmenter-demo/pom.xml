@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version> <!-- compatible with Spring AI 2.x -->
+		<version>4.0.7</version> <!-- compatible with Spring AI 2.x -->
 		<!-- <version>3.5.8</version> --> <!-- compatible with  Spring AI 1.1.x -->
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
@@ -17,7 +17,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>17</java.version>
+		<java.version>25</java.version>
 		<spring-ai.version>2.0.0</spring-ai.version>
 	</properties>
 	<dependencies>

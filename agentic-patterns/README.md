@@ -91,7 +91,7 @@ Implements an iterative refinement process where one LLM generates solutions whi
 All workflows are implemented using:
 - Spring AI for LLM interactions
 - Spring Boot for application framework
-- Java 17+ for modern language features
+- Java 25+ for modern language features
 
 Each workflow module contains:
 - Core workflow implementation

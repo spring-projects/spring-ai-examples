@@ -76,7 +76,7 @@ McpClientCustomizer<McpClient.SyncSpec> samplingCustomizer(Map<String, ChatClien
 
 ## Running
 
-**Prerequisites**: Java 17+, Maven 3.6+, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
+**Prerequisites**: Java 25+, Maven 3.6+, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
 
 ```bash
 # Terminal 1 — start the server

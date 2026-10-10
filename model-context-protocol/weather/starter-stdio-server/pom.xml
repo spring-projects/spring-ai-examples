@@ -15,6 +15,10 @@
     <artifactId>mcp-weather-stdio-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <properties>
+        <java.version>25</java.version>
+    </properties>
+
     <name>Spring AI MCP Weather STDIO server</name>
     <description>Sample Spring Boot application demonstrating MCP stdio server usage</description>
 

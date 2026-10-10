@@ -13,7 +13,7 @@ The application implements a reflection-based system where the **Reflection Agen
 
 
 ## Prerequisites
-- Java 17 or higher
+- Java 25 or higher
 - Maven
 
 This examples uses OpenAI as the model provider.

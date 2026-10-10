@@ -6,7 +6,7 @@ For more information, see the [MCP Server Boot Starter](https://docs.spring.io/s
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Maven 3.6+
 
 ## How It Works

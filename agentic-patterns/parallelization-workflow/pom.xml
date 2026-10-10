@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	
@@ -18,7 +18,7 @@
 	<description>Agentic Parallelization Worflow Pattern with Spring AI</description>
 
 	<properties>
-		<java.version>17</java.version>
+		<java.version>25</java.version>
 		<spring-ai.version>2.0.0</spring-ai.version>
 	</properties>
 	

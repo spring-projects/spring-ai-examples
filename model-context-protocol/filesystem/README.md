@@ -22,7 +22,7 @@ The application **automatically detects** your operating system and configures t
 
 ## Prerequisites
 
-- Java 17 or higher
+- Java 25 or higher
 - Maven 3.6+
 - Node.js and npx (npm comes with Node.js)
 - OpenAI API key

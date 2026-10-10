@@ -13,7 +13,7 @@ A command-line Spring Boot app demonstrating the [MCP Client Boot Starter](https
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Node.js / `npx` (for the Brave Search MCP server)
 - `ANTHROPIC_API_KEY`
 - `BRAVE_API_KEY`

@@ -6,7 +6,7 @@ Interactive chatbot combining Spring AI's Model Context Protocol (MCP) with the 
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Maven 3.6+
 - npx (via [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm))
 - Anthropic API key — [get one here](https://docs.anthropic.com/en/docs/initial-setup)

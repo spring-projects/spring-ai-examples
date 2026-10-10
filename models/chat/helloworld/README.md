@@ -3,7 +3,7 @@
 A simple command-line chat application demonstrating Spring AI's ChatClient capabilities with AI models.
 
 ## Prerequisites
-- Java 17 or higher
+- Java 25 or higher
 - Maven
 
 This examples uses OpenAI as the model provider.

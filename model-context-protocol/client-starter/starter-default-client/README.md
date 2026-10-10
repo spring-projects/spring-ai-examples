@@ -6,7 +6,7 @@ The application connects to a Brave Search MCP server over STDIO, injects all di
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Node.js / `npx` (for the Brave Search MCP server)
 - `ANTHROPIC_API_KEY`
 - `BRAVE_API_KEY`

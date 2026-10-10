@@ -33,7 +33,7 @@ Describe documents in natural language and receive real, downloadable files gene
 
 ### Prerequisites
 
-- Java 21+
+- Java 25+
 - Maven 3.9+
 - Anthropic API Key
 

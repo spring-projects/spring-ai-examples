@@ -27,7 +27,7 @@ RESPONSE: [assistant: "The current weather in Paris is sunny with a temperature 
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Maven 3.6+
 - Anthropic API key (`ANTHROPIC_API_KEY`)
 

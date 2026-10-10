@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.7</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -14,6 +14,10 @@
 
     <artifactId>mcp-sampling-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <java.version>25</java.version>
+    </properties>
 
     <name>Spring AI MCP Sampling - Weather Server</name>
     <description>Sample Spring Boot application demonstrating MCP client and server sampling usage</description>
