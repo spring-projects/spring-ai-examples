@@ -8,7 +8,7 @@ Unlike the manual approach, the MCP client is fully auto-configured via `applica
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - Maven 3.6+
 - npx (via [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm))
 - Anthropic API key

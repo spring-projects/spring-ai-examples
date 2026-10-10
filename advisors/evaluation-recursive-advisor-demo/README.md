@@ -43,7 +43,7 @@ The current weather in Paris is sunny with a temperature of 15°C.
 
 ## Prerequisites
 
-- Java 17+, Maven 3.6+
+- Java 25+, Maven 3.6+
 - Anthropic API key
 - [Ollama](https://ollama.com) running locally with a judge model
 

@@ -19,7 +19,7 @@ This implementation shows a four-step workflow for processing numerical data in 
 
 ## Technical Requirements
 
-- Java 17 or higher
+- Java 25 or higher
 - Spring Boot 4.0.0
 - Spring AI 2.0.0-SNAPSHOT
 - Ollama (for LLM integration)

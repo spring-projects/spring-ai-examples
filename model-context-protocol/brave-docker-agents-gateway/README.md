@@ -8,7 +8,7 @@ When run, the application demonstrates the MCP client's capabilities by asking a
 
 ## Prerequisites
 
-- Java 17 or higher
+- Java 25 or higher
 - Maven 3.6+
 - Docker Desktop 4.41 or later
 - Git

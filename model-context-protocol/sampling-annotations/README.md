@@ -25,7 +25,7 @@ mcp-sampling-client-annotations/   # MCP client — sampling handler + chat entr
 
 ## Prerequisites
 
-- Java 17+
+- Java 25+
 - OpenAI API key
 - Anthropic API key
 

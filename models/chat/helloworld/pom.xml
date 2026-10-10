@@ -14,7 +14,7 @@
 	<name>ai-openai-helloworld</name>
 	<description>Simple AI Application using OpenAPI Service</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>25</java.version>
 	</properties>
 
 	<dependencyManagement>

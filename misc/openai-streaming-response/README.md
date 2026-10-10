@@ -4,7 +4,7 @@ This Spring Boot application demonstrates real-time streaming integration with O
 
 ## Prerequisites
 
-- Java 17 or higher
+- Java 25 or higher
 - Maven
 - OpenAI API key
 

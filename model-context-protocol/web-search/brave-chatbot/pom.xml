@@ -16,7 +16,7 @@
 	<description>Simple AI Application using MCP client to use Brave for Internet search</description>
 	
 	<properties>
-		<java.version>17</java.version>
+		<java.version>25</java.version>
 	</properties>
 
 	<dependencyManagement>
