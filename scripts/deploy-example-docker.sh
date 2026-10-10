@@ -4,31 +4,53 @@ set -euo pipefail
 
 usage() {
     cat <<EOF
-Usage: $0 <module-directory> [--image name:tag] [--name container]
+Usage: $0 [<module-directory> | --select] [--image name:tag] [--name container]
        [--port host:container|none] [--env-file path]
+       [--anthropic-url URL] [--ollama-url URL] [--ollama-model NAME]
+       [--anthropic-api-key KEY]
 
 Build a Maven example, create a Java 25 Docker image, and run it in the background.
+If the module directory is omitted, choose an example from an interactive menu.
 Defaults: image spring-ai-<module>:latest, container spring-ai-<module>,
           port 8080:8080
 Use --port none for applications that do not expose an HTTP port.
+Ollama URL defaults to http://host.docker.internal:11434 (override with --ollama-url).
+Use --env-file for secrets when possible; --anthropic-api-key is provided directly
+to Docker and may be visible in process listings and container metadata.
 EOF
 }
 
-if [[ $# -lt 1 || "$1" == "-h" || "$1" == "--help" ]]; then
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     usage
     exit $(( $# == 1 ? 0 : 1 ))
 fi
 
-MODULE_PATH="$1"
-shift
+SELECT_EXAMPLE=0
+MODULE_PATH=""
+if [[ $# -eq 0 ]]; then
+    SELECT_EXAMPLE=1
+elif [[ "$1" == "--select" ]]; then
+    SELECT_EXAMPLE=1
+    shift
+elif [[ "$1" == -* ]]; then
+    SELECT_EXAMPLE=1
+else
+    MODULE_PATH="$1"
+    shift
+fi
+
 IMAGE=""
 CONTAINER_NAME=""
 PORT_MAPPING="8080:8080"
 ENV_FILE=""
+ANTHROPIC_URL=""
+OLLAMA_URL=""
+OLLAMA_MODEL=""
+ANTHROPIC_API_KEY=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --image|--name|--port|--env-file)
+        --image|--name|--port|--env-file|--anthropic-url|--ollama-url|--ollama-model|--anthropic-api-key)
             if [[ $# -lt 2 ]]; then
                 echo "Error: missing value for $1" >&2
                 usage >&2
@@ -39,6 +61,10 @@ while [[ $# -gt 0 ]]; do
                 --name) CONTAINER_NAME="$2" ;;
                 --port) PORT_MAPPING="$2" ;;
                 --env-file) ENV_FILE="$2" ;;
+                --anthropic-url) ANTHROPIC_URL="$2" ;;
+                --ollama-url) OLLAMA_URL="$2" ;;
+                --ollama-model) OLLAMA_MODEL="$2" ;;
+                --anthropic-api-key) ANTHROPIC_API_KEY="$2" ;;
             esac
             shift 2
             ;;
@@ -52,6 +78,51 @@ done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+if [[ "${SELECT_EXAMPLE}" -eq 1 ]]; then
+    MODULE_CANDIDATES=()
+    while IFS= read -r pom; do
+        [[ "${pom}" == "${PROJECT_ROOT}/pom.xml" ]] && continue
+        if grep -q '<artifactId>spring-boot-maven-plugin</artifactId>' "${pom}"; then
+            MODULE_CANDIDATES+=("${pom#"${PROJECT_ROOT}"/}")
+        fi
+    done < <(find "${PROJECT_ROOT}" -type f -name pom.xml \
+        -not -path "${PROJECT_ROOT}/.git/*" | LC_ALL=C sort)
+
+    if [[ ${#MODULE_CANDIDATES[@]} -eq 0 ]]; then
+        echo "Error: no Spring Boot Maven examples were found." >&2
+        exit 1
+    fi
+
+    printf 'Available Spring Boot examples:\n'
+    for index in "${!MODULE_CANDIDATES[@]}"; do
+        printf '  %d) %s\n' "$((index + 1))" "${MODULE_CANDIDATES[index]%/pom.xml}"
+    done
+
+    if ! read -r -p "Select an example by number (or q to cancel): " selection; then
+        echo "Error: no example selection was provided." >&2
+        exit 1
+    fi
+    case "${selection}" in
+        q|Q)
+            echo "Example selection cancelled." >&2
+            exit 1
+            ;;
+    esac
+
+    MODULE_PATH=""
+    for index in "${!MODULE_CANDIDATES[@]}"; do
+        if [[ "${selection}" == "$((index + 1))" ]]; then
+            MODULE_PATH="${MODULE_CANDIDATES[index]%/pom.xml}"
+            break
+        fi
+    done
+    if [[ -z "${MODULE_PATH}" ]]; then
+        echo "Error: invalid example selection: ${selection}" >&2
+        exit 1
+    fi
+fi
+
 MODULE_DIR="$(cd "${PROJECT_ROOT}/${MODULE_PATH}" 2>/dev/null && pwd)" || {
     echo "Error: module directory does not exist: ${MODULE_PATH}" >&2
     exit 1
@@ -121,6 +192,17 @@ if [[ "${PORT_MAPPING}" != "none" ]]; then
 fi
 if [[ -n "${ENV_FILE}" ]]; then
     DOCKER_RUN_ARGS+=(--env-file "${ENV_FILE}")
+fi
+if [[ -n "${ANTHROPIC_URL}" ]]; then
+    DOCKER_RUN_ARGS+=(--env "SPRING_AI_ANTHROPIC_BASE_URL=${ANTHROPIC_URL}")
+fi
+OLLAMA_URL="${OLLAMA_URL:-http://host.docker.internal:11434}"
+DOCKER_RUN_ARGS+=(--env "OLLAMA_BASE_URL=${OLLAMA_URL}")
+if [[ -n "${OLLAMA_MODEL}" ]]; then
+    DOCKER_RUN_ARGS+=(--env "OLLAMA_MODEL=${OLLAMA_MODEL}")
+fi
+if [[ -n "${ANTHROPIC_API_KEY}" ]]; then
+    DOCKER_RUN_ARGS+=(--env "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}")
 fi
 
 CONTAINER_ID="$(docker run "${DOCKER_RUN_ARGS[@]}" "${IMAGE}")"

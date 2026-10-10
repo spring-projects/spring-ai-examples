@@ -1,24 +1,24 @@
 # Spring AI LLM-as-a-Judge Demo
 
-Demonstrates the **LLM-as-a-Judge** pattern in Spring AI 2.0 using a custom `SelfRefineEvaluationAdvisor` — a recursive advisor that evaluates AI responses and retries with feedback until a quality threshold is met.
+Demonstrates the **LLM-as-a-Judge** pattern in Spring AI 2.0 using a custom `SelfRefineEvaluationAdvisor` — a recursive advisor that evaluates AI responses and retries with feedback until a quality threshold is met. Both the response model and judge use a local Ollama model.
 
 ## How It Works
 
 `SelfRefineEvaluationAdvisor` implements `CallAdvisor` and loops recursively via `callAdvisorChain.copy(this).nextCall()`:
 
-1. Generate a response with the primary model (Anthropic Claude)
-2. Evaluate it using a dedicated judge model (Ollama) on a 1–4 scale
+1. Generate a response with the primary model (Ollama)
+2. Evaluate it using the configured local Ollama model on a 1–4 scale
 3. If rating < `successRating`, augment the prompt with feedback and retry
 4. Return when the rating passes or `maxRepeatAttempts` is exhausted
 
 Tool-call responses are skipped automatically — only final text answers are evaluated.
 
 ```java
-ChatClient chatClient = ChatClient.builder(anthropicChatModel)
+ChatClient chatClient = ChatClient.builder(ollamaChatModel)
     .defaultTools(new MyTools())
     .defaultAdvisors(
         SelfRefineEvaluationAdvisor.builder()
-            .chatClientBuilder(ChatClient.builder(ollamaChatModel)) // separate judge
+            .chatClientBuilder(ChatClient.builder(ollamaChatModel))
             .maxRepeatAttempts(15)
             .successRating(4)
             .order(0)
@@ -44,25 +44,31 @@ The current weather in Paris is sunny with a temperature of 15°C.
 ## Prerequisites
 
 - Java 25+, Maven 3.6+
-- Anthropic API key
-- [Ollama](https://ollama.com) running locally with a judge model
+- [Ollama](https://ollama.com) running locally with a tool-calling-capable model
 
 ## Setup
 
 ```bash
-# Pull a judge model
-ollama pull avcodes/flowaicom-flow-judge:q4
+# Pull a local model that supports tool calling (example)
+ollama pull qwen3.5:latest
 
-export ANTHROPIC_API_KEY=your-key
+export OLLAMA_BASE_URL=http://localhost:11434
+export OLLAMA_MODEL=qwen3.5:latest
 ./mvnw spring-boot:run
 ```
 
 `application.properties` (already configured):
 ```properties
-spring.ai.ollama.chat.model=avcodes/flowaicom-flow-judge:q4
+spring.ai.ollama.base-url=${OLLAMA_BASE_URL:http://localhost:11434}
+spring.ai.ollama.chat.model=${OLLAMA_MODEL:qwen3.5:latest}
 spring.ai.ollama.chat.temperature=0
+spring.ai.ollama.chat.think=false
 spring.ai.chat.client.enabled=false
 ```
+
+The default model is used for both the weather response and its evaluation.
+Override `OLLAMA_BASE_URL` and `OLLAMA_MODEL` to use another local Ollama
+server/model. No Anthropic API key is required.
 
 ## Reference
 

@@ -18,6 +18,34 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 MODULE_PATH="$1"
 shift
 
+if [[ -z "${JAVA_HOME:-}" ]]; then
+    if [[ -x /usr/libexec/java_home ]]; then
+        if detected_java_home="$(/usr/libexec/java_home -v 25 2>/dev/null)"; then
+            if detected_java_version="$("${detected_java_home}/bin/java" -version 2>&1 | sed -n '1s/.*version "\([0-9][0-9]*\).*/\1/p')" \
+                && [[ -n "${detected_java_version}" && "${detected_java_version}" -ge 25 ]]; then
+                JAVA_HOME="${detected_java_home}"
+            fi
+        fi
+    fi
+
+    if [[ -z "${JAVA_HOME:-}" ]]; then
+        for candidate in \
+            "${HOME}"/.jdk/jdk-25*/jdk-25*/Contents/Home \
+            "${HOME}"/.jdk/jdk-25*/Contents/Home \
+            "${HOME}"/.jdk/jdk-25*/jdk-25*/; do
+            if [[ -x "${candidate}/bin/java" ]]; then
+                JAVA_HOME="$(cd "${candidate}" && pwd)"
+                break
+            fi
+        done
+    fi
+fi
+
+if [[ -n "${JAVA_HOME:-}" ]]; then
+    export JAVA_HOME
+    export PATH="${JAVA_HOME}/bin:${PATH}"
+fi
+
 if [[ "$MODULE_PATH" = /* ]]; then
     echo "Error: module directory must be relative to the repository root." >&2
     exit 1

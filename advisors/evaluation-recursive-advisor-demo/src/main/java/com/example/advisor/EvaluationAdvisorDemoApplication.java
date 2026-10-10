@@ -4,7 +4,6 @@ import java.util.Random;
 
 import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -25,10 +24,10 @@ public class EvaluationAdvisorDemoApplication {
 	}
 
 	@Bean
-	CommandLineRunner commandLineRunner(AnthropicChatModel anthropicChatModel, OllamaChatModel ollamaChatModel) {
+	CommandLineRunner commandLineRunner(OllamaChatModel ollamaChatModel) {
 		return args -> {
 
-			ChatClient chatClient = ChatClient.builder(anthropicChatModel) // @formatter:off
+			ChatClient chatClient = ChatClient.builder(ollamaChatModel) // @formatter:off
 					.defaultTools(new MyTools())
 					.defaultAdvisors(
 						
