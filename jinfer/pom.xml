@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.example.spring.ai</groupId>
+	<artifactId>jinfer</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>Spring AI jinfer Examples</name>
+	<description>Spring AI demos running local models in-process with Qxotic jinfer (requires Java 25)</description>
+
+	<modules>
+		<module>jinfer-spring-ai-demo</module>
+		<module>jinfer-tool-search-demo</module>
+		<module>jinfer-transcription-demo</module>
+	</modules>
+
+</project>

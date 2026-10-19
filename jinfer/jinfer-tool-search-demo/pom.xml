@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- jinfer 0.3.1 is built and tested against Spring Boot 4.1.1 and Spring AI 2.0.1. -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.1</version>
+		<relativePath />
+	</parent>
+
+	<groupId>com.example</groupId>
+	<artifactId>jinfer-tool-search-demo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Tool Search Tool Autoconfig (jinfer)</name>
+	<description>Spring AI tool search tool autoconfig with local jinfer chat and embedding models</description>
+
+	<properties>
+		<!-- jinfer uses the FFM API and the Vector API: Java 25 is required. -->
+		<java.version>25</java.version>
+		<spring-ai.version>2.1.0-SNAPSHOT</spring-ai.version>
+		<jinfer.version>0.3.1</jinfer.version>
+		<jinfer.jvm.flags>--add-modules jdk.incubator.vector --enable-native-access=ALL-UNNAMED</jinfer.jvm.flags>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-bom</artifactId>
+				<version>${spring-ai.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.qxotic</groupId>
+				<artifactId>jinfer-bom</artifactId>
+				<version>${jinfer.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- Local chat + embedding models, auto-configured from spring.ai.jinfer.* -->
+		<dependency>
+			<groupId>com.qxotic</groupId>
+			<artifactId>jinfer-spring-ai-spring-boot-starter</artifactId>
+		</dependency>
+		<!-- Model architectures (code only, no weights): LFM2.5, Qwen3 embeddings, Qwen3.5, Gemma
+		4, ... -->
+		<dependency>
+			<groupId>com.qxotic</groupId>
+			<artifactId>jinfer-models-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.qxotic</groupId>
+			<artifactId>jam-native</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.qxotic</groupId>
+			<artifactId>jam-vector</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+
+		<!-- Tool Search Tool advisor + autoconfig -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-tool-search-advisor</artifactId>
+		</dependency>
+
+		<!-- SimpleVectorStore, for tool-index-type=vector -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-vector-store</artifactId>
+		</dependency>
+
+		<!-- for tool-index-type=lucene -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>9.12.3</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!-- Keep full JIT (C2) for inference speed and pass the jinfer JVM flags to
+					spring-boot:run. -->
+					<optimizedLaunch>false</optimizedLaunch>
+					<jvmArguments>${jinfer.jvm.flags}</jvmArguments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>central-portal-snapshots</id>
+			<name>Central Portal Snapshots</name>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>
