@@ -94,7 +94,7 @@ public class Application {
 			}
 
 			var chatClient = chatClientBuilder
-					.defaultToolCallbacks(new SyncMcpToolCallbackProvider(clients))
+					.defaultTools(new SyncMcpToolCallbackProvider(clients))
 					.build();
 
 			System.out.println("Running predefined questions with AI model responses:\n");

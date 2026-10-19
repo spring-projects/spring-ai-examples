@@ -56,21 +56,31 @@ AugmentedToolCallbackProvider<AgentThinking> provider = AugmentedToolCallbackPro
     .build();
 ```
 
-**Wired into `ChatClient` with memory and logging advisors:**
+**Wired into `ChatClient` with session memory and logging advisors:**
 
 ```java
+SessionService sessionService = DefaultSessionService.builder()
+    .sessionRepository(InMemorySessionRepository.builder().build())
+    .build();
+
 ChatClient chatClient = chatClientBuilder
     .defaultTools(provider)
-    .defaultAdvisors(
-        MessageChatMemoryAdvisor.builder(chatMemory).order(Ordered.HIGHEST_PRECEDENCE + 1000).build(),
-        new MyLogAdvisor())
+    .defaultAdvisors(SessionAdvisors.builder(sessionService)
+        .memory(memory -> memory.eventFilter(EventFilter.lastN(100)))
+        .build())
+    .defaultAdvisors(new MyLogAdvisor())
     .build();
+
+chatClient.prompt("What is current weather in Paris?")
+    .advisors(SessionAdvisors.session("default-conversation"))
+    .call()
+    .entity(MyResponse.class);
 ```
 
 ## Prerequisites
 
 - Java 17+
-- Spring Boot 4.0.0 / Spring AI 2.0.0
+- Spring Boot 4.1.1 / Spring AI 2.1.0-SNAPSHOT
 - OpenAI API key
 
 ## Run

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.anthropic.models.beta.files.FileMetadata;
+import com.anthropic.models.beta.files.BetaFileMetadata;
 
 import com.example.documentforge.service.DocumentGenerationService;
 
@@ -37,7 +37,7 @@ public class DownloadController {
 
 		try {
 			// Get file metadata
-			FileMetadata metadata = generationService.getFileMetadata(fileId);
+			BetaFileMetadata metadata = generationService.getFileMetadata(fileId);
 
 			// Download file content
 			byte[] content = generationService.downloadFile(fileId);

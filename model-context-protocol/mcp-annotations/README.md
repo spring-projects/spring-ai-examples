@@ -2,7 +2,7 @@
 
 Demonstrates annotation-driven MCP development with Spring AI. Covers server-side tools, resources, prompts, and completions, plus client-side notification handlers — all using declarative annotations.
 
-**Versions:** Spring Boot `4.0.6` · Spring AI `2.0.0`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT`
 
 ## Modules
 

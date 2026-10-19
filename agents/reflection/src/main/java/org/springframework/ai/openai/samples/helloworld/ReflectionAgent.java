@@ -15,10 +15,14 @@
  */
 package org.springframework.ai.openai.samples.helloworld;
 
+import java.util.UUID;
+
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.session.DefaultSessionService;
+import org.springframework.ai.session.InMemorySessionRepository;
+import org.springframework.ai.session.SessionService;
+import org.springframework.ai.session.advisor.SessionAdvisors;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,6 +33,10 @@ public class ReflectionAgent {
     private final ChatClient critiqueChatClient;
 
 
+    private final SessionService sessionService = DefaultSessionService.builder()
+            .sessionRepository(InMemorySessionRepository.builder().build())
+            .build();
+
     public ReflectionAgent(ChatModel chatModel) {
         this.generateChatClient = ChatClient.builder(chatModel)
                 .defaultSystem("""
@@ -36,7 +44,7 @@ public class ReflectionAgent {
                         Your task is to Generate the best content possible for the user's request. If the user provides critique,
                         respond with a revised version of your previous attempt.
                         """)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
+                .defaultAdvisors(SessionAdvisors.builder(this.sessionService).build())
                 .build();
 
         this.critiqueChatClient = ChatClient.builder(chatModel)
@@ -45,25 +53,38 @@ public class ReflectionAgent {
                         If the user content has something wrong or something to be improved, output a list of recommendations
                         and critiques. If the user content is ok and there's nothing to change, output this: <OK>
                         """)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
+                .defaultAdvisors(SessionAdvisors.builder(this.sessionService).build())
                 .build();
     }
 
     public String run(String userQuestion, int maxIterations) {
 
-        String generation = generateChatClient.prompt(userQuestion).call().content();
+        // Each agent keeps its own conversation in a separate session.
+        String generateSessionId = "generate-" + UUID.randomUUID();
+        String critiqueSessionId = "critique-" + UUID.randomUUID();
+
+        String generation = generateChatClient.prompt(userQuestion)
+                .advisors(SessionAdvisors.session(generateSessionId))
+                .call()
+                .content();
         System.out.println("##generation\n\n" + generation);
         String critique;
         for (int i = 0; i < maxIterations; i++) {
 
-            critique = critiqueChatClient.prompt(generation).call().content();
+            critique = critiqueChatClient.prompt(generation)
+                    .advisors(SessionAdvisors.session(critiqueSessionId))
+                    .call()
+                    .content();
 
             System.out.println("##Critique\n\n" + critique);
             if (critique.contains("<OK>")) {
                 System.out.println("\n\nStop sequence found\n\n");
                 break;
             }
-            generation = generateChatClient.prompt(critique).call().content();
+            generation = generateChatClient.prompt(critique)
+                    .advisors(SessionAdvisors.session(generateSessionId))
+                    .call()
+                    .content();
         }
         return generation;
 

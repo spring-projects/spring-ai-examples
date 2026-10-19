@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.core.http.HttpResponse;
-import com.anthropic.models.beta.files.FileMetadata;
+import com.anthropic.models.beta.files.BetaFileMetadata;
 
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
@@ -107,7 +107,7 @@ public class DocumentGenerationService {
 			List<GeneratedFile> files = new ArrayList<>();
 			for (String fileId : fileIds) {
 				try {
-					FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+					BetaFileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
 					files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
 					logger.info("File: {} ({} bytes)", metadata.filename(), metadata.sizeBytes());
 				}
@@ -198,7 +198,7 @@ public class DocumentGenerationService {
 			List<GeneratedFile> files = new ArrayList<>();
 			for (String fileId : fileIds) {
 				try {
-					FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+					BetaFileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
 					files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
 					logger.info("File: {} ({} bytes)", metadata.filename(), metadata.sizeBytes());
 				}
@@ -370,7 +370,7 @@ public class DocumentGenerationService {
 		List<GeneratedFile> files = new ArrayList<>();
 		for (String fileId : fileIds) {
 			try {
-				FileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
+				BetaFileMetadata metadata = anthropicClient.beta().files().retrieveMetadata(fileId);
 				files.add(new GeneratedFile(fileId, metadata.filename(), metadata.sizeBytes(), metadata.mimeType()));
 			}
 			catch (Exception e) {
@@ -433,7 +433,7 @@ public class DocumentGenerationService {
 	/**
 	 * Get file metadata.
 	 */
-	public FileMetadata getFileMetadata(String fileId) {
+	public BetaFileMetadata getFileMetadata(String fileId) {
 		return anthropicClient.beta().files().retrieveMetadata(fileId);
 	}
 
