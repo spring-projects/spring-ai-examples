@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Speech to Text</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --border: #e2e2dc;
+    --accent: #2f6f4f; --accent-text: #ffffff; --danger: #b3261e;
+    --low: #fde2e1; --mid: #fdf1d6; --high: transparent;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161615; --surface: #1f1f1d; --text: #ecece8; --muted: #9a9a93; --border: #33332f;
+      --accent: #5fb58a; --accent-text: #0d1f16; --danger: #f2827a;
+      --low: #5a2522; --mid: #4d4020; --high: transparent;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button, .file { font: inherit; border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--border);
+                  background: var(--surface); color: var(--text); }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button.recording { background: var(--danger); border-color: var(--danger); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  input[type=file] { display: none; }
+  label.toggle { color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  #status { color: var(--muted); min-height: 1.5em; margin-top: 12px; }
+  #transcript { font-size: 1.15rem; white-space: pre-wrap; min-height: 2em; }
+  #stats { color: var(--muted); font-size: .9rem; margin-top: 8px; }
+  #words { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .word { border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: .9rem; }
+  .word small { color: var(--muted); margin-left: 4px; }
+  .word.low { background: var(--low); } .word.mid { background: var(--mid); }
+  .legend { color: var(--muted); font-size: .85rem; margin-top: 12px; }
+  .legend span { padding: 0 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Local speech to text</h1>
+  <p class="sub">NVIDIA Parakeet running inside the Spring Boot JVM with Qxotic jinfer. Your audio never leaves this machine.</p>
+
+  <div class="card">
+    <div class="row">
+      <button id="record" class="primary">Start recording</button>
+      <label class="file" for="file">Upload audio file</label>
+      <input id="file" type="file" accept="audio/*">
+      <label class="toggle"><input id="detailed" type="checkbox" checked> Word timings</label>
+    </div>
+    <div id="status">Record from your microphone or upload a WAV file.</div>
+  </div>
+
+  <div class="card">
+    <div id="transcript"></div>
+    <div id="stats"></div>
+    <div id="words"></div>
+    <div class="legend" id="legend" hidden>
+      Confidence: <span style="background:var(--low)">below 0.5</span> <span style="background:var(--mid)">below 0.8</span>
+    </div>
+  </div>
+</main>
+
+<script>
+const TARGET_RATE = 16000; // Parakeet's sample rate; jinfer would resample anyway
+const recordBtn = document.getElementById('record');
+const fileInput = document.getElementById('file');
+const statusEl = document.getElementById('status');
+const transcriptEl = document.getElementById('transcript');
+const statsEl = document.getElementById('stats');
+const wordsEl = document.getElementById('words');
+const legendEl = document.getElementById('legend');
+let recorder = null;
+
+recordBtn.addEventListener('click', () => recorder ? stopRecording() : startRecording());
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) transcribe(fileInput.files[0], fileInput.files[0].name);
+  fileInput.value = '';
+});
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
+    const ctx = new AudioContext();
+    const source = ctx.createMediaStreamSource(stream);
+    // ScriptProcessorNode is deprecated but universally available and needs no extra module file
+    const processor = ctx.createScriptProcessor(4096, 1, 1);
+    const chunks = [];
+    processor.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    source.connect(processor);
+    processor.connect(ctx.destination);
+    recorder = { stream, ctx, source, processor, chunks, started: Date.now() };
+    recordBtn.textContent = 'Stop and transcribe';
+    recordBtn.classList.add('recording');
+    statusEl.textContent = 'Recording… speak now.';
+  } catch (err) {
+    statusEl.textContent = 'Microphone unavailable: ' + err.message;
+  }
+}
+
+async function stopRecording() {
+  const { stream, ctx, source, processor, chunks, started } = recorder;
+  recorder = null;
+  source.disconnect(); processor.disconnect();
+  stream.getTracks().forEach(t => t.stop());
+  const sampleRate = ctx.sampleRate;
+  await ctx.close();
+  recordBtn.textContent = 'Start recording';
+  recordBtn.classList.remove('recording');
+
+  const samples = downsample(concat(chunks), sampleRate, TARGET_RATE);
+  const seconds = ((Date.now() - started) / 1000).toFixed(1);
+  transcribe(encodeWav(samples, TARGET_RATE), `recording (${seconds}s)`);
+}
+
+async function transcribe(blob, label) {
+  const detailed = document.getElementById('detailed').checked;
+  const form = new FormData();
+  form.append('file', blob, blob.name || 'recording.wav');
+  statusEl.textContent = `Transcribing ${label}…`;
+  recordBtn.disabled = true;
+  try {
+    const res = await fetch(detailed ? '/api/transcribe/words' : '/api/transcribe', { method: 'POST', body: form });
+    if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
+    render(await res.json());
+    statusEl.textContent = `Transcribed ${label}.`;
+  } catch (err) {
+    statusEl.textContent = 'Transcription failed: ' + err.message;
+  } finally {
+    recordBtn.disabled = false;
+  }
+}
+
+function render(r) {
+  transcriptEl.textContent = r.text || '(no speech detected)';
+  wordsEl.replaceChildren();
+  legendEl.hidden = !r.words;
+  if (r.words) {
+    statsEl.textContent = `${r.audioSeconds}s of speech in ${r.elapsedMillis} ms (${r.realTimeFactor}x real time)`;
+    for (const w of r.words) {
+      const el = document.createElement('span');
+      el.className = 'word' + (w.confidence < 0.5 ? ' low' : w.confidence < 0.8 ? ' mid' : '');
+      el.title = `${w.startSeconds}s to ${w.endSeconds}s, confidence ${w.confidence}`;
+      el.textContent = w.text;
+      const t = document.createElement('small');
+      t.textContent = w.startSeconds.toFixed(1) + 's';
+      el.append(t);
+      wordsEl.append(el);
+    }
+  } else {
+    statsEl.textContent = `Transcribed in ${r.elapsedMillis} ms`;
+  }
+}
+
+function concat(chunks) {
+  const out = new Float32Array(chunks.reduce((n, c) => n + c.length, 0));
+  let offset = 0;
+  for (const c of chunks) { out.set(c, offset); offset += c.length; }
+  return out;
+}
+
+// Box-filter downsampling: averages each output sample's input window, enough for speech.
+function downsample(input, fromRate, toRate) {
+  if (fromRate === toRate) return input;
+  const ratio = fromRate / toRate;
+  const out = new Float32Array(Math.floor(input.length / ratio));
+  for (let i = 0; i < out.length; i++) {
+    const start = Math.floor(i * ratio), end = Math.min(Math.floor((i + 1) * ratio), input.length);
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += input[j];
+    out[i] = sum / Math.max(1, end - start);
+  }
+  return out;
+}
+
+// 16-bit PCM mono WAV: decodable by javax.sound, so the server needs no ffmpeg.
+function encodeWav(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const v = new DataView(buf);
+  const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true); str(8, 'WAVE');
+  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  const blob = new Blob([buf], { type: 'audio/wav' });
+  blob.name = 'recording.wav';
+  return blob;
+}
+</script>
+</body>
+</html>

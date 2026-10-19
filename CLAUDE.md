@@ -9,6 +9,7 @@ This is a collection of Spring AI examples demonstrating various AI integration 
 - **Agentic Patterns**: Chain workflows, orchestrator-workers, parallelization, routing, and evaluator-optimizer patterns
 - **Model Context Protocol (MCP)**: Extensive examples for MCP clients and servers including SQLite, filesystem, weather, web search, and annotations
 - **Kotlin Examples**: Hello world, function callbacks, and RAG implementations in Kotlin
+- **jinfer (`jinfer/`)**: Local in-JVM models with Qxotic jinfer (chat, tool search, transcription); requires Java 25, built by the root `java25` profile
 - **Miscellaneous**: Function callbacks, streaming responses, and prompt engineering patterns
 
 ## Build System and Commands

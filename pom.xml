@@ -71,6 +71,16 @@
 				<module>misc/claude-skills-demo/document-forge</module>
 			</modules>
 		</profile>
+		<!-- Modules that require Java 25+ (jinfer uses the FFM and Vector APIs) -->
+		<profile>
+			<id>java25</id>
+			<activation>
+				<jdk>[25,)</jdk>
+			</activation>
+			<modules>
+				<module>jinfer</module>
+			</modules>
+		</profile>
 	</profiles>
 
 </project>
