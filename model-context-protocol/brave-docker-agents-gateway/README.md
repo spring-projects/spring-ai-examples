@@ -73,7 +73,7 @@ The ChatClient is configured with the MCP tool callbacks in the Application clas
 
 ```java
 var chatClient = chatClientBuilder
-        .defaultToolCallbacks(new SyncMcpToolCallbackProvider(mcpSyncClients))
+        .defaultTools(new SyncMcpToolCallbackProvider(mcpSyncClients))
         .build();
 ```
 
@@ -85,7 +85,7 @@ This setup allows the AI model to:
 ## Dependencies
 
 The project uses:
-- Spring Boot 4.0.0
-- Spring AI 2.0.0-SNAPSHOT
+- Spring Boot 4.1.1
+- Spring AI 2.1.0-SNAPSHOT
 - spring-ai-starter-model-openai
 - spring-ai-starter-mcp-client

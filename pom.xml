@@ -23,7 +23,6 @@
 
 		<module>misc/spring-ai-java-function-callback</module>
 		<module>misc/openai-streaming-response</module>
-		<module>misc/claude-skills-demo/document-forge</module>
 
 		<module>models/chat/helloworld</module>
 
@@ -60,5 +59,18 @@
 		<module>advisors/evaluation-recursive-advisor-demo</module>
 		
 	</modules>
+
+	<profiles>
+		<!-- Modules that require Java 21+ (e.g. virtual threads) -->
+		<profile>
+			<id>java21</id>
+			<activation>
+				<jdk>[21,)</jdk>
+			</activation>
+			<modules>
+				<module>misc/claude-skills-demo/document-forge</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>

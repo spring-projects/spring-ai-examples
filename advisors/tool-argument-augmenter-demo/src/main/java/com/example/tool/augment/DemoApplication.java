@@ -9,11 +9,13 @@ import tools.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.session.DefaultSessionService;
+import org.springframework.ai.session.EventFilter;
+import org.springframework.ai.session.InMemorySessionRepository;
+import org.springframework.ai.session.SessionService;
+import org.springframework.ai.session.advisor.SessionAdvisors;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.ai.tool.augment.AugmentedToolCallbackProvider;
@@ -21,7 +23,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -70,18 +71,22 @@ public class DemoApplication {
 															// tool
 				.build();
 
-			MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder().maxMessages(100).build();
+			SessionService sessionService = DefaultSessionService.builder()
+				.sessionRepository(InMemorySessionRepository.builder().build())
+				.build();
 
 			ChatClient chatClient = chatClientBuilder // @formatter:off
 					.defaultTools(provider)
-					.defaultAdvisors(
-						MessageChatMemoryAdvisor.builder(chatMemory).order(Ordered.HIGHEST_PRECEDENCE + 1000).build(),
-						new MyLogAdvisor()) // order 0 = HIGHEST_PRECEDENCE + 2147483648
+					// Session memory advisors (memory at HIGHEST_PRECEDENCE + 1000)
+					.defaultAdvisors(SessionAdvisors.builder(sessionService)
+						.memory(memory -> memory.eventFilter(EventFilter.lastN(100)))
+						.build())
+					.defaultAdvisors(new MyLogAdvisor()) // order 0 = HIGHEST_PRECEDENCE + 2147483648
 				.build();
-				
+
 				var answer = chatClient
 					.prompt("What is current weather in Paris?")
-					.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "default-conversation"))
+					.advisors(SessionAdvisors.session("default-conversation"))
 					.call()
 					.entity(MyResponse.class);
 

@@ -4,7 +4,7 @@
 
 Demonstrates how to build an MCP server using Spring AI's annotation-driven model. Covers tools, resources, prompts, and completions with a declarative, annotation-based approach.
 
-**Dependencies:** Spring Boot `4.0.6`, Spring AI `2.0.0`
+**Dependencies:** Spring Boot `4.1.1`, Spring AI `2.1.0-SNAPSHOT`
 
 Reference: [MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
 

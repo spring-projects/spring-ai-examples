@@ -224,7 +224,7 @@ MCP tools are automatically discovered and integrated with Spring AI:
 
 ```java
 var chatClient = chatClientBuilder
-    .defaultToolCallbacks(new SyncMcpToolCallbackProvider(clients))
+    .defaultTools(new SyncMcpToolCallbackProvider(clients))
     .build();
 ```
 

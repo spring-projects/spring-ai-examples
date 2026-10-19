@@ -115,8 +115,8 @@ Upload a meeting notes text file and prompt:
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Spring Boot 4.0 |
-| AI | Spring AI 2.0.0-SNAPSHOT + Anthropic Claude Skills |
+| Backend | Spring Boot 4.1 |
+| AI | Spring AI 2.1.0-SNAPSHOT + Anthropic Claude Skills |
 | Templates | Thymeleaf |
 | Interactivity | HTMX |
 | Styling | Tailwind CSS |

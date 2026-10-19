@@ -7,10 +7,13 @@ import java.util.UUID;
 import io.modelcontextprotocol.client.McpSyncClient;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.session.DefaultSessionService;
+import org.springframework.ai.session.InMemorySessionRepository;
+import org.springframework.ai.session.SessionService;
+import org.springframework.ai.session.advisor.SessionAdvisors;
+import org.springframework.ai.session.compaction.TurnCountTrigger;
+import org.springframework.ai.session.compaction.WindowCompactionStrategy;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,10 +31,17 @@ public class Application {
 
 		return args -> {
 
+			SessionService sessionService = DefaultSessionService.builder()
+				.sessionRepository(InMemorySessionRepository.builder().build())
+				.build();
+
 			var chatClient = chatClientBuilder.defaultSystem(
 					"You are useful assistant and can perform web searches Brave's search API to reply to your questions.")
 				.defaultTools(SyncMcpToolCallbackProvider.builder().mcpClients(mcpSyncClients).build())
-				.defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
+				.defaultAdvisors(SessionAdvisors.builder(sessionService)
+					// Keep the last 10 turns once the conversation grows past 20 turns
+					.compaction(new TurnCountTrigger(20), WindowCompactionStrategy.builder().lastTurns(10).build())
+					.build())
 				.build();
 
 			var conversationId = UUID.randomUUID().toString();
@@ -42,7 +52,7 @@ public class Application {
 				while (true) {
 					System.out.print("\nUSER: ");
 					System.out.println("\nASSISTANT: " + chatClient.prompt(scanner.nextLine())
-						.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+						.advisors(SessionAdvisors.session(conversationId))
 						.call()
 						.content());
 				}

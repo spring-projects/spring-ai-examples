@@ -1,6 +1,6 @@
 # Spring AI - MCP Brave Search Chatbot
 
-Interactive chatbot combining Spring AI's Model Context Protocol (MCP) with the [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search). Maintains conversation history via `MessageChatMemoryAdvisor` with an explicit conversation ID, and performs real-time web searches through Brave Search.
+Interactive chatbot combining Spring AI's Model Context Protocol (MCP) with the [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search). Maintains conversation history via [session memory](https://docs.spring.io/spring-ai/reference/api/session.html) (`SessionAdvisors`) with an explicit session ID, and performs real-time web searches through Brave Search.
 
 <img src="spring-ai-mcp-brave.jpg" width="600"/>
 
@@ -66,13 +66,15 @@ An interactive chat session starts. Ask anything — the bot uses Brave Search f
 var chatClient = chatClientBuilder
     .defaultSystem("You are a useful assistant that can perform web searches via Brave's search API.")
     .defaultTools(SyncMcpToolCallbackProvider.builder().mcpClients(mcpSyncClients).build())
-    .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
+    .defaultAdvisors(SessionAdvisors.builder(sessionService)
+        .compaction(new TurnCountTrigger(20), WindowCompactionStrategy.builder().lastTurns(10).build())
+        .build())
     .build();
 
 var conversationId = UUID.randomUUID().toString();
 
 chatClient.prompt(userInput)
-    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+    .advisors(SessionAdvisors.session(conversationId))
     .call()
     .content();
 ```
@@ -80,11 +82,12 @@ chatClient.prompt(userInput)
 Key points:
 - Uses `SyncMcpToolCallbackProvider.builder()` (Spring AI 2.0.0 API)
 - A stable `conversationId` keeps memory scoped to the current session
+- The session is compacted to the last 10 turns once it grows past 20 turns
 - Runs until Ctrl-C
 
 ## Versions
 
 | Dependency | Version |
 |---|---|
-| Spring Boot | 4.0.7 |
-| Spring AI | 2.0.0 |
+| Spring Boot | 4.1.1 |
+| Spring AI | 2.1.0-SNAPSHOT |
