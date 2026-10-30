@@ -80,11 +80,12 @@ Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`,
 | `ctx.elicit(e -> e.message(...), Confirmation.class)` blocks until the client answers | return `InputRequiredResult.builder().elicit("confirm", form).requestState(id).build()`; on the retry read `ctx.inputResponse("confirm", ElicitResponse.class)` |
 | `ctx.sample(s -> s.message(...))` | return `InputRequiredResult.builder().createMessage("summary", request).build()`; on the retry read `ctx.inputResponse("summary", Map.class)` |
 | returns `String` | returns `CallToolOutcome` (a `CallToolResult` or an `InputRequiredResult`) |
+| `ctx.elicit` and `ctx.sample` check the capabilities the client sent at `initialize` | `@McpTool(requiredCapabilities = McpClientCapability.ELICITATION_FORM)` declares what the tool cannot work without |
 | `McpSyncServer.addTool(SyncToolSpecification)` notifies every session | `InMemorySyncToolRepository.add(McpSyncTool.of(tool, handler))` broadcasts to every `subscriptions/listen` stream |
 
 On the client side the `@McpElicitation` and `@McpSampling` handlers disappear.
 The client answers the `inputRequests` of an `input_required` result and retries the same call with `inputResponses` and the sealed `requestState`; see `ModernMcpDriver.callTool`.
-There is no handshake either: the client declares its capabilities in `_meta` of every request, and a tool that asks for input the request did not declare is refused with JSON-RPC error `-32021 Missing required client capability`.
+There is no handshake either: the client declares its capabilities in `_meta` of every request, and a tool whose `requiredCapabilities` the request did not declare is refused with JSON-RPC error `-32021 Missing required client capability` before the method runs.
 
 ### Programmatic specifications and runtime changes
 
@@ -122,5 +123,5 @@ Headers that disagree with the body are rejected with JSON-RPC error `-32020`.
 - `tools/list` on the modern servers carries `ttlMs` and `cacheScope`; `resources/read tasks://all` carries the values from the annotation.
 - Both admin controllers resolve the server or repository through `ObjectProvider`, and the wrapping repository is a `@Bean` method that reads the list beans through `ObjectProvider`. Injecting either directly into a component can create it before the annotated beans are scanned, and the server starts with no annotated tools.
 - The response shape is the method's choice: `delete_task` declares `McpSyncNotifier` and answers over `text/event-stream`, with its progress notifications before the `input_required` result; `summarize_tasks` declares only the context and answers with plain JSON. The driver reads the last SSE frame as the response.
-- The required client capabilities are checked before a programmatic tool's handler runs (`McpSyncTool.of(tool, requiredCapabilities, handler)`), and when an annotated method returns an `InputRequiredResult`.
+- The required client capabilities are checked before the handler runs, declared with `requiredCapabilities` on the annotation or with `McpSyncTool.of(tool, requiredCapabilities, handler)` on a programmatic tool. A method that asks for undeclared input without them is still refused with `-32021`, but only after it has run, and the server logs a warning recommending the attribute.
 - A filtered tool list depends on the caller, so the wrapping repository returns it with `cacheScope: private`.

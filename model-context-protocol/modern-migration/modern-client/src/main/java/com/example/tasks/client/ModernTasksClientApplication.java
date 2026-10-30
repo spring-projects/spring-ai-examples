@@ -77,6 +77,10 @@ public class ModernTasksClientApplication {
 		System.out.println(">>> summarize_tasks (MRTR sampling)");
 		System.out.println("    -> " + mcp.callTool("summarize_tasks", Map.of(), ModernMcpDriver.autoAnswer(), n -> { }).get("content"));
 
+		System.out.println(">>> summarize_tasks from a client that declares only form elicitation");
+		expectError(() -> mcp.withCapabilities(Map.of("elicitation", Map.of("form", Map.of())))
+			.callTool("summarize_tasks", Map.of(), ModernMcpDriver.autoAnswer(), n -> { }));
+
 		System.out.println(">>> subscriptions/listen, then add a tool at runtime");
 		AutoCloseable listener = mcp.listen(Map.of("toolsListChanged", true), ModernTasksClientApplication::printEvent);
 		Thread.sleep(500);

@@ -16,6 +16,7 @@ import io.modelcontextprotocol.modern.server.McpSyncNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.ai.mcp.annotation.McpClientCapability;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.ai.mcp.annotation.context.McpModernSyncRequestContext;
@@ -31,6 +32,10 @@ import org.springframework.stereotype.Component;
  * {@link McpSyncNotifier}, so it answers with a short {@code text/event-stream} that
  * carries its progress notifications before the result. {@code summarizeTasks} declares
  * only the context and answers with plain JSON.
+ * <p>
+ * Neither tool can work without its client capability, so both declare it in
+ * {@code requiredCapabilities}. A client whose request does not declare it gets JSON-RPC
+ * error {@code -32021} before the method runs, and {@code deleteTask} opens no stream.
  */
 @Component
 public class InteractiveTaskProvider {
@@ -50,7 +55,8 @@ public class InteractiveTaskProvider {
 		this.tasks = tasks;
 	}
 
-	@McpTool(name = "delete_task", description = "Deletes a task after asking the user to confirm")
+	@McpTool(name = "delete_task", description = "Deletes a task after asking the user to confirm",
+			requiredCapabilities = McpClientCapability.ELICITATION_FORM)
 	public CallToolOutcome deleteTask(McpSyncNotifier notifier, McpModernSyncRequestContext ctx,
 			@McpToolParam(description = "Task id") String id) {
 		logger.info("delete_task called for {}", id); // logging to the client is gone; log server-side
@@ -73,7 +79,8 @@ public class InteractiveTaskProvider {
 		return text(this.tasks.delete(id) ? "Deleted " + id : "No such task: " + id);
 	}
 
-	@McpTool(name = "summarize_tasks", description = "Asks the client's model to summarise the task list")
+	@McpTool(name = "summarize_tasks", description = "Asks the client's model to summarise the task list",
+			requiredCapabilities = McpClientCapability.SAMPLING)
 	@SuppressWarnings("unchecked")
 	public CallToolOutcome summarizeTasks(McpModernSyncRequestContext ctx) {
 		Optional<Map> sampled = ctx.inputResponse("summary", Map.class);

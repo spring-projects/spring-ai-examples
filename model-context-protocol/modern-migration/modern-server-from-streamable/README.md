@@ -5,7 +5,8 @@
 `InteractiveTaskProvider.deleteTask` returns an `InputRequiredResult` carrying an elicitation form and the task id as `requestState`; the client retries with `inputResponses`, and the second invocation reads the answer through `ctx.inputResponse("confirm", ElicitResponse.class)`.
 `summarizeTasks` does the same with `createMessage`.
 `deleteTask` also declares the SDK `McpSyncNotifier` and reports progress through it, which makes its response a short `text/event-stream`; `summarizeTasks` declares only the context and answers with plain JSON.
-A client that does not declare form elicitation in its request `_meta` gets JSON-RPC error `-32021` instead of the question.
+Both tools declare the capability they cannot work without, `requiredCapabilities = McpClientCapability.ELICITATION_FORM` and `SAMPLING`.
+A client that does not declare it in its request `_meta` gets JSON-RPC error `-32021` before the method runs, as a plain JSON response even for `deleteTask`.
 Client logging has no equivalent and is replaced by server-side logging.
 
 `AdminController` adds an `McpSyncTool` at runtime through `InMemorySyncToolRepository.add`, which broadcasts `notifications/tools/list_changed` to `subscriptions/listen` streams.

@@ -3,7 +3,7 @@
 `spring.ai.mcp.server.protocol=MODERN` with two of the four repositories replaced by application beans.
 The sample shows how a modern server customises what it serves, which a session-based server could only do by adding and removing specifications on `McpSyncServer`.
 
-* **Programmatic tools** - `AdminToolsConfiguration` defines a `List<McpSyncTool>` bean, the same contract the annotation scanner uses. `admin_purge_done` is a multi round-trip tool written against the SDK directly: it declares form elicitation as a required client capability, asks for confirmation, and seals the ids it asked about into `requestState`.
+* **Programmatic tools** - `AdminToolsConfiguration` defines a `List<McpSyncTool>` bean, the same contract the annotation scanner uses. `admin_purge_done` is a multi round-trip tool written against the SDK directly: it declares form elicitation as a required client capability (`McpSyncTool.of(tool, requiredCapabilities, handler)`, the programmatic form of the `requiredCapabilities` annotation attribute), asks for confirmation, and seals the ids it asked about into `requestState`.
 * **Wrapping tool repository** - `RoleFilteringRepositoryConfiguration` builds the in-memory tool repository from the `List<McpSyncTool>` beans and wraps it. The `admin_*` tools are visible and callable only for requests with the `X-Role: admin` header.
 * **Custom resource repository** - `TaskResourceRepository` implements `McpSyncResourceRepository`. It lists one resource per task from `TaskService`, pages the list two at a time, serves the `tasks://{id}` template, and turns `TaskChanged` Spring events into `resources/list_changed` and `resources/updated` notifications on `subscriptions/listen`.
 

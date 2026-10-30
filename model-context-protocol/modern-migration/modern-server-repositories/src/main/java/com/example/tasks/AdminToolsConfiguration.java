@@ -28,7 +28,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class AdminToolsConfiguration {
 
-	/** {@code admin_purge_done} asks for confirmation, so the client must support form elicitation. */
+	/**
+	 * {@code admin_purge_done} asks for confirmation, so the client must support form
+	 * elicitation. This is the programmatic form of
+	 * {@code @McpTool(requiredCapabilities = McpClientCapability.ELICITATION_FORM)}.
+	 */
 	private static final ClientCapabilities FORM_ELICITATION = ClientCapabilities.builder()
 		.elicitation(new ClientCapabilities.Elicitation(new ClientCapabilities.Elicitation.Form(), null))
 		.build();

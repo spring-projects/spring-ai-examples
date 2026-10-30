@@ -6,7 +6,7 @@ It covers `_meta` with the protocol version and the client capabilities, the `Mc
 
 `ModernTasksClientApplication` runs a common walk against any modern tasks server, then one scenario depending on the server's tools:
 
-* **modern-server-from-streamable** - `delete_task` with elicitation and progress, the same call without client capabilities (`-32021`), `summarize_tasks` with sampling, and a runtime tool addition seen on `subscriptions/listen`.
+* **modern-server-from-streamable** - `delete_task` with elicitation and progress, the same call without client capabilities (`-32021`), `summarize_tasks` with sampling and from a client without it (`-32021`), and a runtime tool addition seen on `subscriptions/listen`.
 * **modern-server-repositories** - the icon and argument title in the definitions, the tool list with and without `X-Role: admin`, a hidden tool answered as unknown, resource paging with `nextCursor`, `resources/updated` and `resources/list_changed` events, and the programmatic `admin_purge_done` with and without capabilities.
 
 `scripts/` holds curl equivalents: `discover.sh`, `tools-list.sh`, `tools-call.sh <tool> '<json>'`, `listen.sh` and the generic `mcp.sh <method> '<params>' [name]`.
