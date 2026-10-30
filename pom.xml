@@ -46,6 +46,13 @@
 		<!-- MCP ANNOTATIONS -->
 		<module>model-context-protocol/mcp-annotations/mcp-annotations-server</module>
 		<module>model-context-protocol/mcp-annotations/mcp-annotations-client</module>
+		<module>model-context-protocol/modern-migration/stateless-server</module>
+		<module>model-context-protocol/modern-migration/streamable-server</module>
+		<module>model-context-protocol/modern-migration/modern-server-from-stateless</module>
+		<module>model-context-protocol/modern-migration/modern-server-from-streamable</module>
+		<module>model-context-protocol/modern-migration/modern-server-repositories</module>
+		<module>model-context-protocol/modern-migration/legacy-client</module>
+		<module>model-context-protocol/modern-migration/modern-client</module>
 
 		<!-- DYNAMIC TOOL UPDATE -->
 		<module>model-context-protocol/dynamic-tool-update/client</module>
