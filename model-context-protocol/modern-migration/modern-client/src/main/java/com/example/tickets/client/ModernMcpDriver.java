@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import tools.jackson.databind.json.JsonMapper;
@@ -127,13 +129,25 @@ public class ModernMcpDriver {
 	 */
 	public AutoCloseable listen(Map<String, Object> notifications, Consumer<Map<String, Object>> onEvent) {
 		AtomicReference<Stream<String>> body = new AtomicReference<>();
+		AtomicBoolean closed = new AtomicBoolean();
 		Thread thread = new Thread(() -> {
 			try {
 				Map<String, Object> params = Map.of("notifications", notifications, "_meta", meta(Map.of()));
 				HttpRequest request = request("subscriptions/listen", null, params);
 				HttpResponse<Stream<String>> response = this.http.send(request, HttpResponse.BodyHandlers.ofLines());
 				body.set(response.body());
-				response.body().filter(line -> line.startsWith("data:")).forEach(line -> onEvent.accept(parse(sseData(line))));
+				if (closed.get()) {
+					response.body().close(); // closed before the stream was established
+					return;
+				}
+				String contentType = response.headers().firstValue("Content-Type").orElse("");
+				if (!contentType.startsWith("text/event-stream")) {
+					// The server refused the subscription, with a JSON-RPC error or a transport status.
+					String reply = response.body().collect(Collectors.joining("\n"));
+					System.err.println("subscriptions/listen refused with HTTP " + response.statusCode() + ": " + abbreviate(reply));
+					return;
+				}
+				response.body().forEach(sseEvents(data -> onEvent.accept(parse(data))));
 			}
 			catch (IOException | InterruptedException | UncheckedIOException ex) {
 				// stream closed
@@ -143,6 +157,7 @@ public class ModernMcpDriver {
 		thread.start();
 		return () -> {
 			// Closing the body closes the connection, which ends the server's listen stream.
+			closed.set(true);
 			Stream<String> stream = body.get();
 			if (stream != null) {
 				stream.close();
@@ -163,22 +178,27 @@ public class ModernMcpDriver {
 		withMeta.put("_meta", meta(extraMeta));
 		HttpResponse<String> response = this.http.send(request(method, mcpName, withMeta), HttpResponse.BodyHandlers.ofString());
 		String contentType = response.headers().firstValue("Content-Type").orElse("");
-		Map<String, Object> last = null;
+		List<Map<String, Object>> messages = new ArrayList<>();
 		if (contentType.startsWith("text/event-stream")) {
-			for (String line : response.body().split("\n")) {
-				if (line.startsWith("data:")) {
-					Map<String, Object> message = parse(sseData(line));
-					if (message.containsKey("method")) {
-						onNotification.accept(message);
-					}
-					else {
-						last = message;
-					}
-				}
-			}
+			// A trailing blank line flushes the last event.
+			(response.body() + "\n\n").lines().forEach(sseEvents(data -> messages.add(parse(data))));
+		}
+		else if (contentType.startsWith("application/json") && response.body().contains("\"jsonrpc\"")) {
+			messages.add(parse(response.body()));
 		}
 		else {
-			last = parse(response.body());
+			// Not a JSON-RPC answer: a wrong endpoint, a body the transport refused, a proxy page.
+			throw new IllegalStateException(
+					"HTTP " + response.statusCode() + " for " + method + ": " + abbreviate(response.body()));
+		}
+		Map<String, Object> last = null;
+		for (Map<String, Object> message : messages) {
+			if (message.containsKey("method")) {
+				onNotification.accept(message); // a notification pushed before the response
+			}
+			else {
+				last = message;
+			}
 		}
 		if (last == null) {
 			throw new IllegalStateException("No response for " + method + " (HTTP " + response.statusCode() + ")");
@@ -216,9 +236,29 @@ public class ModernMcpDriver {
 		return meta;
 	}
 
-	/** The payload of an SSE data line; the space after the colon is optional. */
-	private static String sseData(String line) {
-		return line.substring("data:".length()).trim();
+	/**
+	 * Assembles SSE events from lines: the {@code data:} lines of an event are joined, and an
+	 * empty line ends it. Other fields ({@code event:}, {@code id:}, comments) are ignored.
+	 */
+	private static Consumer<String> sseEvents(Consumer<String> onEvent) {
+		StringBuilder data = new StringBuilder();
+		return line -> {
+			if (line.startsWith("data:")) {
+				if (data.length() > 0) {
+					data.append('\n');
+				}
+				data.append(line.substring("data:".length()).trim()); // the space after the colon is optional
+			}
+			else if (line.isEmpty() && data.length() > 0) {
+				onEvent.accept(data.toString());
+				data.setLength(0);
+			}
+		};
+	}
+
+	private static String abbreviate(String text) {
+		String oneLine = text.strip().replaceAll("\\s+", " ");
+		return oneLine.length() > 200 ? oneLine.substring(0, 200) + "..." : oneLine;
 	}
 
 	@SuppressWarnings("unchecked")

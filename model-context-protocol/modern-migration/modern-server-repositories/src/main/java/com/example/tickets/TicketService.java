@@ -2,6 +2,7 @@ package com.example.tickets;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The in-memory ticket store of the other samples, plus a {@link TicketChanged} event for every
@@ -33,6 +35,8 @@ public class TicketService {
 
 	}
 
+	private static final JsonMapper JSON = JsonMapper.builder().build();
+
 	private final Map<String, Ticket> tickets = new ConcurrentHashMap<>();
 
 	private final AtomicInteger ids = new AtomicInteger();
@@ -54,7 +58,7 @@ public class TicketService {
 
 	public List<Ticket> list() {
 		List<Ticket> result = new ArrayList<>(this.tickets.values());
-		result.sort((a, b) -> a.id().compareTo(b.id()));
+		result.sort(Comparator.comparingInt(ticket -> number(ticket.id())));
 		return Collections.unmodifiableList(result);
 	}
 
@@ -79,16 +83,15 @@ public class TicketService {
 	}
 
 	public String toJson(List<Ticket> tickets) {
-		StringBuilder json = new StringBuilder("[");
-		for (int i = 0; i < tickets.size(); i++) {
-			Ticket ticket = tickets.get(i);
-			if (i > 0) {
-				json.append(',');
-			}
-			json.append("{\"id\":\"").append(ticket.id()).append("\",\"title\":\"")
-				.append(ticket.title().replace("\"", "\\\"")).append("\",\"resolved\":").append(ticket.resolved()).append('}');
+		return JSON.writeValueAsString(tickets);
+	}
+
+	/** The number behind {@code t-}, which orders the ids and pages them. */
+	static int number(String id) {
+		if (!id.startsWith("t-")) {
+			throw new IllegalArgumentException("Not a ticket id: " + id);
 		}
-		return json.append(']').toString();
+		return Integer.parseInt(id.substring(2));
 	}
 
 	private Ticket store(Ticket ticket) {

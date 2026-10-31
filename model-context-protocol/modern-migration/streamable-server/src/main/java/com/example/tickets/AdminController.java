@@ -40,7 +40,7 @@ public class AdminController {
 		this.server.getObject().addTool(McpServerFeatures.SyncToolSpecification.builder()
 			.tool(tool)
 			.callHandler((exchange, request) -> CallToolResult.builder()
-				.addTextContent(toolName + ": " + request.arguments().get("text"))
+				.addTextContent(toolName + ": " + (request.arguments() != null ? request.arguments().get("text") : null))
 				.build())
 			.build());
 		return "Registered " + toolName + "\n";

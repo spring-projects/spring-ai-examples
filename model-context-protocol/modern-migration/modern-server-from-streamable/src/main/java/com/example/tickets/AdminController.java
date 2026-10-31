@@ -38,7 +38,7 @@ public class AdminController {
 			.description("Echoes its 'text' argument, registered at runtime")
 			.build();
 		this.tools.getObject().add(McpSyncTool.of(tool, (ctx, request) -> McpSyncResponse.result(CallToolResult.builder()
-			.addContent(TextContent.builder(toolName + ": " + request.arguments().get("text")).build())
+			.addContent(TextContent.builder(toolName + ": " + (request.arguments() != null ? request.arguments().get("text") : null)).build())
 			.build())));
 		return "Registered " + toolName + "\n";
 	}

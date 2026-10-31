@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.modelcontextprotocol.modern.McpException;
 import io.modelcontextprotocol.modern.McpSchema.CallToolResult;
 import io.modelcontextprotocol.modern.McpSchema.ClientCapabilities;
 import io.modelcontextprotocol.modern.McpSchema.ElicitFormRequest;
@@ -79,6 +80,9 @@ public class AdminToolsConfiguration {
 					.build());
 			}
 			// Second round trip: the server has verified and unsealed the request state.
+			if (request.requestState() == null) {
+				throw McpException.invalidParams("A retry of admin_purge_resolved must carry the requestState");
+			}
 			if (!confirmed(answer)) {
 				return McpSyncResponse.result(text("Kept all tickets"));
 			}

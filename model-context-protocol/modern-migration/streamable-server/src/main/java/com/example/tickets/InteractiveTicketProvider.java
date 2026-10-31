@@ -1,6 +1,5 @@
 package com.example.tickets;
 
-import java.util.Map;
 
 import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
@@ -48,11 +47,6 @@ public class InteractiveTicketProvider {
 	public String summarizeTickets(McpSyncRequestContext ctx) {
 		var result = ctx.sample(s -> s.message("Summarise these tickets in one sentence: " + this.tickets.toJson(this.tickets.list())));
 		return result.content() instanceof TextContent text ? text.text() : String.valueOf(result.content());
-	}
-
-	@McpTool(name = "echo", description = "Echoes the arguments")
-	public String echo(Map<String, Object> arguments) {
-		return String.valueOf(arguments);
 	}
 
 }

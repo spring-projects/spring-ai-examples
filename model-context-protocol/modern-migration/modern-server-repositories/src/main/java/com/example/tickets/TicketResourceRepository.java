@@ -2,6 +2,7 @@ package com.example.tickets;
 
 import java.util.List;
 
+import io.modelcontextprotocol.modern.McpException;
 import io.modelcontextprotocol.modern.McpSchema.CacheScope;
 import io.modelcontextprotocol.modern.McpSchema.ReadResourceResult;
 import io.modelcontextprotocol.modern.McpSchema.Resource;
@@ -47,10 +48,18 @@ public class TicketResourceRepository implements McpSyncResourceRepository {
 
 	@Override
 	public ResourcesPage list(McpRequestContext ctx, String cursor) {
-		// The cursor is the id of the last ticket on the previous page.
+		// The cursor is the id of the last ticket on the previous page; ids are compared by
+		// their number, so t-10 follows t-9.
+		int afterNumber;
+		try {
+			afterNumber = cursor == null ? 0 : TicketService.number(cursor);
+		}
+		catch (IllegalArgumentException ex) {
+			throw McpException.invalidParams("Unknown cursor: " + cursor);
+		}
 		List<TicketService.Ticket> after = this.tickets.list()
 			.stream()
-			.filter(ticket -> cursor == null || ticket.id().compareTo(cursor) > 0)
+			.filter(ticket -> TicketService.number(ticket.id()) > afterNumber)
 			.toList();
 		List<Resource> page = after.stream().limit(PAGE_SIZE).map(TicketResourceRepository::resource).toList();
 		String nextCursor = after.size() > PAGE_SIZE ? after.get(PAGE_SIZE - 1).id() : null;
@@ -89,10 +98,14 @@ public class TicketResourceRepository implements McpSyncResourceRepository {
 
 	@EventListener
 	void onTicketChanged(TicketService.TicketChanged event) {
-		if (event.kind() != TicketService.TicketChanged.Kind.UPDATED) {
+		if (event.kind() == TicketService.TicketChanged.Kind.UPDATED) {
+			this.changes.broadcast(new ServerChange.ResourceUpdated(SCHEME + event.id()));
+		}
+		else {
+			// Opened or deleted: the list changed; a subscriber of a deleted URI gets nothing it
+			// could re-read.
 			this.changes.broadcast(new ServerChange.ResourcesListChanged());
 		}
-		this.changes.broadcast(new ServerChange.ResourceUpdated(SCHEME + event.id()));
 	}
 
 	private static Resource resource(TicketService.Ticket ticket) {

@@ -2,7 +2,7 @@
 
 `spring.ai.mcp.server.protocol=MODERN` with the session-bound tools rewritten as multi round-trip requests.
 
-`InteractiveTicketProvider.deleteTicket` returns an `InputRequiredResult` carrying an elicitation form and the ticket id as `requestState`; the client retries with `inputResponses`, and the second invocation reads the answer through `ctx.inputResponse("confirm", ElicitResponse.class)`.
+`InteractiveTicketProvider.deleteTicket` returns an `InputRequiredResult` carrying an elicitation form and the ticket id as `requestState`; the client retries with `inputResponses`, and the second invocation reads the answer through `ctx.inputResponse("confirm", ElicitResponse.class)` and the ticket id through `ctx.requestState()`, which the server has verified; the seal covers the tool and the caller, not the arguments, so the `id` argument of the retry is not trusted.
 `summarizeTickets` does the same with `createMessage`.
 `deleteTicket` also declares the SDK `McpSyncNotifier` and reports progress through it, which makes its response a short `text/event-stream`; `summarizeTickets` declares only the context and answers with plain JSON.
 Both tools declare the capability they cannot work without, `requiredCapabilities = McpClientCapability.ELICITATION_FORM` and `SAMPLING`.

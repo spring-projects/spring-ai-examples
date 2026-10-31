@@ -69,14 +69,17 @@ public class InteractiveTicketProvider {
 				.requestState(id)
 				.build();
 		}
-		// Second round trip: act on the answer.
+		// Second round trip: act on the answer, for the ticket that was sealed into the request
+		// state on the first round. The seal covers the tool and the caller, not the arguments,
+		// so the id argument of the retry is not trusted.
+		String sealedId = ctx.requestState();
 		boolean confirmed = "accept".equals(answer.get().action()) && answer.get().content() != null
 				&& Boolean.TRUE.equals(answer.get().content().get("confirmed"));
 		if (!confirmed) {
-			return text("Kept " + id);
+			return text("Kept " + sealedId);
 		}
 		notifier.progress(100, 100.0, "deleting");
-		return text(this.tickets.delete(id) ? "Deleted " + id : "No such ticket: " + id);
+		return text(this.tickets.delete(sealedId) ? "Deleted " + sealedId : "No such ticket: " + sealedId);
 	}
 
 	@McpTool(name = "summarize_tickets", description = "Asks the client's model to summarise the ticket list",
@@ -95,11 +98,6 @@ public class InteractiveTicketProvider {
 		Object content = sampled.get().get("content");
 		Object summary = content instanceof Map<?, ?> map ? map.get("text") : content;
 		return text(String.valueOf(summary));
-	}
-
-	@McpTool(name = "echo", description = "Echoes the arguments")
-	public String echo(Map<String, Object> arguments) {
-		return String.valueOf(arguments);
 	}
 
 	private static CallToolResult text(String text) {

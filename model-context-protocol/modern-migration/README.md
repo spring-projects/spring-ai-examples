@@ -59,6 +59,7 @@ Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`,
 +spring.ai.mcp.server.protocol=MODERN
 +spring.ai.mcp.server.modern.mcp-endpoint=/mcp
 +spring.ai.mcp.server.modern.list-ttl=30s
++spring.ai.mcp.server.modern.list-cache-scope=PRIVATE
 +spring.ai.mcp.server.modern.discover-ttl=5m
 +spring.ai.mcp.server.modern.page-size=50
 ```
@@ -77,7 +78,7 @@ Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`,
 | `McpSyncRequestContext ctx` | `McpModernSyncRequestContext ctx` |
 | `ctx.info("...")` to the client | `logger.info(...)` on the server; client logging is deprecated in the 2026-07-28 revision and not exposed |
 | `ctx.progress(p -> p.percentage(10))` | declare the SDK `McpSyncNotifier` and call `notifier.progress(10, 100.0, "...")`; that parameter, and only that one, makes the response a short SSE stream |
-| `ctx.elicit(e -> e.message(...), Confirmation.class)` blocks until the client answers | return `InputRequiredResult.builder().elicit("confirm", form).requestState(id).build()`; on the retry read `ctx.inputResponse("confirm", ElicitResponse.class)` |
+| `ctx.elicit(e -> e.message(...), Confirmation.class)` blocks until the client answers | return `InputRequiredResult.builder().elicit("confirm", form).requestState(id).build()`; on the retry read `ctx.inputResponse("confirm", ElicitResponse.class)` and the ticket id from `ctx.requestState()` |
 | `ctx.sample(s -> s.message(...))` | return `InputRequiredResult.builder().createMessage("summary", request).build()`; on the retry read `ctx.inputResponse("summary", Map.class)` |
 | returns `String` | returns `CallToolOutcome` (a `CallToolResult` or an `InputRequiredResult`) |
 | `ctx.elicit` and `ctx.sample` check the capabilities the client sent at `initialize` | `@McpTool(requiredCapabilities = McpClientCapability.ELICITATION_FORM)` declares what the tool cannot work without |
@@ -119,7 +120,7 @@ Headers that disagree with the body are rejected with JSON-RPC error `-32020`.
 
 ## Things to notice
 
-- The stateless server silently skips the two interactive tools: the legacy client prints three tools against it and six against the streamable server.
+- A STATELESS server skips methods that declare `McpSyncRequestContext` (the provider logs a warning), so `stateless-server` has no `InteractiveTicketProvider`: the legacy client prints three tools against it and five against the streamable server.
 - `tools/list` on the modern servers carries `ttlMs` and `cacheScope`; `resources/read tickets://all` carries the values from the annotation.
 - Both admin controllers resolve the server or repository through `ObjectProvider`, and the wrapping repository is a `@Bean` method that reads the list beans through `ObjectProvider`. Injecting either directly into a component can create it before the annotated beans are scanned, and the server starts with no annotated tools.
 - The response shape is the method's choice: `delete_ticket` declares `McpSyncNotifier` and answers over `text/event-stream`, with its progress notifications before the `input_required` result; `summarize_tickets` declares only the context and answers with plain JSON. The driver reads the last SSE frame as the response.
