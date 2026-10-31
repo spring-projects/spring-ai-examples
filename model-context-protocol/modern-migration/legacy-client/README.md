@@ -1,4 +1,4 @@
-# Tasks client, Streamable HTTP
+# Tickets client, Streamable HTTP
 
 Spring AI MCP client (`spring-ai-starter-mcp-client-webflux`) configured for `http://localhost:8080`. Works against [stateless-server](../stateless-server/) and [streamable-server](../streamable-server/).
 

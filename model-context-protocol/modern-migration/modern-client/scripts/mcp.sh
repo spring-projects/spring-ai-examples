@@ -2,7 +2,7 @@
 # Usage: mcp.sh <method> '<params-json>' [mcp-name]
 # Sends one 2026-07-28 MCP request and prints the response (JSON or SSE frames).
 #   ./mcp.sh tools/list '{}'
-#   ./mcp.sh tools/call '{"name":"add_task","arguments":{"title":"Buy milk"}}' add_task
+#   ./mcp.sh tools/call '{"name":"open_ticket","arguments":{"title":"Printer offline"}}' open_ticket
 # Environment:
 #   MCP_ENDPOINT      default http://localhost:8080/mcp
 #   MCP_HEADER        one extra request header, e.g. 'X-Role: admin'

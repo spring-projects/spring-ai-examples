@@ -10,10 +10,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>mcp-tasks-legacy-client</artifactId>
+    <artifactId>mcp-tickets-legacy-client</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MCP Tasks Client (Streamable HTTP)</name>
-    <description>Spring AI MCP client for the STATELESS and STREAMABLE tasks servers with elicitation, sampling, logging and progress handlers</description>
+    <name>MCP Tickets Client (Streamable HTTP)</name>
+    <description>Spring AI MCP client for the STATELESS and STREAMABLE tickets servers with elicitation, sampling, logging and progress handlers</description>
     <properties>
         <java.version>17</java.version>
     </properties>

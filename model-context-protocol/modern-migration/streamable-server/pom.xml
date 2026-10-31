@@ -10,9 +10,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>mcp-tasks-streamable-server</artifactId>
+    <artifactId>mcp-tickets-streamable-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MCP Tasks Server (STREAMABLE)</name>
+    <name>MCP Tickets Server (STREAMABLE)</name>
     <description>Stateful Streamable HTTP MCP server with logging, progress, elicitation, sampling and runtime tool changes</description>
     <properties>
         <java.version>17</java.version>

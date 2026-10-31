@@ -1,6 +1,6 @@
 # Migrating Spring AI MCP servers to the 2026-07-28 ("modern") protocol
 
-These samples show the same small task application on three MCP protocols, what changes when a session-based server is moved to the modern one, and how a modern server customises the repositories that serve its tools and resources.
+These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, and how a modern server customises the repositories that serve its tools and resources.
 
 **Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (branch `modern-mcp-server-2`) · MCP Java SDK `2.2.0-SNAPSHOT`
 
@@ -46,7 +46,7 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 ```
 
 The modern client runs a common walk against every server and then the scenario that the server supports, detected from its tool list.
-Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`, `tools-call.sh add_task '{"title":"x"}'` and `listen.sh`.
+Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`, `tools-call.sh open_ticket '{"title":"x"}'` and `listen.sh`.
 `MCP_HEADER='X-Role: admin'` adds a header and `MCP_CAPABILITIES='{}'` changes the declared client capabilities.
 
 ## What changes in the migration
@@ -64,15 +64,15 @@ Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`,
 ```
 
 ```diff
--@McpResource(uri = "tasks://all", mimeType = "application/json")
-+@McpResource(uri = "tasks://all", mimeType = "application/json", ttlMs = 30_000, cacheScope = CacheScope.PUBLIC)
+-@McpResource(uri = "tickets://all", mimeType = "application/json")
++@McpResource(uri = "tickets://all", mimeType = "application/json", ttlMs = 30_000, cacheScope = CacheScope.PUBLIC)
 ```
 
-`TaskProvider` is otherwise identical in the stateless, streamable and both migrated servers.
+`TicketProvider` is otherwise identical in the stateless, streamable and both migrated servers.
 
 ### Streamable to modern: rewrite the session-bound methods
 
-| Streamable (`InteractiveTaskProvider`) | Modern (`InteractiveTaskProvider`) |
+| Streamable (`InteractiveTicketProvider`) | Modern (`InteractiveTicketProvider`) |
 |---|---|
 | `McpSyncRequestContext ctx` | `McpModernSyncRequestContext ctx` |
 | `ctx.info("...")` to the client | `logger.info(...)` on the server; client logging is deprecated in the 2026-07-28 revision and not exposed |
@@ -109,7 +109,7 @@ The annotation scanner produces the same list beans, so annotated and programmat
 Defining any bean of an SDK repository type (`McpSyncToolRepository`, `McpSyncResourceRepository`, `McpSyncPromptRepository`, `McpSyncCompletionRepository`) makes the auto-configured in-memory repository for that primitive back off.
 
 * **Delegation** - `RoleFilteringRepositoryConfiguration` builds the in-memory tool repository from the `List<McpSyncTool>` beans and wraps it. Callers without `X-Role: admin` do not see the `admin_*` tools in `tools/list`, and calling one answers `-32602 Unknown tool`. Use this when the catalogue stays a fixed list and only its visibility depends on the caller.
-* **Implementation** - `TaskResourceRepository` implements `McpSyncResourceRepository` directly. Every task is a resource, listed from the domain service on each request and paged by task id; nothing is registered, added or removed. Task changes arrive as Spring events and leave as `resources/list_changed` and `resources/updated` notifications. Use this when the catalogue lives in a database, a remote service or the domain model.
+* **Implementation** - `TicketResourceRepository` implements `McpSyncResourceRepository` directly. Every ticket is a resource, listed from the domain service on each request and paged by ticket id; nothing is registered, added or removed. Ticket changes arrive as Spring events and leave as `resources/list_changed` and `resources/updated` notifications. Use this when the catalogue lives in a database, a remote service or the domain model.
 
 ## Wire format, for the curious
 
@@ -120,8 +120,8 @@ Headers that disagree with the body are rejected with JSON-RPC error `-32020`.
 ## Things to notice
 
 - The stateless server silently skips the two interactive tools: the legacy client prints three tools against it and six against the streamable server.
-- `tools/list` on the modern servers carries `ttlMs` and `cacheScope`; `resources/read tasks://all` carries the values from the annotation.
+- `tools/list` on the modern servers carries `ttlMs` and `cacheScope`; `resources/read tickets://all` carries the values from the annotation.
 - Both admin controllers resolve the server or repository through `ObjectProvider`, and the wrapping repository is a `@Bean` method that reads the list beans through `ObjectProvider`. Injecting either directly into a component can create it before the annotated beans are scanned, and the server starts with no annotated tools.
-- The response shape is the method's choice: `delete_task` declares `McpSyncNotifier` and answers over `text/event-stream`, with its progress notifications before the `input_required` result; `summarize_tasks` declares only the context and answers with plain JSON. The driver reads the last SSE frame as the response.
+- The response shape is the method's choice: `delete_ticket` declares `McpSyncNotifier` and answers over `text/event-stream`, with its progress notifications before the `input_required` result; `summarize_tickets` declares only the context and answers with plain JSON. The driver reads the last SSE frame as the response.
 - The required client capabilities are checked before the handler runs, declared with `requiredCapabilities` on the annotation or with `McpSyncTool.of(tool, requiredCapabilities, handler)` on a programmatic tool. A method that asks for undeclared input without them is still refused with `-32021`, but only after it has run, and the server logs a warning recommending the attribute.
 - A filtered tool list depends on the caller, so the wrapping repository returns it with `cacheScope: private`.

@@ -10,10 +10,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>mcp-tasks-modern-server-repositories</artifactId>
+    <artifactId>mcp-tickets-modern-server-repositories</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MCP Tasks Server (MODERN, custom repositories)</name>
-    <description>A modern tasks server that customises its repositories: programmatic tools, a wrapping tool repository that filters per caller, and a resource repository backed by the domain</description>
+    <name>MCP Tickets Server (MODERN, custom repositories)</name>
+    <description>A modern tickets server that customises its repositories: programmatic tools, a wrapping tool repository that filters per caller, and a resource repository backed by the domain</description>
     <properties>
         <java.version>17</java.version>
     </properties>

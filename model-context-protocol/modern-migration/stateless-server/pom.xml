@@ -10,9 +10,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>mcp-tasks-stateless-server</artifactId>
+    <artifactId>mcp-tickets-stateless-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MCP Tasks Server (STATELESS)</name>
+    <name>MCP Tickets Server (STATELESS)</name>
     <description>Stateless Streamable HTTP MCP server: tools, resources and a prompt without session features</description>
     <properties>
         <java.version>17</java.version>

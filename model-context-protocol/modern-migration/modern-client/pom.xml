@@ -10,10 +10,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>mcp-tasks-modern-client</artifactId>
+    <artifactId>mcp-tickets-modern-client</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MCP Tasks Client (2026-07-28)</name>
-    <description>Minimal JSON-RPC driver for the modern tasks servers: headers, server/discover, MRTR retry loop, subscriptions/listen</description>
+    <name>MCP Tickets Client (2026-07-28)</name>
+    <description>Minimal JSON-RPC driver for the modern tickets servers: headers, server/discover, MRTR retry loop, subscriptions/listen</description>
     <properties>
         <java.version>17</java.version>
     </properties>
