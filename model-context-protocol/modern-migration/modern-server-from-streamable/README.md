@@ -14,4 +14,4 @@ It resolves the repository through `ObjectProvider`, so that the repository is c
 
 Drive it with [modern-client](../modern-client/). Compare with [streamable-server](../streamable-server/).
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw -o -llr spring-boot:run`; the server listens on `http://localhost:8080`.

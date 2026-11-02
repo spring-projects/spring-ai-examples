@@ -2,10 +2,11 @@
 
 These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, and how a modern server customises the repositories that serve its tools and resources.
 
-**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (branch `modern-mcp-server-2`) · MCP Java SDK `2.2.0-SNAPSHOT`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (branch `modern-mcp-server-2`) · MCP Java SDK `2.2.0-M2`
 
 IMPORTANT: The modern server integration is not released yet.
-Build the SDK `2.2.0-SNAPSHOT` and the Spring AI `modern-mcp-server-2` branch into your local Maven repository first (`./mvnw install -DskipTests` in both checkouts), and run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `main` does not replace the local build.
+Build the Spring AI `modern-mcp-server-2` branch into your local Maven repository first (`./mvnw install -DskipTests`); it pulls the released SDK `2.2.0-M2` from Maven Central.
+Run the samples with `./mvnw -o -llr` so that a newer remote snapshot of Spring AI `main` does not replace the local build (`-llr` lets the offline build accept artifacts that another checkout downloaded).
 
 ## Modules
 
@@ -25,24 +26,24 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 
 ```bash
 # 1. stateless
-(cd stateless-server && ./mvnw -o spring-boot:run)          # terminal 1
-(cd legacy-client    && ./mvnw -o spring-boot:run)          # terminal 2
+(cd stateless-server && ./mvnw -o -llr spring-boot:run)          # terminal 1
+(cd legacy-client    && ./mvnw -o -llr spring-boot:run)          # terminal 2
 
 # 2. stateful streamable: watch the handler log lines for logging, progress, elicitation, sampling, list_changed
-(cd streamable-server && ./mvnw -o spring-boot:run)
-(cd legacy-client     && ./mvnw -o spring-boot:run)
+(cd streamable-server && ./mvnw -o -llr spring-boot:run)
+(cd legacy-client     && ./mvnw -o -llr spring-boot:run)
 
 # 3. modern, from stateless: same calls, now with ttlMs/cacheScope on lists and the resource
-(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
-(cd modern-client                && ./mvnw -o spring-boot:run)
+(cd modern-server-from-stateless && ./mvnw -o -llr spring-boot:run)
+(cd modern-client                && ./mvnw -o -llr spring-boot:run)
 
 # 4. modern, from streamable: watch the "input_required round" lines, the -32021 error and the listen events
-(cd modern-server-from-streamable && ./mvnw -o spring-boot:run)
-(cd modern-client                 && ./mvnw -o spring-boot:run)
+(cd modern-server-from-streamable && ./mvnw -o -llr spring-boot:run)
+(cd modern-client                 && ./mvnw -o -llr spring-boot:run)
 
 # 5. modern, custom repositories: per-caller tool lists, paged resources, resources/updated events
-(cd modern-server-repositories && ./mvnw -o spring-boot:run)
-(cd modern-client              && ./mvnw -o spring-boot:run)
+(cd modern-server-repositories && ./mvnw -o -llr spring-boot:run)
+(cd modern-client              && ./mvnw -o -llr spring-boot:run)
 ```
 
 The modern client runs a common walk against every server and then the scenario that the server supports, detected from its tool list.
@@ -97,7 +98,7 @@ Tools, prompts and resources are served by repositories, and the Spring AI integ
 |---|---|
 | `@Bean List<McpServerFeatures.SyncToolSpecification>` | `@Bean List<McpSyncTool>`; the SDK type is a `Tool` definition, optional required client capabilities, and a handler |
 | `@Bean List<SyncPromptSpecification>` | `@Bean List<McpSyncPrompt>` |
-| `@Bean List<SyncResourceSpecification>` / `SyncResourceTemplateSpecification` | `@Bean List<SyncResourceEntry>` / `List<SyncResourceTemplateEntry>` (`of(definition, handler)`) |
+| `@Bean List<SyncResourceSpecification>` / `SyncResourceTemplateSpecification` | `@Bean List<SyncResourceRegistration>` / `List<SyncResourceTemplateRegistration>` (`of(definition, handler)`) |
 | `McpSyncServer.addTool/removeTool/notifyToolsListChanged` | `InMemorySyncToolRepository.add/remove`, resolved through `ObjectProvider` |
 | `McpSyncServer.notifyResourcesUpdated` | `InMemorySyncResourceRepository.resourceUpdated(uri)`, or `McpChangeBroadcaster.broadcast(new ServerChange.ResourceUpdated(uri))` from a custom repository |
 | a different tool list per caller | not available; on the modern server, a repository bean that wraps the in-memory one |

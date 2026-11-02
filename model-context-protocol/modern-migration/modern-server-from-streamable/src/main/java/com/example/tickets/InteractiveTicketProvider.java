@@ -2,7 +2,6 @@ package com.example.tickets;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.modelcontextprotocol.modern.McpSchema.CallToolOutcome;
 import io.modelcontextprotocol.modern.McpSchema.CallToolResult;
@@ -60,8 +59,8 @@ public class InteractiveTicketProvider {
 	public CallToolOutcome deleteTicket(McpSyncNotifier notifier, McpModernSyncRequestContext ctx,
 			@McpToolParam(description = "Ticket id") String id) {
 		logger.info("delete_ticket called for {}", id); // logging to the client is gone; log server-side
-		Optional<ElicitResponse> answer = ctx.inputResponse("confirm", ElicitResponse.class);
-		if (answer.isEmpty()) {
+		ElicitResponse answer = ctx.inputResponse("confirm", ElicitResponse.class);
+		if (answer == null) {
 			// First round trip: ask. The ticket id travels in the sealed request state.
 			notifier.progress(10, 100.0, "asking for confirmation");
 			return InputRequiredResult.builder()
@@ -73,8 +72,8 @@ public class InteractiveTicketProvider {
 		// state on the first round. The seal covers the tool and the caller, not the arguments,
 		// so the id argument of the retry is not trusted.
 		String sealedId = ctx.requestState();
-		boolean confirmed = "accept".equals(answer.get().action()) && answer.get().content() != null
-				&& Boolean.TRUE.equals(answer.get().content().get("confirmed"));
+		boolean confirmed = "accept".equals(answer.action()) && answer.content() != null
+				&& Boolean.TRUE.equals(answer.content().get("confirmed"));
 		if (!confirmed) {
 			return text("Kept " + sealedId);
 		}
@@ -84,10 +83,9 @@ public class InteractiveTicketProvider {
 
 	@McpTool(name = "summarize_tickets", description = "Asks the client's model to summarise the ticket list",
 			requiredCapabilities = McpClientCapability.SAMPLING)
-	@SuppressWarnings("unchecked")
 	public CallToolOutcome summarizeTickets(McpModernSyncRequestContext ctx) {
-		Optional<Map> sampled = ctx.inputResponse("summary", Map.class);
-		if (sampled.isEmpty()) {
+		Map<?, ?> sampled = ctx.inputResponse("summary", Map.class);
+		if (sampled == null) {
 			String prompt = "Summarise these tickets in one sentence: " + this.tickets.toJson(this.tickets.list());
 			return InputRequiredResult.builder()
 				.createMessage("summary", CreateMessageRequest
@@ -95,7 +93,7 @@ public class InteractiveTicketProvider {
 					.build())
 				.build();
 		}
-		Object content = sampled.get().get("content");
+		Object content = sampled.get("content");
 		Object summary = content instanceof Map<?, ?> map ? map.get("text") : content;
 		return text(String.valueOf(summary));
 	}

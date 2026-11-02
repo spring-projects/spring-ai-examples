@@ -6,4 +6,4 @@
 
 Drive it with [legacy-client](../legacy-client/).
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw -o -llr spring-boot:run`; the server listens on `http://localhost:8080`.
