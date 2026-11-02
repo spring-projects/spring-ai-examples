@@ -1,6 +1,7 @@
 package com.example.tickets;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import io.modelcontextprotocol.modern.McpSchema.CallToolResult;
 import io.modelcontextprotocol.modern.McpSchema.TextContent;
@@ -10,6 +11,7 @@ import io.modelcontextprotocol.modern.server.feature.McpSyncTool;
 
 import org.springframework.ai.mcp.modern.InMemorySyncToolRepository;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminController {
 
-	// Resolved lazily: injecting the repository directly would create it while this controller
-	// is being wired, before the @McpTool beans have been scanned, and it would start empty.
-	private final ObjectProvider<InMemorySyncToolRepository> tools;
+	// Resolved lazily, once: injecting the repository directly would create it while this
+	// controller is being wired, before the @McpTool beans have been scanned, and it would
+	// start empty. The ObjectProvider defers the lookup; the SingletonSupplier caches its result.
+	private final Supplier<InMemorySyncToolRepository> tools;
 
 	public AdminController(ObjectProvider<InMemorySyncToolRepository> tools) {
-		this.tools = tools;
+		this.tools = SingletonSupplier.of(tools::getObject);
 	}
 
 	@PostMapping("/admin/tools/{name}")
@@ -37,7 +40,7 @@ public class AdminController {
 		Tool tool = Tool.builder(toolName, Map.of("type", "object", "properties", Map.of("text", Map.of("type", "string"))))
 			.description("Echoes its 'text' argument, registered at runtime")
 			.build();
-		this.tools.getObject().add(McpSyncTool.of(tool, (ctx, request) -> McpSyncResponse.result(CallToolResult.builder()
+		this.tools.get().add(McpSyncTool.of(tool, (ctx, request) -> McpSyncResponse.result(CallToolResult.builder()
 			.addContent(TextContent.builder(toolName + ": " + (request.arguments() != null ? request.arguments().get("text") : null)).build())
 			.build())));
 		return "Registered " + toolName + "\n";

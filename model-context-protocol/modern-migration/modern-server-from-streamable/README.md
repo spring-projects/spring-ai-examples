@@ -10,7 +10,7 @@ A client that does not declare it in its request `_meta` gets JSON-RPC error `-3
 Client logging has no equivalent and is replaced by server-side logging.
 
 `AdminController` adds an `McpSyncTool` at runtime through `InMemorySyncToolRepository.add`, which broadcasts `notifications/tools/list_changed` to `subscriptions/listen` streams.
-It resolves the repository through `ObjectProvider`, so that the repository is created after the annotated tools were scanned.
+It resolves the repository through `ObjectProvider` wrapped in a `SingletonSupplier`: the lookup is deferred past the scan of the annotated tools, and happens once.
 
 Drive it with [modern-client](../modern-client/). Compare with [streamable-server](../streamable-server/).
 
