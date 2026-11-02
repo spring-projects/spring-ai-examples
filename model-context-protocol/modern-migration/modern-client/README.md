@@ -12,4 +12,4 @@ It covers `_meta` with the protocol version and the client capabilities, the `Mc
 `scripts/` holds curl equivalents: `discover.sh`, `tools-list.sh`, `tools-call.sh <tool> '<json>'`, `listen.sh` and the generic `mcp.sh <method> '<params>' [name]`.
 Point them elsewhere with `MCP_ENDPOINT=http://host:port/mcp`, add a header with `MCP_HEADER='X-Role: admin'`, and change the declared capabilities with `MCP_CAPABILITIES='{}'`.
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o -llr spring-boot:run` while one of the modern servers is running.
+Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run` while one of the modern servers is running.

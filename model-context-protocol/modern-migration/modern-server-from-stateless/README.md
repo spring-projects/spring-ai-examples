@@ -6,4 +6,4 @@ The Java code is the [stateless-server](../stateless-server/) code plus `ttlMs` 
 
 Drive it with [modern-client](../modern-client/) or the curl scripts in `modern-client/scripts`.
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o -llr spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.

@@ -6,7 +6,7 @@ These samples show the same small ticket application on three MCP protocols, wha
 
 IMPORTANT: The modern server integration is not released yet.
 Build the Spring AI `modern-mcp-server-2` branch into your local Maven repository first (`./mvnw install -DskipTests`); it pulls the released SDK `2.2.0-M2` from Maven Central.
-Run the samples with `./mvnw -o -llr` so that a newer remote snapshot of Spring AI `main` does not replace the local build (`-llr` lets the offline build accept artifacts that another checkout downloaded).
+Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `main` does not replace the local build; each module's `.mvn/maven.config` lets the offline build accept the SDK milestone that the Spring AI build downloaded.
 
 ## Modules
 
@@ -26,24 +26,24 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 
 ```bash
 # 1. stateless
-(cd stateless-server && ./mvnw -o -llr spring-boot:run)          # terminal 1
-(cd legacy-client    && ./mvnw -o -llr spring-boot:run)          # terminal 2
+(cd stateless-server && ./mvnw -o spring-boot:run)          # terminal 1
+(cd legacy-client    && ./mvnw -o spring-boot:run)          # terminal 2
 
 # 2. stateful streamable: watch the handler log lines for logging, progress, elicitation, sampling, list_changed
-(cd streamable-server && ./mvnw -o -llr spring-boot:run)
-(cd legacy-client     && ./mvnw -o -llr spring-boot:run)
+(cd streamable-server && ./mvnw -o spring-boot:run)
+(cd legacy-client     && ./mvnw -o spring-boot:run)
 
 # 3. modern, from stateless: same calls, now with ttlMs/cacheScope on lists and the resource
-(cd modern-server-from-stateless && ./mvnw -o -llr spring-boot:run)
-(cd modern-client                && ./mvnw -o -llr spring-boot:run)
+(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
+(cd modern-client                && ./mvnw -o spring-boot:run)
 
 # 4. modern, from streamable: watch the "input_required round" lines, the -32021 error and the listen events
-(cd modern-server-from-streamable && ./mvnw -o -llr spring-boot:run)
-(cd modern-client                 && ./mvnw -o -llr spring-boot:run)
+(cd modern-server-from-streamable && ./mvnw -o spring-boot:run)
+(cd modern-client                 && ./mvnw -o spring-boot:run)
 
 # 5. modern, custom repositories: per-caller tool lists, paged resources, resources/updated events
-(cd modern-server-repositories && ./mvnw -o -llr spring-boot:run)
-(cd modern-client              && ./mvnw -o -llr spring-boot:run)
+(cd modern-server-repositories && ./mvnw -o spring-boot:run)
+(cd modern-client              && ./mvnw -o spring-boot:run)
 ```
 
 The modern client runs a common walk against every server and then the scenario that the server supports, detected from its tool list.

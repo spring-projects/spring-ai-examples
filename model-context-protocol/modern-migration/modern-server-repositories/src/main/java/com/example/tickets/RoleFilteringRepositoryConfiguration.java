@@ -9,12 +9,14 @@ import io.modelcontextprotocol.modern.server.feature.McpChangeFeed;
 import io.modelcontextprotocol.modern.server.feature.McpSyncTool;
 import io.modelcontextprotocol.modern.server.feature.McpSyncToolRepository;
 import io.modelcontextprotocol.modern.server.feature.ToolsPage;
+import io.modelcontextprotocol.server.McpTransportContextExtractor;
 
 import org.springframework.ai.mcp.modern.InMemorySyncToolRepository;
 import org.springframework.ai.mcp.modern.McpTransportContexts;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.function.ServerRequest;
 
 /**
  * Customises the tool repository by delegation. The bean builds the in-memory repository from
@@ -27,6 +29,13 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 public class RoleFilteringRepositoryConfiguration {
+
+	// The transport context is empty by default: nothing from the request reaches a repository or
+	// a tool unless an extractor bean copies it. This one copies the X-Role header and nothing else.
+	@Bean
+	McpTransportContextExtractor<ServerRequest> roleHeaderExtractor() {
+		return request -> McpTransportContexts.fromHeaders(List.of("X-Role"), request.headers().asHttpHeaders()::get);
+	}
 
 	// The lists are resolved through ObjectProvider, and the repository is a @Bean method
 	// rather than a @Component, so that it is created after the annotated beans were scanned.
@@ -56,7 +65,7 @@ public class RoleFilteringRepositoryConfiguration {
 	}
 
 	private static boolean visible(McpRequestContext ctx, String toolName) {
-		// The default transport context extractor puts the HTTP request headers in the context.
+		// Present only because roleHeaderExtractor copied it; see above.
 		return !toolName.startsWith("admin_") || "admin".equals(McpTransportContexts.header(ctx, "X-Role"));
 	}
 

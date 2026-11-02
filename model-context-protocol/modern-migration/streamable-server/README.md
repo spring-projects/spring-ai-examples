@@ -6,4 +6,4 @@ Adds `InteractiveTicketProvider`, whose tools call back into the client over the
 
 Drive it with [legacy-client](../legacy-client/). Compare with [modern-server-from-streamable](../modern-server-from-streamable/).
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o -llr spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
