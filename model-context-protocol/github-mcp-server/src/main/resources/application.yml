@@ -1,0 +1,53 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: github-mcp-server
+  main:
+    banner-mode: off
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: github-mcp-server
+        version: 1.0.0
+        type: SYNC
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
+        annotation-scanner:
+          enabled: true
+        capabilities:
+          tool: true
+
+github:
+  personal-access-token: ${GITHUB_PERSONAL_ACCESS_TOKEN:}
+  host: ${GITHUB_HOST:github.com}
+  toolsets: ${GITHUB_TOOLSETS:}
+  tools: ${GITHUB_TOOLS:}
+  exclude-tools: ${GITHUB_EXCLUDE_TOOLS:}
+  features: ${GITHUB_FEATURES:}
+  dynamic-toolsets: ${GITHUB_DYNAMIC_TOOLSETS:false}
+  read-only: ${GITHUB_READ_ONLY:false}
+  log-file: ${GITHUB_LOG_FILE:}
+  enable-command-logging: ${GITHUB_ENABLE_COMMAND_LOGGING:false}
+  export-translations: ${GITHUB_EXPORT_TRANSLATIONS:false}
+  content-window-size: ${GITHUB_CONTENT_WINDOW_SIZE:5000}
+  lockdown-mode: ${GITHUB_LOCKDOWN_MODE:false}
+  insiders: ${GITHUB_INSIDERS:false}
+  repo-access-cache-ttl: ${GITHUB_REPO_ACCESS_CACHE_TTL:5m}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.github.mcp: DEBUG
