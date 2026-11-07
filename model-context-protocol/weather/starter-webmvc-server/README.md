@@ -6,7 +6,7 @@ For more information, see the [MCP Server Boot Starter](https://docs.spring.io/s
 
 ## Overview
 
-- Integration with `spring-ai-mcp-server-webmvc-spring-boot-starter`
+- Integration with `spring-ai-starter-mcp-server-webmvc`
 - SSE, Streamable HTTP, and STDIO transport support
 - Automatic tool registration via `@McpTool` annotation (no manual bean wiring required)
 - Two weather tools: forecast by lat/lon and alerts by US state
@@ -16,7 +16,7 @@ For more information, see the [MCP Server Boot Starter](https://docs.spring.io/s
 ```xml
 <dependency>
     <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-mcp-server-webmvc-spring-boot-starter</artifactId>
+    <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
 </dependency>
 ```
 
