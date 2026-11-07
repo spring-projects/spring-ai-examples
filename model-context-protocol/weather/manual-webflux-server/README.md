@@ -19,24 +19,28 @@ java -Dtransport.mode=sse -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
 
 **Stdio mode** (launched automatically by the stdio client):
 ```bash
-java -Dtransport.mode=stdio -Dspring.main.web-application-type=none -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
+java -Dtransport.mode=stdio -Dspring.main.web-application-type=none \
+  -Dspring.main.banner-mode=off -Dlogging.pattern.console= \
+  -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
 ```
 
 ## Sample Clients
 
-Run from the repository root after building:
+Run from the repository root after building. The executable Spring Boot JAR keeps client classes and dependencies under `BOOT-INF`, so use `PropertiesLauncher` to select the client main class:
 
 **SSE client** — connects to a running SSE server:
 ```bash
 # Start server first (SSE mode), then:
-java -cp target/mcp-weather-server-0.0.1-SNAPSHOT.jar \
-  org.springframework.ai.mcp.sample.client.ClientSse
+java -Dloader.main=org.springframework.ai.mcp.sample.client.ClientSse \
+  -cp model-context-protocol/weather/manual-webflux-server/target/mcp-weather-server-0.0.1-SNAPSHOT.jar \
+  org.springframework.boot.loader.launch.PropertiesLauncher
 ```
 
 **Stdio client** — launches the server as a subprocess automatically:
 ```bash
-java -cp target/mcp-weather-server-0.0.1-SNAPSHOT.jar \
-  org.springframework.ai.mcp.sample.client.ClientStdio
+java -Dloader.main=org.springframework.ai.mcp.sample.client.ClientStdio \
+  -cp model-context-protocol/weather/manual-webflux-server/target/mcp-weather-server-0.0.1-SNAPSHOT.jar \
+  org.springframework.boot.loader.launch.PropertiesLauncher
 ```
 
 ## Available Tools
