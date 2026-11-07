@@ -19,7 +19,9 @@ java -Dtransport.mode=sse -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
 
 **Stdio mode** (launched automatically by the stdio client):
 ```bash
-java -Dtransport.mode=stdio -Dspring.main.web-application-type=none -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
+java -Dtransport.mode=stdio -Dspring.main.web-application-type=none \
+  -Dspring.main.banner-mode=off -Dlogging.pattern.console= \
+  -jar target/mcp-weather-server-0.0.1-SNAPSHOT.jar
 ```
 
 ## Sample Clients
