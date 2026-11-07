@@ -28,11 +28,22 @@ For more information, see the [MCP Server Boot Starter](https://docs.spring.io/s
 
 ## Running the Server
 
-### WebMVC SSE / Streamable HTTP (Default)
+### Streamable HTTP (Default)
 ```bash
 java -jar target/mcp-weather-starter-webmvc-server-0.0.1-SNAPSHOT.jar
 ```
-Server starts on port 8080.
+Server starts on port 8080 with Streamable HTTP at `/mcp`, as selected by `spring.ai.mcp.server.protocol=STREAMABLE` in `application.properties`.
+
+### SSE Mode
+
+Start the server with the SSE protocol before using an SSE client:
+
+```bash
+java -Dspring.ai.mcp.server.protocol=SSE \
+  -jar target/mcp-weather-starter-webmvc-server-0.0.1-SNAPSHOT.jar
+```
+
+SSE clients connect to `/sse` in this mode.
 
 ### STDIO Mode
 ```bash
@@ -47,6 +58,9 @@ spring.ai.mcp.server.name=my-weather-server
 spring.ai.mcp.server.version=0.0.1
 spring.ai.mcp.server.type=SYNC
 spring.ai.mcp.server.stdio=false
+spring.ai.mcp.server.protocol=STREAMABLE
+
+# Used when spring.ai.mcp.server.protocol=SSE
 spring.ai.mcp.server.sse-message-endpoint=/mcp/message
 
 # Required for STDIO transport
@@ -86,6 +100,9 @@ The sample includes three client implementations:
 - [StreamableHttpClient.java](src/main/java/org/springframework/ai/mcp/sample/client/StreamableHttpClient.java) — Streamable HTTP transport
 
 ### SSE Client
+
+Start the server in SSE mode for this client.
+
 ```java
 var transport = HttpClientSseClientTransport.builder("http://localhost:8080").build();
 var client = McpClient.sync(transport).build();
@@ -139,6 +156,8 @@ java -Dspring.ai.mcp.client.stdio.servers-configuration=file:mcp-servers-config.
 ```
 
 ### SSE Transport
+
+Start the server in SSE mode before running this client command.
 
 ```bash
 java -Dspring.ai.mcp.client.sse.connections.weather-server.url=http://localhost:8080 \
