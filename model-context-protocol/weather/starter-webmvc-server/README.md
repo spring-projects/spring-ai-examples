@@ -48,6 +48,7 @@ SSE clients connect to `/sse` in this mode.
 ### STDIO Mode
 ```bash
 java -Dspring.ai.mcp.server.stdio=true -Dspring.main.web-application-type=none \
+  -Dlogging.pattern.console= \
   -jar target/mcp-weather-starter-webmvc-server-0.0.1-SNAPSHOT.jar
 ```
 
@@ -65,6 +66,7 @@ spring.ai.mcp.server.sse-message-endpoint=/mcp/message
 
 # Required for STDIO transport
 spring.main.banner-mode=off
+logging.pattern.console=
 logging.file.name=./target/starter-webmvc-server.log
 ```
 
