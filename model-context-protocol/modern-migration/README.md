@@ -127,7 +127,7 @@ Tools, prompts and resources are served by repositories, and the Spring AI integ
 | a different tool list per caller | not available; on the modern server, a repository bean that wraps the in-memory one |
 
 The annotation scanner produces the same list beans, so annotated and programmatic primitives end up in the same repository.
-An annotated `@McpComplete` method is attached to the `@McpPrompt` or `@McpResource` template it names; `TicketProvider.completeTicketId` completes the `id` of `tickets://{id}`, and the application fails to start if no annotated template has that URI.
+An annotated `@McpComplete` method is attached to the `@McpPrompt` or `@McpResource` template it names: `TicketProvider.completeOwner` completes the `owner` of the `daily-summary` prompt and `completeTicketId` the `id` of `tickets://{id}`, and the application fails to start if no annotated prompt or template has that name or URI.
 On `type=ASYNC` the same contract uses the async twins: `List<McpAsyncTool>`, `List<McpAsyncPrompt>`, `List<AsyncResourceRegistration>` and `List<AsyncResourceTemplateRegistration>`.
 
 ## Customising the repositories

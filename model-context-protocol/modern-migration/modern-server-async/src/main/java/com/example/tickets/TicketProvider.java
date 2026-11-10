@@ -24,6 +24,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TicketProvider {
 
+	/** The people the daily summary is written for; tickets have no owner of their own. */
+	private static final List<String> OWNERS = List.of("Ana", "Andrei", "Ben", "Chloe");
+
 	private final TicketService tickets;
 
 	public TicketProvider(TicketService tickets) {
@@ -75,6 +78,12 @@ public class TicketProvider {
 	@McpPrompt(name = "daily-summary", description = "Asks the model to summarise the open tickets for an owner")
 	public Mono<String> dailySummary(@McpArg(name = "owner", description = "Who the summary is for", required = true) String owner) {
 		return Mono.fromSupplier(() -> "Summarise the open tickets for " + owner + " in two sentences: " + this.tickets.toJson(this.tickets.list()));
+	}
+
+	// Completes the owner argument of daily-summary, which the server attaches to that prompt.
+	@McpComplete(prompt = "daily-summary")
+	public Mono<List<String>> completeOwner(String prefix) {
+		return Mono.just(OWNERS.stream().filter(owner -> owner.toLowerCase().startsWith(prefix.toLowerCase())).toList());
 	}
 
 }
