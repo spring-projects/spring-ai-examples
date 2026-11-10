@@ -5,6 +5,7 @@ import java.util.List;
 import io.modelcontextprotocol.modern.McpSchema.CacheScope;
 
 import org.springframework.ai.mcp.annotation.McpArg;
+import org.springframework.ai.mcp.annotation.McpComplete;
 import org.springframework.ai.mcp.annotation.McpPrompt;
 import org.springframework.ai.mcp.annotation.McpResource;
 import org.springframework.ai.mcp.annotation.McpTool;
@@ -50,6 +51,13 @@ public class TicketProvider {
 	@McpResource(uri = "tickets://{id}", name = "Ticket", description = "One ticket as JSON", mimeType = "application/json")
 	public String oneTicket(String id) {
 		return this.tickets.find(id).map(ticket -> this.tickets.toJson(List.of(ticket))).orElse("null");
+	}
+
+	// Completes the {id} variable of tickets://{id}. On the modern server the handler travels
+	// with that template, so it must name an @McpResource template of this application.
+	@McpComplete(uri = "tickets://{id}")
+	public List<String> completeTicketId(String prefix) {
+		return this.tickets.list().stream().map(ticket -> ticket.id()).filter(id -> id.startsWith(prefix)).toList();
 	}
 
 	@McpPrompt(name = "daily-summary", description = "Asks the model to summarise the open tickets for an owner")
