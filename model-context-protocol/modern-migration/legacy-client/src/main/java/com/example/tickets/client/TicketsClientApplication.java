@@ -12,8 +12,12 @@ import java.util.stream.Collectors;
 
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.CompleteRequest;
+import io.modelcontextprotocol.spec.McpSchema.CompleteRequest.CompleteArgument;
 import io.modelcontextprotocol.spec.McpSchema.GetPromptRequest;
+import io.modelcontextprotocol.spec.McpSchema.PromptReference;
 import io.modelcontextprotocol.spec.McpSchema.ReadResourceRequest;
+import io.modelcontextprotocol.spec.McpSchema.ResourceReference;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +53,14 @@ public class TicketsClientApplication {
 				System.out.println("prompt daily-summary -> " + client
 					.getPrompt(GetPromptRequest.builder("daily-summary").arguments(Map.of("owner", "Ana")).build())
 					.messages());
+				System.out.println("complete daily-summary owner=\"A\" -> " + client
+					.completeCompletion(new CompleteRequest(new PromptReference("daily-summary"), new CompleteArgument("owner", "A")))
+					.completion()
+					.values());
+				System.out.println("complete tickets://{id} id=\"t-\" -> " + client
+					.completeCompletion(new CompleteRequest(new ResourceReference("tickets://{id}"), new CompleteArgument("id", "t-")))
+					.completion()
+					.values());
 
 				if (tools.contains("delete_ticket")) {
 					// Elicitation and sampling are answered by the handlers in ClientHandlers.

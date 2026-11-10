@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.modelcontextprotocol.modern.McpException;
 import io.modelcontextprotocol.modern.McpSchema.CacheScope;
+import io.modelcontextprotocol.modern.McpSchema.CompleteResult;
 import io.modelcontextprotocol.modern.McpSchema.ReadResourceResult;
 import io.modelcontextprotocol.modern.McpSchema.Resource;
 import io.modelcontextprotocol.modern.McpSchema.ResourceTemplate;
@@ -13,6 +14,7 @@ import io.modelcontextprotocol.modern.server.McpSyncResponse;
 import io.modelcontextprotocol.modern.server.feature.McpChangeBroadcaster;
 import io.modelcontextprotocol.modern.server.feature.McpSyncResource;
 import io.modelcontextprotocol.modern.server.feature.McpSyncResourceRepository;
+import io.modelcontextprotocol.modern.server.feature.McpSyncResourceTemplate;
 import io.modelcontextprotocol.modern.server.feature.ResourceTemplatesPage;
 import io.modelcontextprotocol.modern.server.feature.ResourcesPage;
 import io.modelcontextprotocol.modern.server.feature.ServerChange;
@@ -28,11 +30,20 @@ import org.springframework.stereotype.Component;
  * Ticket changes arrive as Spring events and leave as MCP notifications on
  * {@code subscriptions/listen}: {@code resources/list_changed} when a ticket is opened or deleted,
  * {@code resources/updated} for the ticket's URI when it changes.
+ * <p>
+ * The {@code tickets://{id}} template completes its {@code id} variable: the repository
+ * returns the template with a completion handler from {@code findTemplate} and opts in with
+ * {@code supportsCompletion()}, both default methods of the SDK interface.
  */
 @Component
 public class TicketResourceRepository implements McpSyncResourceRepository {
 
 	private static final String SCHEME = "tickets://";
+
+	private static final ResourceTemplate TEMPLATE = ResourceTemplate.builder(SCHEME + "{id}", "Ticket")
+		.description("One ticket as JSON")
+		.mimeType("application/json")
+		.build();
 
 	/** Small on purpose, so that the client sees a {@code nextCursor}. */
 	private static final int PAGE_SIZE = 2;
@@ -68,10 +79,29 @@ public class TicketResourceRepository implements McpSyncResourceRepository {
 
 	@Override
 	public ResourceTemplatesPage listTemplates(McpRequestContext ctx, String cursor) {
-		return ResourceTemplatesPage.of(List.of(ResourceTemplate.builder(SCHEME + "{id}", "Ticket")
-			.description("One ticket as JSON")
-			.mimeType("application/json")
-			.build()));
+		return ResourceTemplatesPage.of(List.of(TEMPLATE));
+	}
+
+	// completion/complete for ref/resource tickets://{id}: the SDK has checked that the
+	// argument is a variable of the template.
+	@Override
+	public McpSyncResourceTemplate findTemplate(McpRequestContext ctx, String uriTemplate) {
+		if (!TEMPLATE.uriTemplate().equals(uriTemplate)) {
+			return null; // answered as an unknown template
+		}
+		return McpSyncResourceTemplate.of(TEMPLATE).withCompletionHandler((completeCtx, request) -> {
+			List<String> ids = this.tickets.list()
+				.stream()
+				.map(TicketService.Ticket::id)
+				.filter(id -> id.startsWith(request.argument().value()))
+				.toList();
+			return CompleteResult.of(new CompleteResult.Completion(ids));
+		});
+	}
+
+	@Override
+	public boolean supportsCompletion() {
+		return true;
 	}
 
 	@Override

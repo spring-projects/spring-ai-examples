@@ -17,9 +17,11 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * Walks the modern tickets servers. Every server gets the common walk (discover, list, call,
- * resources, prompt); the scenarios after it run only when the server offers what they need:
- * the multi round-trip tools of {@code modern-server-from-streamable}, and the admin tools and
- * ticket resources of {@code modern-server-repositories}.
+ * resources, prompt, the owner completion, and the ticket id completion where the server has the template); the
+ * scenarios after it run only when the server offers what they need: the asynchronous tool
+ * of {@code modern-server-async}, the multi round-trip tools of
+ * {@code modern-server-from-streamable} and {@code modern-server-async}, and the admin tools
+ * and ticket resources of {@code modern-server-repositories}.
  */
 @SpringBootApplication
 public class ModernTicketsClientApplication {
@@ -35,6 +37,9 @@ public class ModernTicketsClientApplication {
 			ModernMcpDriver mcp = new ModernMcpDriver(endpoint);
 			List<String> toolNames = common(mcp);
 			ModernMcpDriver admin = mcp.withHeader("X-Role", "admin");
+			if (toolNames.contains("count_open_tickets")) {
+				asynchronous(mcp);
+			}
 			if (toolNames.contains("delete_ticket")) {
 				interactive(mcp, adminUrl);
 			}
@@ -61,7 +66,19 @@ public class ModernTicketsClientApplication {
 		Map<String, Object> resource = mcp.readResource(uris.get(0));
 		System.out.println(">>> resources/read " + uris.get(0) + " (ttlMs=" + resource.get("ttlMs") + ", cacheScope=" + resource.get("cacheScope") + ") -> " + resource.get("contents"));
 		System.out.println(">>> prompts/get daily-summary -> " + mcp.getPrompt("daily-summary", Map.of("owner", "Ana")).get("messages"));
+		Map<String, Object> owners = mcp.complete(Map.of("type", "ref/prompt", "name", "daily-summary"), "owner", "A");
+		System.out.println(">>> completion/complete daily-summary owner=\"A\" -> " + ((Map<?, ?>) owners.get("completion")).get("values"));
+		if (ModernMcpDriver.values(mcp.listResourceTemplates(), "resourceTemplates", "uriTemplate").contains("tickets://{id}")) {
+			Map<String, Object> completion = mcp.complete(Map.of("type", "ref/resource", "uri", "tickets://{id}"), "id", "t-");
+			System.out.println(">>> completion/complete tickets://{id} id=\"t-\" -> " + ((Map<?, ?>) completion.get("completion")).get("values"));
+		}
 		return toolNames;
+	}
+
+	/** modern-server-async: the same walk, answered by Mono and CompletableFuture methods. */
+	private static void asynchronous(ModernMcpDriver mcp) throws Exception {
+		System.out.println(">>> count_open_tickets (a CompletableFuture on the server) -> "
+				+ mcp.callTool("count_open_tickets", Map.of(), ModernMcpDriver.autoAnswer(), n -> { }).get("content"));
 	}
 
 	/** modern-server-from-streamable: elicitation and sampling as multi round-trip requests, runtime tools. */

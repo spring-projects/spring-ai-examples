@@ -89,6 +89,16 @@ public class ModernMcpDriver {
 		return call("resources/list", cursor != null ? Map.of("cursor", cursor) : Map.of(), null, Map.of());
 	}
 
+	public Map<String, Object> listResourceTemplates() throws Exception {
+		return call("resources/templates/list", Map.of(), null, Map.of());
+	}
+
+	/** {@code completion/complete} for one argument of a prompt or resource template reference. */
+	public Map<String, Object> complete(Map<String, Object> ref, String argument, String value) throws Exception {
+		return call("completion/complete", Map.of("ref", ref, "argument", Map.of("name", argument, "value", value)), null,
+				Map.of());
+	}
+
 	public Map<String, Object> readResource(String uri) throws Exception {
 		return call("resources/read", Map.of("uri", uri), uri, Map.of());
 	}
