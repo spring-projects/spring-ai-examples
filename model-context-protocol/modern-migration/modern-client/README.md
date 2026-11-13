@@ -1,6 +1,7 @@
 # Tickets client, 2026-07-28
 
-There is no modern MCP Java client in the SDK yet, so `ModernMcpDriver` shows the wire format directly with the JDK `HttpClient`.
+`ModernMcpDriver` shows the wire format directly with the JDK `HttpClient`, without the modern client of the MCP Java SDK.
+For that client on the Spring AI starter, see [modern-client-from-legacy](../modern-client-from-legacy/).
 It covers `_meta` with the protocol version and the client capabilities, the `Mcp-Method`, `MCP-Protocol-Version` and `Mcp-Name` headers, JSON and SSE responses, the `input_required` retry loop (`callTool`), `completion/complete` (`complete`), and a closeable `subscriptions/listen` reader.
 `withHeader` and `withCapabilities` derive drivers that send an extra header or declare other capabilities.
 

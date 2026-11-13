@@ -54,6 +54,7 @@
 		<module>model-context-protocol/modern-migration/modern-server-async</module>
 		<module>model-context-protocol/modern-migration/legacy-client</module>
 		<module>model-context-protocol/modern-migration/modern-client</module>
+		<module>model-context-protocol/modern-migration/modern-client-from-legacy</module>
 
 		<!-- DYNAMIC TOOL UPDATE -->
 		<module>model-context-protocol/dynamic-tool-update/client</module>
