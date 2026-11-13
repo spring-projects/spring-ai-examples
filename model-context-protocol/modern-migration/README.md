@@ -1,12 +1,12 @@
-# Migrating Spring AI MCP servers to the 2026-07-28 ("modern") protocol
+# Migrating Spring AI MCP servers and clients to the 2026-07-28 ("modern") protocol
 
-These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, and the same server written against the asynchronous API type.
+These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, the same server written against the asynchronous API type, and the Spring AI client after its migration.
 
-**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (branch `modern-mcp-async`, spring-projects/spring-ai#7349) · MCP Java SDK `2.2.0-SNAPSHOT`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (spring-projects/spring-ai#7385) · MCP Java SDK `2.2.0-SNAPSHOT`
 
-IMPORTANT: The modern server shipped in Spring AI 2.1.0-RC2.
-These samples follow spring-projects/spring-ai#7349, which adds `spring.ai.mcp.server.type=ASYNC` and moves completions onto prompts and resource templates, as MCP Java SDK #1316 requires; the SDK change is in `2.2.0-SNAPSHOT` until its next milestone.
-Build the Spring AI `modern-mcp-async` branch into your local Maven repository first (`./mvnw install -DskipTests`).
+IMPORTANT: The modern server shipped in Spring AI 2.1.0-RC2, and spring-projects/spring-ai#7349 added `spring.ai.mcp.server.type=ASYNC` and moved completions onto prompts and resource templates.
+The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, are not merged yet; they are in spring-projects/spring-ai#7385 and build on the modern client of the MCP Java SDK `2.2.0-SNAPSHOT`.
+Build the branch of that pull request into your local Maven repository first (`./mvnw install -DskipTests`).
 Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `main` does not replace the local build; each module's `.mvn/maven.config` lets the offline build accept the SDK snapshot that the Spring AI build downloaded.
 
 ## Modules
@@ -20,7 +20,8 @@ Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `m
 | [modern-server-repositories](modern-server-repositories/) | `MODERN` | Customising the repositories: a programmatic `List<McpSyncTool>` bean, a wrapping tool repository that filters per caller, and a resource repository backed by the domain that turns Spring events into `resources/updated` notifications and completes its template; also an `@McpIcon` and an argument `title` in the definitions |
 | [modern-server-async](modern-server-async/) | `MODERN`, `type=ASYNC` | The streamable migration written against the asynchronous API type on WebFlux: `Mono`, `CompletableFuture` and plain returns, `McpAsyncNotifier` progress, and runtime changes through `InMemoryAsyncToolRepository` |
 | [legacy-client](legacy-client/) | Streamable HTTP | Spring AI MCP client with `@McpElicitation`, `@McpSampling`, `@McpLogging`, `@McpProgress` and `@McpToolListChanged` handlers; works against both legacy servers |
-| [modern-client](modern-client/) | 2026-07-28 | A minimal JSON-RPC driver (there is no modern Java client in the SDK yet) plus curl scripts: `server/discover`, headers, per-request client capabilities, the `input_required` retry loop, `completion/complete`, `subscriptions/listen` |
+| [modern-client](modern-client/) | 2026-07-28 | A minimal JSON-RPC driver that shows the wire format, plus curl scripts: `server/discover`, headers, per-request client capabilities, the `input_required` retry loop, `completion/complete`, `subscriptions/listen` |
+| [modern-client-from-legacy](modern-client-from-legacy/) | 2026-07-28, optionally with a legacy connection | The legacy client after migration, on the Spring AI client starter: a `protocol=MODERN` connection whose tools arrive as tool callbacks, a client for each caller, the unchanged `@McpElicitation`, `@McpProgress` and `@McpToolListChanged` methods, a listen stream, a tool filter, an optional scope with one client for each role, and a legacy and a modern server behind one provider |
 
 All servers listen on `http://localhost:8080`, so run one at a time.
 
@@ -50,9 +51,18 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 # 6. modern, asynchronous API type on WebFlux: the output of pair 4, plus count_open_tickets
 (cd modern-server-async && ./mvnw -o spring-boot:run)
 (cd modern-client       && ./mvnw -o spring-boot:run)
+
+# 7. any modern server with the migrated Spring AI client: tool callbacks, and the scenario the server supports
+(cd modern-server-repositories && ./mvnw -o spring-boot:run)
+(cd modern-client-from-legacy  && ./mvnw -o spring-boot:run)
+
+# 8. a legacy and a modern server behind one tool callback provider
+(cd stateless-server             && ./mvnw -o spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
+(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
+(cd modern-client-from-legacy    && ./mvnw -o spring-boot:run -Dspring-boot.run.profiles=mixed)
 ```
 
-The modern client runs a common walk against every server and then the scenario that the server supports, detected from its tool list.
+Both modern clients run a common walk against every server and then the scenario that the server supports, detected from its tool list.
 Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`, `tools-call.sh open_ticket '{"title":"x"}'` and `listen.sh`.
 `MCP_HEADER='X-Role: admin'` adds a header and `MCP_CAPABILITIES='{}'` changes the declared client capabilities.
 
@@ -91,8 +101,9 @@ Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`,
 | `ctx.elicit` and `ctx.sample` check the capabilities the client sent at `initialize` | `@McpTool(requiredCapabilities = McpClientCapability.ELICITATION_FORM)` declares what the tool cannot work without |
 | `McpSyncServer.addTool(SyncToolSpecification)` notifies every session | `InMemorySyncToolRepository.add(McpSyncTool.of(tool, handler))` broadcasts to every `subscriptions/listen` stream |
 
-On the client side the `@McpElicitation` and `@McpSampling` handlers disappear.
+On the wire the server no longer sends elicitation and sampling requests to the client.
 The client answers the `inputRequests` of an `input_required` result and retries the same call with `inputResponses` and the sealed `requestState`; see `ModernMcpDriver.callTool`.
+The modern client of the MCP Java SDK runs that loop itself and calls the `@McpElicitation` methods of a Spring AI client for the answers, see [Legacy client to modern](#legacy-client-to-modern-a-property-and-the-handlers-stay).
 There is no handshake either: the client declares its capabilities in `_meta` of every request, and a tool whose `requiredCapabilities` the request did not declare is refused with JSON-RPC error `-32021 Missing required client capability` before the method runs.
 
 ### Synchronous to asynchronous: the API type
@@ -110,6 +121,44 @@ The tools, resources, prompt and completion are the same; only the programming m
 
 A method that returns a `Flux` is rejected at startup, because an MCP request has one result; return a `Mono` of a list instead.
 On `type=SYNC` it is the other way round: methods with an asynchronous return type, `CompletableFuture` included, are skipped with a warning.
+
+### Legacy client to modern: a property, and the handlers stay
+
+[modern-client-from-legacy](modern-client-from-legacy/) is [legacy-client](legacy-client/) after migration.
+The protocol is a property of the connection, so an application can keep legacy connections next to modern ones, and one `SyncMcpToolCallbackProvider` bean returns the tools of both.
+
+```diff
+-spring.ai.mcp.client.streamable-http.connections.server1.url=http://localhost:8080
++spring.ai.mcp.client.streamable-http.connections.tickets.url=http://localhost:8080
++spring.ai.mcp.client.streamable-http.connections.tickets.protocol=MODERN
++spring.ai.mcp.client.streamable-http.connections.tickets.listen=true
+```
+
+The connection is renamed because its name becomes the prefix of the tool names.
+The annotated handler methods keep their annotations and their legacy schema types: one method serves the legacy and the modern connections that it names.
+
+```diff
+-@McpElicitation(clients = "server1")
+-public StructuredElicitResult<Confirmation> confirm(McpSchema.ElicitRequest request) {
++@McpElicitation(clients = { "tickets", "legacy" })
++public StructuredElicitResult<Confirmation> confirm(McpSchema.ElicitRequest request, ToolContext toolContext) {
+```
+
+| Legacy connection (`legacy-client`) | Modern connection (`modern-client-from-legacy`) |
+|---|---|
+| the client runs `initialize` at startup | nothing is sent at startup, apart from the listen stream of a connection with `listen=true`; the first request goes out when the tools are first resolved |
+| tools from the `SyncMcpToolCallbackProvider` bean, under their own names | tools from the same bean, named `<connection>_<tool>`, for example `tickets_open_ticket` |
+| `List<McpSyncClient>` beans for resources, prompts and completions | `List<SyncModernMcpConnection>`; `connection.client()` returns the modern `McpSyncClient` of the SDK for the current request |
+| one client for the application, with one session | `client-scope=PER_REQUEST` (the default) creates a client each time the tools are resolved, so each request carries its own caller; `client-scope=SHARED` creates one client; `client-scope=CUSTOM` asks a `SyncModernMcpClientScope` bean, for example for one client for each user |
+| `@McpElicitation` | the same method; the SDK client calls it for the input request of the server and retries the tool call. It may take the `ToolContext` of that tool call, to know whom to ask |
+| `@McpProgress` | the same method |
+| `@McpToolListChanged` | the same method, for a connection with `listen=true`; the tools are listed first, as a modern server sends no list with the change |
+| `@McpSampling` | not supported by the modern SDK client; the server refuses a tool that requires it with `-32021`, so a `McpModernToolFilter` bean hides it |
+| `@McpLogging` | gone, as client logging is |
+| `McpToolFilter`, `McpToolNamePrefixGenerator` | `McpModernToolFilter`, `McpModernToolNamePrefixGenerator`; an application with a `McpToolFilter` bean and a modern connection must define a `McpModernToolFilter` bean too |
+| headers from a `McpSyncHttpClientRequestCustomizer` | headers from a `McpHttpRequestCustomizer` bean, which reads the caller from the `McpTransportContext` of the request |
+
+Modern connections support only `spring.ai.mcp.client.type=SYNC`, and both client starters serve them with the JDK `HttpClient` transport of the SDK.
 
 ### Programmatic specifications and runtime changes
 
@@ -154,3 +203,7 @@ Headers that disagree with the body are rejected with JSON-RPC error `-32020`.
 - A filtered tool list depends on the caller, so the wrapping repository returns it with `cacheScope: private`.
 - `completion/complete` carries no `Mcp-Name` header. The server completes only the arguments that a prompt or template declares and answers `-32602` for any other, and a static resource such as `tickets://all` has nothing to complete.
 - On `modern-server-async` the WebFlux transport never blocks an event loop: `Mono` methods run where they are subscribed, and `resolve_ticket`, which returns a plain `String`, runs on `boundedElastic`.
+- The Spring AI client keeps a tool listing across requests only when the server allows it for every caller: a `ttlMs` above zero with `cacheScope: public`. The sample servers send a `ttlMs` with `private`, so `modern-client-from-legacy` lists the tools each time it resolves them, and the client logs once that the listing could be kept. Set `spring.ai.mcp.server.modern.list-cache-scope=PUBLIC` on a server whose tools are the same for every caller, or keep a client that outlives the request: `client-scope=SHARED` for an application with a single identity, or `client-scope=CUSTOM` for one client for each user.
+- A connection with `listen=true` keeps a listen stream open, for the application and not for a caller. When the server reports a tool change, a kept listing is dropped at once and the `@McpToolListChanged` methods are called. They are also called when the stream is established again after it had ended, as the server may have changed in between.
+- A tool callback of a modern connection is bound to the client it was resolved with. `modern-client-from-legacy` reads the caller when that client is built, so a call made later, or on another thread, still carries the caller's `X-Role` header.
+- A modern server that cannot be reached does not fail the client: its tools are left out with one warning, and the server is not asked again for `spring.ai.mcp.client.modern.unreachable-cool-down` (30 seconds by default).
