@@ -14,4 +14,4 @@ It resolves the repository through `ObjectProvider` wrapped in a `SingletonSuppl
 
 Drive it with [modern-client](../modern-client/). Compare with [streamable-server](../streamable-server/).
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw spring-boot:run`; the server listens on `http://localhost:8080`.

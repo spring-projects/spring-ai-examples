@@ -2,12 +2,11 @@
 
 These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, the same server written against the asynchronous API type, and the Spring AI client after its migration.
 
-**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (spring-projects/spring-ai#7385) · MCP Java SDK `2.2.0-SNAPSHOT`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` · MCP Java SDK `2.2.0`
 
 IMPORTANT: The modern server shipped in Spring AI 2.1.0-RC2, and spring-projects/spring-ai#7349 added `spring.ai.mcp.server.type=ASYNC` and moved completions onto prompts and resource templates.
-The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, are not merged yet; they are in spring-projects/spring-ai#7385 and build on the modern client of the MCP Java SDK `2.2.0-SNAPSHOT`.
-Build the branch of that pull request into your local Maven repository first (`./mvnw install -DskipTests`).
-Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `main` does not replace the local build; each module's `.mvn/maven.config` lets the offline build accept the SDK snapshot that the Spring AI build downloaded.
+The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, were added by spring-projects/spring-ai#7385 on top of the modern client of the MCP Java SDK `2.2.0`.
+Both are in the Spring AI `2.1.0-SNAPSHOT` builds, which the samples take from the Spring snapshot repository.
 
 ## Modules
 
@@ -29,37 +28,37 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 
 ```bash
 # 1. stateless
-(cd stateless-server && ./mvnw -o spring-boot:run)          # terminal 1
-(cd legacy-client    && ./mvnw -o spring-boot:run)          # terminal 2
+(cd stateless-server && ./mvnw spring-boot:run)          # terminal 1
+(cd legacy-client    && ./mvnw spring-boot:run)          # terminal 2
 
 # 2. stateful streamable: watch the handler log lines for logging, progress, elicitation, sampling, list_changed
-(cd streamable-server && ./mvnw -o spring-boot:run)
-(cd legacy-client     && ./mvnw -o spring-boot:run)
+(cd streamable-server && ./mvnw spring-boot:run)
+(cd legacy-client     && ./mvnw spring-boot:run)
 
 # 3. modern, from stateless: same calls, now with ttlMs/cacheScope on lists and the resource
-(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
-(cd modern-client                && ./mvnw -o spring-boot:run)
+(cd modern-server-from-stateless && ./mvnw spring-boot:run)
+(cd modern-client                && ./mvnw spring-boot:run)
 
 # 4. modern, from streamable: watch the "input_required round" lines, the -32021 error and the listen events
-(cd modern-server-from-streamable && ./mvnw -o spring-boot:run)
-(cd modern-client                 && ./mvnw -o spring-boot:run)
+(cd modern-server-from-streamable && ./mvnw spring-boot:run)
+(cd modern-client                 && ./mvnw spring-boot:run)
 
 # 5. modern, custom repositories: per-caller tool lists, paged resources, resources/updated events
-(cd modern-server-repositories && ./mvnw -o spring-boot:run)
-(cd modern-client              && ./mvnw -o spring-boot:run)
+(cd modern-server-repositories && ./mvnw spring-boot:run)
+(cd modern-client              && ./mvnw spring-boot:run)
 
 # 6. modern, asynchronous API type on WebFlux: the output of pair 4, plus count_open_tickets
-(cd modern-server-async && ./mvnw -o spring-boot:run)
-(cd modern-client       && ./mvnw -o spring-boot:run)
+(cd modern-server-async && ./mvnw spring-boot:run)
+(cd modern-client       && ./mvnw spring-boot:run)
 
 # 7. any modern server with the migrated Spring AI client: tool callbacks, and the scenario the server supports
-(cd modern-server-repositories && ./mvnw -o spring-boot:run)
-(cd modern-client-from-legacy  && ./mvnw -o spring-boot:run)
+(cd modern-server-repositories && ./mvnw spring-boot:run)
+(cd modern-client-from-legacy  && ./mvnw spring-boot:run)
 
 # 8. a legacy and a modern server behind one tool callback provider
-(cd stateless-server             && ./mvnw -o spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
-(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
-(cd modern-client-from-legacy    && ./mvnw -o spring-boot:run -Dspring-boot.run.profiles=mixed)
+(cd stateless-server             && ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
+(cd modern-server-from-stateless && ./mvnw spring-boot:run)
+(cd modern-client-from-legacy    && ./mvnw spring-boot:run -Dspring-boot.run.profiles=mixed)
 ```
 
 Both modern clients run a common walk against every server and then the scenario that the server supports, detected from its tool list.

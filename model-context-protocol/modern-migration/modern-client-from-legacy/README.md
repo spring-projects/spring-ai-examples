@@ -33,9 +33,9 @@ A stream that ends is opened again with growing pauses, and the methods are then
 * **A legacy and a modern server together.** Run a legacy server on port 8081, a modern server on 8080, and the client with the `mixed` profile, which adds a connection without the `protocol` property. One provider returns `open_ticket` of the legacy server and `tickets_open_ticket` of the modern one, and the methods of `ClientHandlers` serve both connections.
 
   ```bash
-  (cd ../stateless-server             && ./mvnw -o spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
-  (cd ../modern-server-from-stateless && ./mvnw -o spring-boot:run)
-  ./mvnw -o spring-boot:run -Dspring-boot.run.profiles=mixed
+  (cd ../stateless-server             && ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
+  (cd ../modern-server-from-stateless && ./mvnw spring-boot:run)
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=mixed
   ```
 
 * **An unreachable modern server.** Run the `mixed` profile with only the legacy server up. The listen stream and the provider each log a warning, the `tickets_*` tools are left out, and the server is not asked for its tools again for the `unreachable-cool-down` time; the legacy tools stay usable.
@@ -44,4 +44,4 @@ A stream that ends is opened again with growing pauses, and the methods are then
 * **A client for each role.** Set `spring.ai.mcp.client.streamable-http.connections.tickets.client-scope=CUSTOM` in `application.properties`. The `SyncModernMcpClientScope` bean of `ModernClientConfiguration` keeps one client for each role, and each client keeps the private listing of its role: the second resolution sends nothing, and against `modern-server-repositories` the admin still gets the admin tools.
 * **A shared client.** Set `client-scope=SHARED` instead. One client serves every request and keeps even a private listing, which fits an application that calls the server under a single identity. Against `modern-server-repositories` the admin tools no longer appear, because the shared client was built at startup, without a caller.
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run` while one of the modern servers is running.
+Part of [modern-migration](../README.md). Run with `./mvnw spring-boot:run` while one of the modern servers is running.
