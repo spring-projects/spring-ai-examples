@@ -12,4 +12,4 @@ On WebFlux the request is served without blocking an event loop; on the WebMvc s
 
 Drive it with [modern-client](../modern-client/). Compare with [modern-server-from-streamable](../modern-server-from-streamable/).
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw spring-boot:run`; the server listens on `http://localhost:8080`.

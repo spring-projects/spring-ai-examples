@@ -27,4 +27,4 @@ MCP_HEADER='X-Role: admin' MCP_CAPABILITIES='{}' \
   '{"notifications":{"resourcesListChanged":true,"resourceSubscriptions":["tickets://t-1"]}}'
 ```
 
-Part of [modern-migration](../README.md). Run with `./mvnw -o spring-boot:run`; the server listens on `http://localhost:8080`.
+Part of [modern-migration](../README.md). Run with `./mvnw spring-boot:run`; the server listens on `http://localhost:8080`.

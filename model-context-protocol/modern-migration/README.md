@@ -1,13 +1,12 @@
 # Migrating Spring AI MCP servers and clients to the 2026-07-28 ("modern") protocol
 
-These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, the same server written against the asynchronous API type, and the Spring AI client after its migration.
+These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, the same server written against the asynchronous API type, and the Spring AI client after its migration, with the synchronous and the asynchronous client type.
 
-**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` (spring-projects/spring-ai#7385) · MCP Java SDK `2.2.0-SNAPSHOT`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` · MCP Java SDK `2.2.0`
 
 IMPORTANT: The modern server shipped in Spring AI 2.1.0-RC2, and spring-projects/spring-ai#7349 added `spring.ai.mcp.server.type=ASYNC` and moved completions onto prompts and resource templates.
-The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, are not merged yet; they are in spring-projects/spring-ai#7385 and build on the modern client of the MCP Java SDK `2.2.0-SNAPSHOT`.
-Build the branch of that pull request into your local Maven repository first (`./mvnw install -DskipTests`).
-Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `main` does not replace the local build; each module's `.mvn/maven.config` lets the offline build accept the SDK snapshot that the Spring AI build downloaded.
+The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, were added by spring-projects/spring-ai#7385 on top of the modern client of the MCP Java SDK `2.2.0`, and spring-projects/spring-ai#7392 added their asynchronous client type, which [modern-client-async](modern-client-async/) uses.
+Both are in the Spring AI `2.1.0-SNAPSHOT` builds, which the samples take from the Spring snapshot repository.
 
 ## Modules
 
@@ -22,6 +21,7 @@ Run the samples with `./mvnw -o` so that a newer remote snapshot of Spring AI `m
 | [legacy-client](legacy-client/) | Streamable HTTP | Spring AI MCP client with `@McpElicitation`, `@McpSampling`, `@McpLogging`, `@McpProgress` and `@McpToolListChanged` handlers; works against both legacy servers |
 | [modern-client](modern-client/) | 2026-07-28 | A minimal JSON-RPC driver that shows the wire format, plus curl scripts: `server/discover`, headers, per-request client capabilities, the `input_required` retry loop, `completion/complete`, `subscriptions/listen` |
 | [modern-client-from-legacy](modern-client-from-legacy/) | 2026-07-28, optionally with a legacy connection | The legacy client after migration, on the Spring AI client starter: a `protocol=MODERN` connection whose tools arrive as tool callbacks, a client for each caller, the unchanged `@McpElicitation`, `@McpProgress` and `@McpToolListChanged` methods, a listen stream, a tool filter, an optional scope with one client for each role, and a legacy and a modern server behind one provider |
+| [modern-client-async](modern-client-async/) | 2026-07-28, `type=ASYNC`, optionally with a legacy connection | The migrated client with the asynchronous client type: a caller provider bean instead of a client customizer, reactive `@McpElicitation`, `@McpProgress` and `@McpToolListChanged` methods, an `AsyncModernMcpChangeListener`, the asynchronous SDK client in one reactive pipeline, and what happens when the tools are resolved on a thread that may not block |
 
 All servers listen on `http://localhost:8080`, so run one at a time.
 
@@ -29,40 +29,44 @@ All servers listen on `http://localhost:8080`, so run one at a time.
 
 ```bash
 # 1. stateless
-(cd stateless-server && ./mvnw -o spring-boot:run)          # terminal 1
-(cd legacy-client    && ./mvnw -o spring-boot:run)          # terminal 2
+(cd stateless-server && ./mvnw spring-boot:run)          # terminal 1
+(cd legacy-client    && ./mvnw spring-boot:run)          # terminal 2
 
 # 2. stateful streamable: watch the handler log lines for logging, progress, elicitation, sampling, list_changed
-(cd streamable-server && ./mvnw -o spring-boot:run)
-(cd legacy-client     && ./mvnw -o spring-boot:run)
+(cd streamable-server && ./mvnw spring-boot:run)
+(cd legacy-client     && ./mvnw spring-boot:run)
 
 # 3. modern, from stateless: same calls, now with ttlMs/cacheScope on lists and the resource
-(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
-(cd modern-client                && ./mvnw -o spring-boot:run)
+(cd modern-server-from-stateless && ./mvnw spring-boot:run)
+(cd modern-client                && ./mvnw spring-boot:run)
 
 # 4. modern, from streamable: watch the "input_required round" lines, the -32021 error and the listen events
-(cd modern-server-from-streamable && ./mvnw -o spring-boot:run)
-(cd modern-client                 && ./mvnw -o spring-boot:run)
+(cd modern-server-from-streamable && ./mvnw spring-boot:run)
+(cd modern-client                 && ./mvnw spring-boot:run)
 
 # 5. modern, custom repositories: per-caller tool lists, paged resources, resources/updated events
-(cd modern-server-repositories && ./mvnw -o spring-boot:run)
-(cd modern-client              && ./mvnw -o spring-boot:run)
+(cd modern-server-repositories && ./mvnw spring-boot:run)
+(cd modern-client              && ./mvnw spring-boot:run)
 
 # 6. modern, asynchronous API type on WebFlux: the output of pair 4, plus count_open_tickets
-(cd modern-server-async && ./mvnw -o spring-boot:run)
-(cd modern-client       && ./mvnw -o spring-boot:run)
+(cd modern-server-async && ./mvnw spring-boot:run)
+(cd modern-client       && ./mvnw spring-boot:run)
 
 # 7. any modern server with the migrated Spring AI client: tool callbacks, and the scenario the server supports
-(cd modern-server-repositories && ./mvnw -o spring-boot:run)
-(cd modern-client-from-legacy  && ./mvnw -o spring-boot:run)
+(cd modern-server-repositories && ./mvnw spring-boot:run)
+(cd modern-client-from-legacy  && ./mvnw spring-boot:run)
 
 # 8. a legacy and a modern server behind one tool callback provider
-(cd stateless-server             && ./mvnw -o spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
-(cd modern-server-from-stateless && ./mvnw -o spring-boot:run)
-(cd modern-client-from-legacy    && ./mvnw -o spring-boot:run -Dspring-boot.run.profiles=mixed)
+(cd stateless-server             && ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081)
+(cd modern-server-from-stateless && ./mvnw spring-boot:run)
+(cd modern-client-from-legacy    && ./mvnw spring-boot:run -Dspring-boot.run.profiles=mixed)
+
+# 9. any modern server with the migrated client on the asynchronous client type
+(cd modern-server-from-streamable && ./mvnw spring-boot:run)
+(cd modern-client-async           && ./mvnw spring-boot:run)
 ```
 
-Both modern clients run a common walk against every server and then the scenario that the server supports, detected from its tool list.
+The modern clients run a common walk against every server and then the scenario that the server supports, detected from its tool list.
 Quick checks without Java: `modern-client/scripts/discover.sh`, `tools-list.sh`, `tools-call.sh open_ticket '{"title":"x"}'` and `listen.sh`.
 `MCP_HEADER='X-Role: admin'` adds a header and `MCP_CAPABILITIES='{}'` changes the declared client capabilities.
 
@@ -158,7 +162,39 @@ The annotated handler methods keep their annotations and their legacy schema typ
 | `McpToolFilter`, `McpToolNamePrefixGenerator` | `McpModernToolFilter`, `McpModernToolNamePrefixGenerator`; an application with a `McpToolFilter` bean and a modern connection must define a `McpModernToolFilter` bean too |
 | headers from a `McpSyncHttpClientRequestCustomizer` | headers from a `McpHttpRequestCustomizer` bean, which reads the caller from the `McpTransportContext` of the request |
 
-Modern connections support only `spring.ai.mcp.client.type=SYNC`, and both client starters serve them with the JDK `HttpClient` transport of the SDK.
+Both client starters serve modern connections with the JDK `HttpClient` transport of the SDK.
+
+### Synchronous to asynchronous: the client type
+
+[modern-client-async](modern-client-async/) is the migrated client with `spring.ai.mcp.client.type=ASYNC`.
+The connection properties stay; what changes is where the caller comes from and what the handler methods return.
+
+```diff
++spring.ai.mcp.client.type=ASYNC
+```
+
+```diff
+-@Bean
+-McpClientCustomizer<McpClient.SyncBuilder> modernClientCustomizer() {
+-    return (connectionName, builder) -> {
+-        McpTransportContext caller = callerOf(CurrentRole.get());
+-        builder.transportContextProvider(() -> caller);
+-    };
+-}
++@Bean
++AsyncModernMcpTransportContextProvider callerProvider() {
++    return connection -> callerOf(CurrentRole.get());
++}
+```
+
+```diff
+ @McpElicitation(clients = { "tickets", "legacy" })
+-public StructuredElicitResult<Confirmation> confirm(McpSchema.ElicitRequest request, ToolContext toolContext) {
++public Mono<StructuredElicitResult<Confirmation>> confirm(McpSchema.ElicitRequest request, ToolContext toolContext) {
+```
+
+The tools come from the `AsyncMcpToolCallbackProvider` bean, `SyncModernMcpClientScope` and `SyncModernMcpChangeListener` become `AsyncModernMcpClientScope` and `AsyncModernMcpChangeListener`, and `connection.client()` returns the asynchronous `McpAsyncClient` of the SDK.
+The tool callbacks stay blocking, so a reactive application starts its chat call on a thread that may block, for example with `subscribeOn(Schedulers.boundedElastic())`.
 
 ### Programmatic specifications and runtime changes
 
@@ -205,5 +241,6 @@ Headers that disagree with the body are rejected with JSON-RPC error `-32020`.
 - On `modern-server-async` the WebFlux transport never blocks an event loop: `Mono` methods run where they are subscribed, and `resolve_ticket`, which returns a plain `String`, runs on `boundedElastic`.
 - The Spring AI client keeps a tool listing across requests only when the server allows it for every caller: a `ttlMs` above zero with `cacheScope: public`. The sample servers send a `ttlMs` with `private`, so `modern-client-from-legacy` lists the tools each time it resolves them, and the client logs once that the listing could be kept. Set `spring.ai.mcp.server.modern.list-cache-scope=PUBLIC` on a server whose tools are the same for every caller, or keep a client that outlives the request: `client-scope=SHARED` for an application with a single identity, or `client-scope=CUSTOM` for one client for each user.
 - A connection with `listen=true` keeps a listen stream open, for the application and not for a caller. When the server reports a tool change, a kept listing is dropped at once and the `@McpToolListChanged` methods are called. They are also called when the stream is established again after it had ended, as the server may have changed in between.
-- A tool callback of a modern connection is bound to the client it was resolved with. `modern-client-from-legacy` reads the caller when that client is built, so a call made later, or on another thread, still carries the caller's `X-Role` header.
+- A tool callback of a modern connection is bound to the client it was resolved with. `modern-client-from-legacy` reads the caller when that client is built, so a call made later, or on another thread, still carries the caller's `X-Role` header. `modern-client-async` reads it when the tools are resolved, and the callbacks keep it.
+- With the asynchronous client type, resolving the tools on a thread that may not block fails at once with a message that names the connection and the thread, and nothing is sent; `modern-client-async` shows it on `Schedulers.parallel()`.
 - A modern server that cannot be reached does not fail the client: its tools are left out with one warning, and the server is not asked again for `spring.ai.mcp.client.modern.unreachable-cool-down` (30 seconds by default).
