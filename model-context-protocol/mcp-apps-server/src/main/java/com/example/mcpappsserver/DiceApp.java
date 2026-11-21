@@ -1,5 +1,7 @@
 package com.example.mcpappsserver;
 
+import io.modelcontextprotocol.spec.McpSchema.ReadResourceResult;
+import io.modelcontextprotocol.spec.McpSchema.TextResourceContents;
 import org.springframework.ai.mcp.annotation.McpResource;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.context.MetaProvider;
@@ -21,22 +23,24 @@ public class DiceApp {
   @Value("classpath:/app/dice-app.html")
   private Resource diceAppResource;
 
-  @McpResource(name = "Dice App Resource",
-      uri = "ui://dice/dice-app.html",
-      mimeType = "text/html;profile=mcp-app",
-      metaProvider = CspMetaProvider.class)
-  public String getDiceAppResource() throws IOException {
-    return diceAppResource.getContentAsString(Charset.defaultCharset());
-  }
+  private static final String DICE_APP_URI = "ui://dice/dice-app.html";
 
-  public static final class CspMetaProvider implements MetaProvider {
-    @Override
-    public Map<String, Object> getMeta() {
-      return Map.of("ui",
-          Map.of("csp",
-              Map.of("resourceDomains",
-                  List.of("https://unpkg.com"))));
-    }
+  private static final String DICE_APP_MIME_TYPE = "text/html;profile=mcp-app";
+
+  @McpResource(name = "Dice App Resource",
+      uri = DICE_APP_URI,
+      mimeType = DICE_APP_MIME_TYPE)
+  public ReadResourceResult getDiceAppResource() throws IOException {
+    String html = diceAppResource.getContentAsString(Charset.defaultCharset());
+    return ReadResourceResult.builder(List.of(
+        TextResourceContents.builder(DICE_APP_URI, html)
+            .mimeType(DICE_APP_MIME_TYPE)
+            .meta(Map.of("ui",
+                Map.of("csp",
+                    Map.of("resourceDomains",
+                        List.of("https://unpkg.com")))))
+            .build()))
+        .build();
   }
 
   //
@@ -56,7 +60,7 @@ public class DiceApp {
     public Map<String, Object> getMeta() {
       return Map.of("ui",
           Map.of(
-              "resourceUri", "ui://dice/dice-app.html"));
+              "resourceUri", DICE_APP_URI));
     }
   }
 
