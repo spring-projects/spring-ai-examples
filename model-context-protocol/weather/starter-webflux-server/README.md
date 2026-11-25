@@ -1,6 +1,6 @@
 # Spring AI MCP Weather Server — WebFlux Starter
 
-MCP server built with the Spring AI WebFlux starter. Exposes weather tools via [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) (default) and STDIO transports.
+MCP server built with the Spring AI WebFlux starter. Exposes weather tools via [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) (default), SSE, and STDIO transports.
 
 Reference docs: [MCP Server Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html)
 
@@ -26,6 +26,19 @@ Reference docs: [MCP Server Boot Starter](https://docs.spring.io/spring-ai/refer
 ```bash
 java -jar target/mcp-weather-starter-webflux-server-0.0.1-SNAPSHOT.jar
 ```
+
+The default configuration exposes Streamable HTTP at `/mcp`.
+
+### SSE
+
+Select SSE before using an SSE client:
+
+```bash
+java -Dspring.ai.mcp.server.protocol=SSE \
+     -jar target/mcp-weather-starter-webflux-server-0.0.1-SNAPSHOT.jar
+```
+
+SSE clients connect to `/sse` in this mode.
 
 ### STDIO
 
@@ -80,6 +93,8 @@ client.initialize();
 ```
 
 ### SSE
+
+Start the server in SSE mode before running this client.
 
 ```java
 var transport = new WebFluxSseClientTransport(
@@ -139,7 +154,8 @@ java -Dspring.ai.mcp.client.stdio.servers-configuration=file:mcp-servers-config.
 
 ```bash
 # Terminal 1 — start the server
-java -jar mcp-weather-starter-webflux-server-0.0.1-SNAPSHOT.jar
+java -Dspring.ai.mcp.server.protocol=SSE \
+     -jar target/mcp-weather-starter-webflux-server-0.0.1-SNAPSHOT.jar
 
 # Terminal 2 — run the client
 java -Dspring.ai.mcp.client.sse.connections.weather-server.url=http://localhost:8080 \
