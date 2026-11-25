@@ -1,12 +1,12 @@
-/* 
+/*
 * Copyright 2024 - 2024 the original author or authors.
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 * https://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 package com.example.agentic;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * Record representing the response from the routing classification process.
@@ -32,15 +34,14 @@ package com.example.agentic;
  * @see RoutingWorkflow
  */
 public record RoutingResponse(
-		/**
-		 * The reasoning behind the route selection, explaining why this particular
-		 * route was chosen based on the input analysis.
-		 */
+
+		@JsonPropertyDescription(
+				"The reasoning behind the route selection, explaining why this particular " +
+				"route was chosen based on the input analysis. Consider factors like key terms, " +
+				"intent, and urgency level."
+		)
 		String reasoning,
 
-		/**
-		 * The selected route name that will handle the input based on the
-		 * classification analysis.
-		 */
+		@JsonPropertyDescription("The selected route key")
 		String selection) {
 }
