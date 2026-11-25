@@ -8,8 +8,15 @@
 
 set -e
 
-# Get the version parameter or use default
-VERSION="${1:-2.0.0-RC1}"
+# Require exactly one version parameter
+if [ "$#" -ne 1 ]; then
+    echo "Error: exactly one Spring AI version is required." >&2
+    echo "Usage: $0 <version>" >&2
+    echo "Example: $0 2.0.0-SNAPSHOT" >&2
+    exit 2
+fi
+
+VERSION="$1"
 
 # Validate version format
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(SNAPSHOT|RC[0-9]+|M[0-9]+))?$ ]]; then
