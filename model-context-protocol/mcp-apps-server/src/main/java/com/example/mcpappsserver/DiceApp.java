@@ -1,8 +1,8 @@
 package com.example.mcpappsserver;
 
+import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.mcp.annotation.McpResource;
 import org.springframework.ai.mcp.annotation.McpTool;
-import org.springframework.ai.mcp.annotation.context.MetaProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -23,20 +23,19 @@ public class DiceApp {
 
   @McpResource(name = "Dice App Resource",
       uri = "ui://dice/dice-app.html",
-      mimeType = "text/html;profile=mcp-app",
-      metaProvider = CspMetaProvider.class)
-  public String getDiceAppResource() throws IOException {
-    return diceAppResource.getContentAsString(Charset.defaultCharset());
-  }
-
-  public static final class CspMetaProvider implements MetaProvider {
-    @Override
-    public Map<String, Object> getMeta() {
-      return Map.of("ui",
-          Map.of("csp",
-              Map.of("resourceDomains",
-                  List.of("https://unpkg.com"))));
-    }
+      mimeType = "text/html;profile=mcp-app")
+  public McpSchema.ReadResourceResult getDiceAppResource(McpSchema.ReadResourceRequest request)
+      throws IOException {
+    var content = diceAppResource.getContentAsString(Charset.defaultCharset());
+    return McpSchema.ReadResourceResult.builder(List.of(
+        McpSchema.TextResourceContents.builder(request.uri(), content)
+            .mimeType("text/html;profile=mcp-app")
+            .build()))
+        .meta(Map.of("ui",
+            Map.of("csp",
+                Map.of("resourceDomains",
+                    List.of("https://unpkg.com")))))
+        .build();
   }
 
   //
