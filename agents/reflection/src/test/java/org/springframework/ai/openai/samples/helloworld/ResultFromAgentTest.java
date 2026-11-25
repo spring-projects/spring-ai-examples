@@ -1,5 +1,8 @@
 package org.springframework.ai.openai.samples.helloworld;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,6 +77,50 @@ class ResultFromAgentTest {
         int[] expected = {1};
 
         MergeSort.mergeSort(array);
+        assertArrayEquals(expected, array);
+    }
+
+    @Test
+    void testMergeSortWithTwoElementsInReverseOrder() {
+        int[] array = {2, 1};
+        int[] expected = {1, 2};
+
+        MergeSort.mergeSort(array);
+
+        assertArrayEquals(expected, array);
+    }
+
+    @Test
+    void testMergeSortWithIntegerBoundaryValues() {
+        int[] array = {
+                Integer.MAX_VALUE,
+                0,
+                Integer.MIN_VALUE,
+                -1,
+                1
+        };
+        int[] expected = {
+                Integer.MIN_VALUE,
+                -1,
+                0,
+                1,
+                Integer.MAX_VALUE
+        };
+
+        MergeSort.mergeSort(array);
+
+        assertArrayEquals(expected, array);
+    }
+
+    @Test
+    void testMergeSortMatchesArraysSortForLargeRandomArray() {
+        Random random = new Random(42);
+        int[] array = random.ints(10_000).toArray();
+        int[] expected = array.clone();
+
+        Arrays.sort(expected);
+        MergeSort.mergeSort(array);
+
         assertArrayEquals(expected, array);
     }
 }
