@@ -68,7 +68,7 @@ The version management script handles two patterns:
 ### Module Structure
 - Each example is a self-contained Spring Boot application
 - Modules follow standard Maven directory structure: `src/main/java` and `src/test/java`
-- Common Spring AI version: `2.1.0-SNAPSHOT`
+- Common Spring AI version: `2.1.1-SNAPSHOT`
 - Java version: 17 (document-forge requires 21)
 - Spring Boot parent: `4.1.1`
 

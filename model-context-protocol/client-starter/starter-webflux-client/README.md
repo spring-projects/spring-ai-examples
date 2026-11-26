@@ -2,7 +2,7 @@
 
 A command-line Spring Boot app demonstrating the [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) with WebFlux (reactive) transport.
 
-**Stack:** Spring Boot 4.1.1 · Spring AI 2.1.0-SNAPSHOT · Java 17
+**Stack:** Spring Boot 4.1.1 · Spring AI 2.1.1-SNAPSHOT · Java 17
 
 ## How It Works
 

@@ -2,11 +2,12 @@
 
 These samples show the same small ticket application on three MCP protocols, what changes when a session-based server is moved to the modern one, how a modern server customises the repositories that serve its tools and resources, the same server written against the asynchronous API type, and the Spring AI client after its migration, with the synchronous and the asynchronous client type.
 
-**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.0-SNAPSHOT` · MCP Java SDK `2.2.0`
+**Versions:** Spring Boot `4.1.1` · Spring AI `2.1.1-SNAPSHOT` · MCP Java SDK `2.2.0`
 
 IMPORTANT: The modern server shipped in Spring AI 2.1.0-RC2, and spring-projects/spring-ai#7349 added `spring.ai.mcp.server.type=ASYNC` and moved completions onto prompts and resource templates.
 The modern connections of the Spring AI client, which [modern-client-from-legacy](modern-client-from-legacy/) uses, were added by spring-projects/spring-ai#7385 on top of the modern client of the MCP Java SDK `2.2.0`, and spring-projects/spring-ai#7392 added their asynchronous client type, which [modern-client-async](modern-client-async/) uses.
-Both are in the Spring AI `2.1.0-SNAPSHOT` builds, which the samples take from the Spring snapshot repository.
+All of them are released in Spring AI `2.1.0`.
+The samples take the `2.1.1-SNAPSHOT` builds from the Spring snapshot repository, which add spring-projects/spring-ai#7400: the modern clients are built with the JSON mapper of the application.
 
 ## Modules
 

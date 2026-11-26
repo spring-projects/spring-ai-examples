@@ -21,7 +21,7 @@ appears as the provider in the POM and in `application.properties`.
 
 Requirements: **JDK 25** (jinfer uses the FFM and Vector APIs) and Maven 3.9+.
 
-This example uses Spring Boot 4.1.1 and Spring AI 2.1.0-SNAPSHOT.
+This example uses Spring Boot 4.1.1 and Spring AI 2.1.1-SNAPSHOT.
 
 ```bash
 sdk use java 25.0.3-graal          # or any JDK 25; check with: java -version
@@ -71,7 +71,7 @@ Use [start.spring.io](https://start.spring.io) (or `spring init`) with:
 - the **Spring Web** dependency, if you want REST endpoints
 - **no** Spring AI model starter. jinfer is not listed on start.spring.io, so you add it by hand.
 
-jinfer 0.3.1 is built and tested against Spring Boot 4.1.1 and Spring AI 2.0.1, and also runs on Spring AI 2.1.0-SNAPSHOT, which this example uses.
+jinfer 0.3.1 is built and tested against Spring Boot 4.1.1 and Spring AI 2.0.1, and also runs on Spring AI 2.1.1-SNAPSHOT, which this example uses.
 
 ### 2. Import both BOMs
 

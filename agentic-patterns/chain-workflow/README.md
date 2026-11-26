@@ -21,7 +21,7 @@ This implementation shows a four-step workflow for processing numerical data in 
 
 - Java 17 or higher
 - Spring Boot 4.1.1
-- Spring AI 2.1.0-SNAPSHOT
+- Spring AI 2.1.1-SNAPSHOT
 - Ollama (for LLM integration)
 
 ## Getting Started

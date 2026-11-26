@@ -80,7 +80,7 @@ chatClient.prompt("What is current weather in Paris?")
 ## Prerequisites
 
 - Java 17+
-- Spring Boot 4.1.1 / Spring AI 2.1.0-SNAPSHOT
+- Spring Boot 4.1.1 / Spring AI 2.1.1-SNAPSHOT
 - OpenAI API key
 
 ## Run

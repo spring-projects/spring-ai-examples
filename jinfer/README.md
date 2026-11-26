@@ -17,7 +17,7 @@ The application code is plain Spring AI. jinfer appears only as the provider in 
 
 - **JDK 25**: jinfer uses the FFM and Vector APIs.
 - Maven 3.9+
-- Spring Boot 4.1.1, Spring AI 2.1.0-SNAPSHOT and jinfer 0.3.1, all resolved by the POMs.
+- Spring Boot 4.1.1, Spring AI 2.1.1-SNAPSHOT and jinfer 0.3.1, all resolved by the POMs.
 
 Every JVM that runs jinfer needs these flags:
 
