@@ -10,7 +10,7 @@ transcript with per-word timings and confidences.
 
 ## Run it
 
-Requirements: **JDK 25** and Maven 3.9+. The example uses Spring Boot 4.1.1 and Spring AI 2.1.0-SNAPSHOT.
+Requirements: **JDK 25** and Maven 3.9+. The example uses Spring Boot 4.1.1 and Spring AI 2.1.1-SNAPSHOT.
 
 ```bash
 sdk use java 25.0.3-graal
@@ -94,7 +94,7 @@ spring.ai.jinfer.transcription.model=mudler/parakeet-cpp-gguf/tdt-0.6b-v3-q8_0.g
 ```
 
 Setting the model property is what creates the `TranscriptionModel` bean. The pom also imports the
-`spring-ai-bom` (2.1.0-SNAPSHOT) and `jinfer-bom` (0.3.1). It passes
+`spring-ai-bom` (2.1.1-SNAPSHOT) and `jinfer-bom` (0.3.1). It passes
 `--add-modules jdk.incubator.vector --enable-native-access=ALL-UNNAMED` to the JVM through the
 `spring-boot-maven-plugin`. To run the jar directly, pass the same flags:
 

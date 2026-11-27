@@ -90,4 +90,4 @@ Key points:
 | Dependency | Version |
 |---|---|
 | Spring Boot | 4.1.1 |
-| Spring AI | 2.1.0-SNAPSHOT |
+| Spring AI | 2.1.1-SNAPSHOT |

@@ -20,7 +20,7 @@
   <properties>
     <!-- jinfer uses the FFM API and the Vector API: Java 25 is required. -->
     <java.version>25</java.version>
-    <spring-ai.version>2.1.0-SNAPSHOT</spring-ai.version>
+    <spring-ai.version>2.1.1-SNAPSHOT</spring-ai.version>
     <jinfer.version>0.3.1</jinfer.version>
     <jinfer.jvm.flags>--add-modules jdk.incubator.vector --enable-native-access=ALL-UNNAMED</jinfer.jvm.flags>
   </properties>

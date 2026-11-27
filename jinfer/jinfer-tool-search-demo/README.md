@@ -22,7 +22,7 @@ ASSIST Based on the current time in Landsmeer, NL, here are the clothing shops t
 
 ## Run
 
-Requirements: JDK 25 and Maven 3.9+. The example uses Spring Boot 4.1.1 and Spring AI 2.1.0-SNAPSHOT.
+Requirements: JDK 25 and Maven 3.9+. The example uses Spring Boot 4.1.1 and Spring AI 2.1.1-SNAPSHOT.
 
 ```bash
 sdk use java 25.0.3-graal
